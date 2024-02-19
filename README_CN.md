@@ -55,7 +55,9 @@ PeerJS：PeerJS 是一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通
 简化的 API：PeerJS 提供了简单易用的 API，使开发者能够快速实现 P2P 连接和数据传输。
 它抽象了复杂的 WebRTC 细节，使开发过程更加简便。
 >
-+ **关于本地Peer服务器**：PS(ignore it if you don't run peerjs server locally如果不想本地运行自行忽略):
+## **关于本地Peer服务器**：
+**PS(ignore it if you don't run peerjs server locally如果不想本地运行自行忽略):**
+### PeerServer
 先装npm，国内cnpm也可以，然后安装peer：
 ```
 npm install peer -g
@@ -64,5 +66,12 @@ npm install peer -g
 然后用下面命令可以启用本地peer服务器(路径等值需要与网页内peerjs统一)
 ```
 peerjs --port 9000 --key peerjs --path /myapp Started PeerServer on ::, port: 9000, path: /myapp
+```
+### 修改JS引用路径
+在head标签中引用远程js路径改为本地的js路径，示例如下
+```
+<script src="js/peerjs.min.js"></script>
+
+<!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
 ```
 

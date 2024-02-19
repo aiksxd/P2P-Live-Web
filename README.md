@@ -40,6 +40,28 @@ However, you can still capture the **nodesMap** array in the **built-in console 
 + null is used to distinguish the information channel.
 + 1 indicates that the network information originates from the root node (each time a new node joins, it is transmitted along the line to the root node, which then consolidates and distributes it to various nodes; during the consolidation process, this value is 0).
 
+## **About Local Peer Server**:
+
+(**ignore it if you don't run peerjs server locally**):
+
+### PeerServer
+Need to install nodejs at first, and then use its npm to install peer
+```
+npm install peer -g
+```
+-g is selective if you only want to use in a folder
+local peer server run command(value of path need to be united on web & terminal):
+```
+ peerjs --port 9000 --key peerjs --path /myapp Started PeerServer on ::, port: 9000, path: /myapp
+```
+### Modify JS path
+Modify path of remote peerjs.min.js to local path of js in headP (example)
+```
+<script src="js/peerjs.min.js"></script>
+
+<!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
+```
+
 ## Others
 + **About P2P**:
 > P2P is a distributed network architecture where each participant (also known as a node) acts as both a client and a server.
@@ -53,15 +75,4 @@ However, you can still capture the **nodesMap** array in the **built-in console 
 > Simplified API: PeerJS provides a simple and easy-to-use API that allows developers to quickly establish P2P connections and transfer data.
 > It abstracts the complex WebRTC details, making the development process more convenient.
 
-+ **About Local Peer Server**:
-(**ignore it if you don't run peerjs server locally**):
-Need to install nodejs at first, and then use its npm to install peer
-```
-npm install peer -g
-```
--g is selective if you only want to use in a folder
-local peer server run command(value of path need to be united on web & terminal):
-```
- peerjs --port 9000 --key peerjs --path /myapp Started PeerServer on ::, port: 9000, path: /myapp
-```
 
