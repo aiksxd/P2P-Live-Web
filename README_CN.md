@@ -22,6 +22,7 @@
 
 ## 对于**P2P-Live-web**
 它采用**节点式传递**，允许数据直接从一个节点传递到另一个节点，这意味着无论连接谁，都可以收到相同的文字互动信息，而且**无需依赖中央服务器**，大大减少网络延迟。
+ ![DeliverGIF](https://github.com/aiksxd/material/blob/main/img/DeliverGIF.gif)
 
 ## 对于**exchange**
 **仅用于两端**相互交换流媒体而非传递，要求连接方和接收方都提交流媒体，如果增加第三者，其中一个人的流媒体会被**覆盖**
@@ -41,6 +42,7 @@
 + **关于P2P**：
 P2P 是一种分布式网络架构，其中每个参与者（也称为节点）充当客户端和服务器的角色。
 与传统的客户端-服务器模型不同，P2P 允许直接的节点之间通信，而无需通过中央服务器进行转发。
+![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 
 + **关于PeerJS**：
 PeerJS：PeerJS 是一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实现。
