@@ -30,6 +30,7 @@
 - [Exchange](https://aiksxd.github.io/exchange.html)
 
 ## Issue: 
+### 连接无反馈
 + 由于P2P本身的局限性，有些网络之间难以建立P2P连接，不过可以通过桥接都可以连接网络来解决
 + 关于获取所有节点连接状况：尽管节点网络数据发送已经做完了，但是由于本人能力有限，还没有写好解析数组的函数
 但你仍然可以在任意节点的**浏览器内置的控制台**抓取**nodesMap**数组，其中包含从根节点到子节点的所有连接id与关系，其结构为：
@@ -38,6 +39,8 @@
 + **childsIDs**为根节点的**子节点（若子节点无子节点则为id值，若有则为格式相同的嵌套数组）**
 + null用于区分信息通道
 + 1表示该网络信息来源为根节点(每当新节点加入都会沿线路传输到根节点，根节点汇总后发布再传递至各个节点，汇总过程中该值为0)
+### 清理断开连接
+没做完
 
 ## 其他
 + **关于P2P**：
@@ -55,9 +58,9 @@ PeerJS：PeerJS 是一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通
 + **关于本地Peer服务器**：PS(ignore it if you don't run peerjs server locally如果不想本地运行自行忽略):
 先装npm，国内cnpm也可以，然后安装peer：
 ```
-npm install peerjs -g
+npm install peer -g
 ```
-其中-g可选，表示全局安装，安装至用户文件夹，否则根目录 
+其中-g可选，表示全局安装，安装至用户文件夹，否则当前目录 
 然后用下面命令可以启用本地peer服务器(路径等值需要与网页内peerjs统一)
 ```
 peerjs --port 9000 --key peerjs --path /myapp Started PeerServer on ::, port: 9000, path: /myapp

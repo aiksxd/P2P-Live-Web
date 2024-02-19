@@ -106,7 +106,7 @@
     
     <script>
         /* PS(ignore it if you don't run peerjs server locally):
-            Need to install nodejs and use its npm to install peerjs(npm install peerjs -g)(-g is selective if you only want to use in a folder) at first 
+            Need to install nodejs and use its npm to install peerjs(npm install peer -g)(-g is selective if you only want to use in a folder) at first 
             local peerjs run command(value of path need to be united):
             "
                 peerjs --port 9000 --key peerjs --path /myapp Started PeerServer on ::, port: 9000, path: /myapp
@@ -152,8 +152,8 @@
         peer.on('connection', (hostPort) => {
             closeHost = hostsPeers.indexOf(hostPort.peer);
             if((closeHost !== -1) && (closeHost !== null)){
-                hostsPeers[closeHost] = null;
-                hosts[closeHost] = null;
+                hostsPeers.splice(closeHost,1,);
+                hosts.splice(closeHost,1,);
                 closeHost = null;
             }
             hostsPeers.push(hostPort.peer);
@@ -237,7 +237,6 @@
             }
             if (hosts){
                 for(var i=0; i<hosts.length; i++){
-                    if(hosts[i] == null){continue;}
                     if( ! [msg[2], predecessorGuest, predecessorHost, temp].includes(hosts[i].peer)){
                         if(hosts[i].open){
                             hosts[i].send(msg);
@@ -318,19 +317,19 @@
         }
 
         function recorder(data){
-            var sameID = hostsPeers.indexOf(data[0]);
-            if(data[3] === 0){
+            var sameID = hostsPeers.indexOf(data[0]);   // locate old data
+            if(data[3] === 0){  // 0 means unfinished
                 console.log('New node joined:', data);
-                var idTemp = Object.assign({}, hostsPeers);
-                idTemp[sameID] = data;
-                thereMap = [peer.id, idTemp, null, 0];
+                var idTemp = Object.assign({}, hostsPeers);     // make hostsPeers value stable
+                idTemp[sameID] = data;      // replace old data
+                thereMap = [peer.id, idTemp, null, 0];  //record this node's info
                 if(guest){
                     if(guest.open){       // collect information about the connection map and send to parent node
-                        guest.send(thereMap);
+                        guest.send(thereMap);   // if not root node
                     }
-                } else {
+                } else {    // if there is root node
                     nodesMap = thereMap;
-                    for(var i=0; i<hosts.length; i++){
+                    for(var i=0; i<hosts.length; i++){  // send nodesMap to all of child nodes
                         if(hosts[i] == null){
                             continue;
                         }
@@ -339,9 +338,9 @@
                         }
                     }
                 }
-            } else {
+            } else {    // once collection is completed
                  nodesMap = data;
-                 for(var i=0; i<hosts.length; i++){
+                 for(var i=0; i<hosts.length; i++){     // send nodesMap to everyone
                     if(hosts[i] == null){
                         continue;
                     }

@@ -26,8 +26,10 @@ it is **only used for bilateral** exchange of media streams rather than transmis
 - [Exchange](https://aiksxd.github.io/exchange.html)
 
 ## Issue: 
-### Connect failed:
+### Connect without feedback(failed):
 Due to the inherent limitations of P2P,establishing connections between some networks can be challenging, but this can be resolved by bridging networks.
+### Clean disconnected nodes
+haven't done.
 
 ### Regarding obtaining the connection status of all nodes: 
 Although the data transmission between nodes has been completed, due to my limited abilities, the function to parse the array has not been implemented yet.
@@ -55,7 +57,7 @@ However, you can still capture the **nodesMap** array in the **built-in console 
 (**ignore it if you don't run peerjs server locally**):
 Need to install nodejs at first, and then use its npm to install peer
 ```
-npm install peerjs -g
+npm install peer -g
 ```
 -g is selective if you only want to use in a folder
 local peer server run command(value of path need to be united on web & terminal):
