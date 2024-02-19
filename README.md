@@ -34,9 +34,9 @@ haven't done.
 ### Regarding obtaining the connection status of all nodes: 
 Although the data transmission between nodes has been completed, due to my limited abilities, the function to parse the array has not been implemented yet.
 However, you can still capture the **nodesMap** array in the **built-in console of any node's browser**, which contains all connection IDs and relationships from the root node to child nodes. Its structure is as follows:
-`[parentID, [childsIDs], null, 1]`
-+ **parentID** is the **root node**.
-+ **childsIDs** are the **child nodes of the root node (if a child node has no children, it is the ID value; if it has children, it is a nested array with the same format)**.
+`[thisID, [childsIDs], null, 1]`
++ **thisID** which first of it is the **root node**.
++ **childsIDs** which first of them are the **child nodes of the root node (if a child node has no children, it is the ID value; if it has children, it is a nested array with the same format)**.
 + null is used to distinguish the information channel.
 + 1 indicates that the network information originates from the root node (each time a new node joins, it is transmitted along the line to the root node, which then consolidates and distributes it to various nodes; during the consolidation process, this value is 0).
 
