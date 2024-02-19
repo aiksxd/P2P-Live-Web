@@ -18,6 +18,7 @@ Note: Desktop stream is obtained by **MediaDevices.getDisplayMedia()** by defaul
 
 ### For **P2P-Live-web**
  it employs a **node-based delivery** that allows data to be passed directly from one node to another, enabling the same text interaction message to be received by anyone connected without relying on a central server, thus significantly reducing network latency.
+ 
  ![DeliverGIF](https://github.com/aiksxd/material/blob/main/img/DeliverGIF.gif)
 
 ### Regarding **exchange**
@@ -41,6 +42,7 @@ However, you can still capture the **nodesMap** array in the **built-in console 
 + **About P2P**:
 > P2P is a distributed network architecture where each participant (also known as a node) acts as both a client and a server.
 > Unlike the traditional client-server model, P2P allows direct communication between nodes without the need for relay through a central server.
+
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 
 + **About PeerJS**:
