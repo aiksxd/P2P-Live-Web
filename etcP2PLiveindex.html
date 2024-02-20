@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!--script src="js/peerjs.min.js"></script-->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        #message {
+            margin-bottom: 10px;
+            border-bottom: 2px solid #000000;
+            overflow: auto;
+        }
+        html, body {
+            height:99%;
+        }
+        .container {
+            border: 1px solid black;
+            display: flex;
+            align-items: flex-start;
+            height: 20%;
+        }
+        .box {
+            padding: 10px;
+            width: 50%;
+        }
+        .rooms {
+            border: 1px solid black;
+            display: block;
+            float: left;
+            height: 200px;
+            width: 200px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Join a live web -->
+        <div class="box">
+            <!-- Sender -->
+            <div style="font-weight: bold; font-size: 32px;">Join a root node</div>
+            <!-- Connect box -->
+            <input type="text" id="peerID" placeholder="Input counterpart's ID" autofocus="true">
+            <button id="connectButton">Connect & Refresh</button><br/>
+            PS: Connection can only be established after acquiring the ID (verified through F12 check)<br/>
+            <button id="live">Go To Live(after joined)</button>
+            <div style="font-weight: bold; font-size: 32px;">Rooms List:</div>
+        </div>
+        <div class="box">
+            <a href="https://peerjs.com/" target="_blank">View PeerJS official web</a><br/>
+            <a href="https://github.com/aiksxd/P2P-Live-Web" target="_blank">View P2P-Live-Web on GitHub</a>
+        </div>
+    </div>
+    <div id="rooms">
+    </div>
+
+    <script>
+        // choose one of both
+        // const peer = new Peer({ host: 'localhost', port: 9000, path: '/myapp', debug: 2})     //if you use local peer server
+        const peer = new Peer({ debug: 2})      //use PeerJS official server
+
+        var myid = null;
+        let guest = null;
+
+        // Listen for the event when a Peer connection is successfully opened
+        // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
+        peer.on('open', (id) => {
+            console.log(id);
+        });
+
+        // Click event for the send message button && guest uploads, host receives the reply from the receiving party.
+        // *Explanation: In the given code snippet, there is an event listener attached to the "connectButton" element, which triggers a function when the button is clicked.
+        // *Inside the function, the "guest" variable is assigned the value of the connection made with the peer using the peer ID obtained from the input field with the ID "peerID".
+        document.getElementById('connectButton').addEventListener('click', () => {
+            // Close old connection
+            if (guest) {
+                guest.close();
+            }
+            guest = peer.connect(document.getElementById("peerID").value);
+
+            // guest.on('open', () => {
+            //     guest.send([peer.id, hostsPeers, null, 0]);    // ("0" means unfinished) collect information about the connection map and send to parent node
+            // });
+
+            // Receive the reply of text: Host --> Guset
+            guest.on('data', (data) => {
+                // web guest receive
+                console.log("Room list received");
+                appearRooms(data[4]);
+            });
+        });
+
+        // add rooms to box
+        function appearRooms(data) {
+            console.log("Rooms list upate: " + data);
+            document.getElementById("rooms").innerHTML = "";
+            for (var i = 0; i < data.length; i++){
+                document.getElementById("rooms").innerHTML = document.getElementById("rooms").innerHTML + "<a href=\"./etcP2PLiveGuest.html?id="+ data[i] +"\"><div class=\"rooms list\">Room number is "+ i +"</div></a>";
+            }
+        }
+        
+        document.getElementById('live').addEventListener('click', () => {
+            if(guest){
+                if(guest.open){
+                    document.location.href = "./etcP2PLiveHost.html?id=" + guest.peer;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!--script src="js/peerjs.min.js"></script-->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        #message {
+            margin-bottom: 10px;
+            border-bottom: 2px solid #000000;
+            overflow: auto;
+        }
+        html, body {
+            height:99%;
+        }
+        .time {
+            color: rgb(63, 63, 63);
+        }
+
+        .usr {
+            color: rgb(69, 164, 241);
+        }
+
+        .container {
+            display: flex;
+            align-items: flex-start;
+            height: 14%;
+        }
+        .box {
+            border: 1px solid black;
+            padding: 10px;
+            height: 80%;
+            width: 50%;
+        }
+        /* .custome {
+            border: 1px solid black;
+            padding: 10px;
+            height: 80%;
+            width: 30%;
+        } */
+        .chatContainer {
+            float: left;
+            width: 100%;
+            height: 85%;
+        }
+        .chatBox {
+            position: sticky;
+            position: -webkit-sticky;
+            height: 94%;
+        }
+        /* .sendInput {
+            min-height: 30px;
+        } */
+    </style>
+</head>
+<body>
+
+    <!-- ID interaction -->
+    <div class="container">
+        <div class="box">
+            <!-- Receiver -->
+            <div style="font-weight: bold; font-size: 32px;">Root Node <a href="./etcP2PLiveindex.html">Go to index</a></div>
+            <div id="myid" style="font-weight: bold;">Your ID:</div>
+            </div>
+        <div class="box">
+            <!-- <div>Custome Name<input type="text" id="name" placeholder="Input your name here..." /></div><br/> -->
+            <a href="https://github.com/aiksxd/P2P-Live-Web" target="_blank">View P2P-Live-Web on GitHub</a><br/>
+            <a href="https://peerjs.com/" target="_blank">View PeerJS official web</a>
+        </div>
+    </div>
+    
+    <!-- Message box -->
+    <div class="chatContainer">
+        <div class="chatBox" id="message" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
+        <!--div class="sendInput">
+            <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
+            <button type="button" id="sendButton">Send</button>
+        </div -->
+    </div>
+
+    <script>
+        /* PS(ignore it if you don't run peerjs server locally):
+            Need to install nodejs and use its npm to install peerjs(npm install peer -g)(-g is selective if you only want to use in a folder) at first 
+            local peerjs run command(value of path need to be united):
+            "
+                peerjs --port 9000 --key peerjs --path /myapp Started PeerServer on ::, port: 9000, path: /myapp
+            "
+		*/
+        // choose one of both
+        // const peer = new Peer("root", { host: 'localhost', port: 9000, path: '/myapp', debug: 2})     //if you use local peer server
+        const peer = new Peer({ debug: 2})      //use PeerJS official server
+
+        var host = null;
+        var myid = null;
+        
+        let ifAutoScroll = true;
+        // let predecessorHost = null;
+        let hosts = new Array();
+        let hostsPeers = new Array();
+        let nodesMap = new Array();
+        let liveHostsPeers = new Array();
+
+
+        // Listen for the event when a Peer connection is successfully opened
+        // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
+        peer.on('open', (id) => {
+            console.log(id);
+            document.getElementById("myid").innerHTML = "Your ID:<br/>" + peer.id;
+        });
+
+        // When a new connection request is received, this code creates a data channel and sends the local or remote stream (if available) and text messages.
+        peer.on('connection', (hostPort) => {
+            hostsPeers.push(hostPort.peer);
+            hosts.push(hostPort);
+            host = hostPort;
+
+            host.on('open', () => {
+                console.log("Be connected to: " + host.peer);
+                rootSend([null, null, null, null, liveHostsPeers]);
+            });
+
+            host.on('close', () => {
+                for (var i = 0; i< hosts.length; i++){
+                    if(hosts[i]){
+                        if (hosts[i].open){
+                            continue;
+                        }else{
+                            var disconnectedHost = hostsPeers.indexOf(hosts[i].peer);
+                            var disconnectedLiveHost = liveHostsPeers.indexOf(hosts[i].peer);
+                            if (disconnectedHost !== -1){
+                                console.log("Disconnected and deleted: " + hosts[i].peer);     //DEBUG
+                                hosts.splice(disconnectedHost, 1);
+                                hostsPeers.splice(disconnectedHost, 1);
+                            }
+                            if (disconnectedLiveHost !== -1){
+                                liveHostsPeers.splice(disconnectedLiveHost, 1);
+                            }
+                        }
+                    }else{break;}
+                }
+            })
+
+            // Receive the text: Host <-- Guest
+            host.on('data', (data) => {
+                if(data[4]){
+                    liveHostsPeers.push(data[0]);
+                    console.log("Live rooms update");  //debug
+                    rootSend([null, null, null, null, liveHostsPeers]);
+                }
+                else if(data[2]){
+                    console.log('Received data:', data);
+                    // predecessorHost = data[2];
+                    // data[2] = peer.id;
+                    // if ( liveSend(data) > 0 ) {
+                    //     console.log("Msg delivered successfully: " + data);
+                    // }else{console.log('Msg delivered failed');}
+                    appearMsg(data);
+                }else{recorder(data)}
+            });
+        });
+
+        // Root Send Massage
+        function rootSend (rooms){
+            console.log("deliver rooms update");  //debug
+            // var aims = 0;     // count successful times
+            // var temp = null;    // to avoid encountering errors, ensure that null.peer is not existed.
+            if (hosts){
+                for(var i=0; i<hosts.length; i++){
+                    if( ! hostsPeers.includes(liveHostsPeers[i])){
+                        if(hosts[i].open){
+                            console.log("send " + hosts[i].peer + " to " + rooms);    //DEBUG
+                            hosts[i].send(rooms);
+                            // aims++;
+                        }
+                    }
+                }
+            }
+            // avoid losing text when sending
+            // predecessorHost = null;
+        }
+
+        // *Explanation: This comment indicates that the following code block is responsible for sending a message.
+        // *It serves as a brief description of the purpose of the code.
+        // document.getElementById("sendButton").addEventListener('click', function () {   //*This line of code adds an event listener to the element with the ID "sendButton". It listens for a click event on the button and triggers the provided function when the event occurs.
+        //     var msg = [ document.getElementById("name").value, document.getElementById("sendMessageBox").value, peer.id];   //*This line of code creates an array called "msg" and assigns it two values. The first value is the value of the element with the ID "name", and the second value is the value of the element with the ID "sendMessageBox". These values are used to construct the message that will be sent.
+        //     if (msg[1]){    // *This condition checks if the second element of the "msg" array (i.e., the message content) exists and is not empty.
+        //         if ( liveSend(msg) > 0 ) {   // *This condition checks if the "liveSend" function returns a value greater than 0 when called with the "msg" array and 0 as arguments. If it does, it means the message was sent successfully.
+        //             appearMsg(msg);     // This function is responsible for displaying the own sent message
+        //             document.getElementById("sendMessageBox").value = "";
+        //             console.log("Sent successfully: " + msg);
+        //         }else{console.log('Connection is closed');}
+        //     }else{
+        //         document.getElementById("sendMessageBox").setAttribute("placeholder","Void content!!!!!!!!!!!!!!"); //*This line of code sets the placeholder attribute of the element with the ID "sendMessageBox" to display a message indicating that the content should not be empty.
+        //     }
+        // });
+
+        // add msg to box
+        function appearMsg(msg) {
+            var now = new Date();
+            document.getElementById("message").innerHTML =  document.getElementById("message").innerHTML + "<br><span class=\"time\">[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]</span>" + "<span class=\"usr\">"+ msg[0] + ": </span>" + msg[1];
+            if (ifAutoScroll){
+                document.getElementById('message').scrollTop = document.getElementById('message').scrollHeight;
+            }
+        }
+
+
+        // display the local stream for debug
+        // function displayLocalStream(stream) {
+        //     const localVideo = document.getElementById('localVideo');
+        //     localVideo.srcObject = stream;
+        // }
+
+        // autoScroll the scrollbar
+        function autoScroll(){ ifAutoScroll = true;}
+        function autoScrollStop(){ ifAutoScroll = false;}
+
+        function recorder(data){
+            var sameID = liveHostsPeers.indexOf(data[0]);   // locate old data
+            if(data[3] === 0){  // 0 means unfinished
+                console.log('New node joined:', data);
+                var idTemp = Object.assign({}, liveHostsPeers);     // make hostsPeers value stable
+                idTemp[sameID] = data;      // replace old data
+                nodesMap = idTemp;  //record this node's info
+            }
+        }
+    </script>
+</body>
+</html>
