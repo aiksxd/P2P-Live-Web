@@ -5,22 +5,22 @@ PS: Due to the lack of attention to the project, all messages will be replied to
 
 ## [Single Room Type Live Streaming](https://aiksxd.github.io/P2PLiveWeb.html)
 ### Instructions:
-1. Load the file **locally** or **access directly** via the following links, etc.
+1. Load the file **locally** or **access directly** via the following links, e.g..
 2. The broadcaster clicks the **Start Local Stream** button and shares their ID with the audience.
 3. The audience can connect to any broadcaster's ID, but the connection must remain uninterrupted. If the connection is broken in the middle, a new connection object is required.
 
-## [Multi-Room Type (URL->ROOT)](https://aiksxd.github.io/etcP2PRootMonitor.html)
+## [Multi-Room Type (URL->ROOT)](https://aiksxd.github.io/e.g.P2PRootMonitor.html)
 Version Update Example:
-+ etcP2PLiveindex.html serves as the website homepage (displaying rooms ready for live streaming and providing entry points)
-+ etcP2PRootMonitor.html acts as the website's root node (responsible for monitoring and providing all IDs of live stream initiators to the homepage)
-+ etcP2PLiveHost & Guest.html are auxiliary pages placed in the same directory
++ e.g.P2PLiveindex.html serves as the website homepage (displaying rooms ready for live streaming and providing entry points)
++ e.g.P2PRootMonitor.html acts as the website's root node (responsible for monitoring and providing all IDs of live stream initiators to the homepage)
++ e.g.P2PLiveHost & Guest.html are auxiliary pages placed in the same directory
 ### Instructions:
 1. Visit the homepage (the root node page contains hyperlinks), enter the **root node's ID**, and click the **Connect** button
 2. The broadcaster clicks **Go To Live** and then **Share Local Stream**
 3. After completing step one, audience members can view all active live streaming rooms under the root node (based on the connectivity status of the live streaming pages)
 ### Extensions:
-1. To customize the room list style, modify the parameters in the `guest.on('data', (data) => {` section of the live streaming page (etcP2PLiveHost). **Note: Do not modify the fifth parameter at index 4!**
-2. Optimize the connection method by parsing the **nodesMap array** (containing all node information) yourself (Note: **etc version not tested**). The nodesMap of the broadcaster node contains all nested node information, while the **root node nodeMaps** = hostsPeers (excluding sub-child nodes). If you are not satisfied with the current nodesMap array collecting node information, consider **restructuring the recorder() method**. Depending on the broadcaster's device configuration, it is recommended to use a **multi-binary tree-style** connection method.
+1. To customize the room list style, modify the parameters in the `guest.on('data', (data) => {` section of the live streaming page (e.g.P2PLiveHost). **Note: Do not modify the fifth parameter at index 4!**
+2. Optimize the connection method by parsing the **nodesMap array** (containing all node information) yourself (Note: **e.g. version not tested**). The nodesMap of the broadcaster node contains all nested node information, while the **root node nodeMaps** = hostsPeers (excluding sub-child nodes). If you are not satisfied with the current nodesMap array collecting node information, consider **restructuring the recorder() method**. Depending on the broadcaster's device configuration, it is recommended to use a **multi-binary tree-style** connection method.
 
 ## **Considerations**:
 1. The **root node** has the **highest priority for streaming**, overriding all child nodes and their subsequent children's live streams.
@@ -39,7 +39,7 @@ Note: Desktop stream is obtained by **MediaDevices.getDisplayMedia()** by defaul
 
 ### Regarding **exchange**
 it is **only used for bilateral** exchange of media streams rather than transmission. Both the connecting and receiving parties need to submit media streams. If a third party is added, one person's media stream will be **overwritten**.
-- [Exchange](https://aiksxd.github.io/exchange.html)
+- [e.g.Exchange](https://aiksxd.github.io/e.g.exchange.html)
 
 ## Issue: 
 ### Connect without feedback(failed):

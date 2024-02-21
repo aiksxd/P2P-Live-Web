@@ -41,9 +41,8 @@
             <div style="font-weight: bold; font-size: 32px;">Join a root node</div>
             <!-- Connect box -->
             <input type="text" id="peerID" placeholder="Input counterpart's ID" autofocus="true">
-            <button id="connectButton">Connect & Refresh</button><br/>
+            <button id="connectButton">Connect & Refresh</button><button id="live">Go To Live(after joined)</button><br/>
             PS: Connection can only be established after acquiring the ID (verified through F12 check)<br/>
-            <button id="live">Go To Live(after joined)</button>
             <div style="font-weight: bold; font-size: 32px;">Rooms List:</div>
         </div>
         <div class="box">
@@ -95,14 +94,14 @@
             console.log("Rooms list upate: " + data);
             document.getElementById("rooms").innerHTML = "";
             for (var i = 0; i < data.length; i++){
-                document.getElementById("rooms").innerHTML = document.getElementById("rooms").innerHTML + "<a href=\"./etcP2PLiveGuest.html?id="+ data[i] +"\"><div class=\"rooms list\">Room number is "+ i +"</div></a>";
+                document.getElementById("rooms").innerHTML = document.getElementById("rooms").innerHTML + "<a href=\"./e.g.P2PLiveGuest.html?id="+ data[i] +"\"><div class=\"rooms list\">Room number is "+ i +"</div></a>";
             }
         }
         
         document.getElementById('live').addEventListener('click', () => {
             if(guest){
                 if(guest.open){
-                    document.location.href = "./etcP2PLiveHost.html?id=" + guest.peer;
+                    document.location.href = "./e.g.P2PLiveHost.html?id=" + guest.peer;
                 }
             }
         });

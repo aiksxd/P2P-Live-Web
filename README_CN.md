@@ -8,18 +8,18 @@
 2. 直播方点击**共享本地流**按钮，并且分享自己的ID给观众
 3. 观众与主播的id任意相连，不过需要保持中间不断开，如果中间断开则需更换连接对象
 
-## [etc多房间型(URL->ROOT)](https://aiksxd.github.io/etcP2PRootMonitorCN.html)
+## [e.g.多房间型(URL->ROOT)](https://aiksxd.github.io/e.g.P2PRootMonitorCN.html)
 改版示例：
-+ etcP2PLiveindex.html 为网站主页（用于展示准备发起直播的房间，并为之提供入口）
-+ etcP2PRootMonitor.html 为网站根节点（根节点为监听器，负责获取发起直播的所有ID，并递交给主页）
-+ etcP2PLiveHost & Guest.html 为附属页面，置于同目录下即可
++ e.g.P2PLiveindex.html 为网站主页（用于展示准备发起直播的房间，并为之提供入口）
++ e.g.P2PRootMonitor.html 为网站根节点（根节点为监听器，负责获取发起直播的所有ID，并递交给主页）
++ e.g.P2PLiveHost & Guest.html 为附属页面，置于同目录下即可
 ### 用法：
 1. 访问主页(根节点页面有超链接)，**填入根节点的ID**并按下**连接**按钮
 2. 直播方点击**去开播**之后点击**共享本地流**
 3. 观众在执行第一步后可以看到该根节点下的所有活跃直播间(列入标准不在于是否推流，而是直播页面的连接情况)
 ### 拓展：
-1. 如增加房间列表的样式，可以增加直播间页面(etcP2PLiveHost)中`guest.on('data', (data) => {`中`guest.send([peer.id, null, null, 0, 1]);`中的参数，**注意：第索引为4的第五个参数勿动！**
-2. 优化连接方法，自行解析**nodesMap数组**(包含所有节点信息)(注：**etc版本未测试**，**主播节点**的nodesMap包含**所有嵌套节点信息**，而**根节点nodeMaps**=hostsPeers(**不含子子节点**)，如果不喜欢现有的nodesMap数组收集节点信息建议**重构recorder()方法**)，根据主播设备配置推荐采用**围绕主播多个二叉树式**连接法
+1. 如增加房间列表的样式，可以增加直播间页面(e.g.P2PLiveHost)中`guest.on('data', (data) => {`中`guest.send([peer.id, null, null, 0, 1]);`中的参数，**注意：第索引为4的第五个参数勿动！**
+2. 优化连接方法，自行解析**nodesMap数组**(包含所有节点信息)(注：**e.g.版本未测试**，**主播节点**的nodesMap包含**所有嵌套节点信息**，而**根节点nodeMaps**=hostsPeers(**不含子子节点**)，如果不喜欢现有的nodesMap数组收集节点信息建议**重构recorder()方法**)，根据主播设备配置推荐采用**围绕主播多个二叉树式**连接法
 
 ## **注意事项**：
 1. **根节点**具有**推流最高优先级**，它会覆盖所有子节点及其子子节点等的直播
@@ -39,7 +39,7 @@
 
 ## 对于**exchange**
 **仅用于两端**相互交换流媒体而非传递，要求连接方和接收方都提交流媒体，如果增加第三者，其中一个人的流媒体会被**覆盖**
-- [Exchange](https://aiksxd.github.io/exchange.html)
+- [e.g.Exchange](https://aiksxd.github.io/e.g.exchange.html)
 
 ## Issue: 
 ### 连接无反馈
