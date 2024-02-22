@@ -1,7 +1,7 @@
 - [中文文档](README_CN.md)
 
 # P2P-Live-Web
-PS: Due to the lack of attention to the project, all messages will be replied to once every 2 to 3 weeks.
+PS: All messages will be replied to once every 2 to 3 weeks.
 
 ## [Single Room Type Live Streaming](https://aiksxd.github.io/P2PLiveWeb.html)
 ### Instructions:
@@ -10,7 +10,7 @@ PS: Due to the lack of attention to the project, all messages will be replied to
 3. The audience can connect to any broadcaster's ID, but the connection must remain uninterrupted. If the connection is broken in the middle, a new connection object is required.
 
 ## [Multi-Room Type (URL->ROOT)](https://aiksxd.github.io/e.g.P2PRootMonitor.html)
-Version Update Example:
++ Version Modified Example:
 + e.g.P2PLiveindex.html serves as the website homepage (displaying rooms ready for live streaming and providing entry points)
 + e.g.P2PRootMonitor.html acts as the website's root node (responsible for monitoring and providing all IDs of live stream initiators to the homepage)
 + e.g.P2PLiveHost & Guest.html are auxiliary pages placed in the same directory
@@ -18,9 +18,12 @@ Version Update Example:
 1. Visit the homepage (the root node page contains hyperlinks), enter the **root node's ID**, and click the **Connect** button
 2. The broadcaster clicks **Go To Live** and then **Share Local Stream**
 3. After completing step one, audience members can view all active live streaming rooms under the root node (based on the connectivity status of the live streaming pages)
+
 ### Extensions:
-1. To customize the room list style, modify the parameters in the `guest.on('data', (data) => {` section of the live streaming page (e.g.P2PLiveHost). **Note: Do not modify the fifth parameter at index 4!**
-2. Optimize the connection method by parsing the **nodesMap array** (containing all node information) yourself (Note: **e.g. version not tested**). The nodesMap of the broadcaster node contains all nested node information, while the **root node nodeMaps** = hostsPeers (excluding sub-child nodes). If you are not satisfied with the current nodesMap array collecting node information, consider **restructuring the recorder() method**. Depending on the broadcaster's device configuration, it is recommended to use a **multi-binary tree-style** connection method.
+1. For the multi-room type, by creating a root node on your own device, deploying the remaining pages on the web site, and specifying the root node connection, you can implement a simple live streaming website.
+2. For the single live room type, similarly, create a page on your own, start streaming after obtaining the ID, deploy another page on the web, and specify the ID connection to achieve a specific live room.
+3. To customize the room list style, modify the parameters in the `guest.on('data', (data) => {` section of the live streaming page (e.g.P2PLiveHost). **Note: Do not modify the fifth parameter at index 4!**
+4. Optimize the connection method by parsing the **nodesMap array** (containing all node information) yourself (Note: **e.g. version not tested**). The nodesMap of the broadcaster node contains all nested node information, while the **root node nodeMaps** = hostsPeers (excluding sub-child nodes). If you are not satisfied with the current nodesMap array collecting node information, consider **restructuring the recorder() method**. Depending on the broadcaster's device configuration, it is recommended to use a **multi-binary tree-style** connection method.
 
 ## **Considerations**:
 1. The **root node** has the **highest priority for streaming**, overriding all child nodes and their subsequent children's live streams.
@@ -30,7 +33,9 @@ Version Update Example:
 5. In the event of the host losing connection, the information from the host's child nodes will not be transmitted to other host's child nodes.
 6. Video quality may initially be blurry when passed from child nodes to sub-child nodes; waiting for synchronization may resolve this (quality synchronization observed after 26 seconds in a test).
 
-Note: Desktop stream is obtained by **MediaDevices.getDisplayMedia()** by default, which means **most mobile devices** cannot initiate live streaming and can **only receive media streams and text messages**. It also requires a local development environment or HTTPS to work properly. If needed, you can **modify the getLocalStream() function yourself**.
+### Adapting and Expanding Streaming Sources
++ The desktop stream is obtained by default using MediaDevices.getDisplayMedia(), which means that it only shares the desktop. This also implies that **most mobile devices** are unable to initiate live streams and can **only receive media streams and text information**. Additionally, this functionality requires operation in a local development environment or under HTTPS to function properly.
++ If there is a need for mobile screen streaming, accessing the camera, taking photos, etc., you can refer to the getUserMedia() API and modify the page's getLocalStream() function.
 
 ### For **P2P-Live-web**
  it employs a **node-based delivery** that allows data to be passed directly from one node to another, enabling the same text interaction message to be received by anyone connected without relying on a central server, thus significantly reducing network latency.
