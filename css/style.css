@@ -1,0 +1,196 @@
+html {
+    background-color: #ffffff;
+}
+#message {
+    margin-bottom: 10px;
+    border-bottom: 2px solid #000000;
+    overflow: auto;
+}
+html, body {
+    height:99%;
+}
+.time {
+    color: rgb(63, 63, 63);
+}
+.usr {
+    color: rgb(69, 164, 241);
+}
+.video {
+    object-fit: fill;
+}
+.container {
+    display: flex;
+    align-items: flex-start;
+    height: 14%;
+}
+.box {
+    border: 1px solid black;
+    padding: 10px;
+    height: 80%;
+    width: 35%;
+}
+.custome {
+    border: 1px solid black;
+    padding: 10px;
+    height: 80%;
+    width: 30%;
+}
+.videoBox {
+    float: left;
+    width: 70%;
+    height: 85%;
+}
+.chatContainer {
+    float: left;
+    width: 30%;
+    height: 85%;
+}
+.chatBox {
+    position: sticky;
+    position: -webkit-sticky;
+    height: 94%;
+}
+.sendInput {
+    min-height: 30px;
+}
+.indexContainer {
+    border: 1px solid black;
+    display: flex;
+    align-items: flex-start;
+}
+.indexBox {
+    padding: 10px;
+    width: 50%;
+}
+.rooms {
+    border: 1px solid black;
+    display: block;
+    float: left;
+    height: 200px;
+    width: 200px;
+    font-size: 20px;
+    color: #ffffff;
+    text-shadow: -1px 1px 0 #000000, 1px 1px 0 #000000;
+    overflow: hidden;
+}
+#openRoomInfo {
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(0, 0, 0);
+    display: flex;
+    align-items: flex-start;
+    position: absolute;
+    z-index: 1;
+    width: 99%;
+    top: 0;
+    overflow-y: hidden;
+    transition: 0.5s;
+    height: 0px;
+}
+#roomCover {
+    width: 20%;
+    height: 90%;
+    margin: 1%;
+    border: 1px solid rgb(0, 0, 0);
+}
+#roomText {
+    width: 70%;
+    height: 90%;
+    margin-top: 1%;
+}
+.actionButton {
+    width: 8%;
+    height: 90%;
+    margin-top: 1%;
+}
+#roomTitle {
+    width: 90%;
+    height: 20%;
+    margin: 1%;
+    border: 1px solid rgb(0, 0, 0);
+}
+#roomSummary {
+    float: left;
+    width: 40%;
+    height: 60%;
+    margin: 1%;
+    border: 1px solid rgb(0, 0, 0);
+    overflow: auto;
+}
+#nodeInfo {
+    float: left;
+    width: 50%;
+    height: 60%;
+    padding: 1%;
+}
+#stable {
+    float: left;
+    width: 15%;
+    height: 100%;
+}
+#hostBlock {
+    width: 100%;
+    height: 50%;
+}
+#refreshMap {
+    font-size: 11px;
+    width: 100%;
+    height: 50%;
+}
+#block0 {
+    float: left;
+    width: 40%;
+    height: 100%;
+    border: 1px solid rgb(0, 0, 0);
+    overflow: auto;
+}
+#block1 {
+    float: left;
+    width: 40%;
+    height: 100%;
+    border: 1px solid rgb(0, 0, 0);
+    overflow: auto;
+}
+.childNodes {
+    width: 100%;
+}
+#liveSetting {
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(0, 0, 0);
+    display: flex;
+    align-items: flex-start;
+    overflow-y: hidden;
+    position: absolute;
+    z-index: 1;
+    width: 99%;
+    top: 0;
+    transition: 0.5s;
+    height: 0px;
+}
+#liveCover {
+    width: 20%;
+    height: 90%;
+    margin: 1%;
+    border: 1px solid rgb(0, 0, 0);
+}
+.liveInput {
+    width: 95%;
+    height: 10%;
+}
+#liveSummary {
+    margin-top: 3%;
+    width: 95%;
+    height: 60%;
+    overflow: auto;
+}
+#streamSource {
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(0, 0, 0);
+    display: flex;
+    overflow-y: hidden;
+    position: absolute;
+    z-index: 1;
+    width: 99%;
+    top: 0;
+    transition: 0.5s;
+    height: 0px;
+}

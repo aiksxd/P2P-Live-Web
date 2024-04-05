@@ -2,56 +2,9 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <!--script src="js/peerjs.min.js"></script-->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <style>
-        #message {
-            margin-bottom: 10px;
-            border-bottom: 2px solid #000000;
-            overflow: auto;
-        }
-        html, body {
-            height:99%;
-        }
-        .time {
-            color: rgb(63, 63, 63);
-        }
-
-        .usr {
-            color: rgb(69, 164, 241);
-        }
-
-        .container {
-            display: flex;
-            align-items: flex-start;
-            height: 14%;
-        }
-        .box {
-            border: 1px solid black;
-            padding: 10px;
-            height: 80%;
-            width: 50%;
-        }
-        /* .custome {
-            border: 1px solid black;
-            padding: 10px;
-            height: 80%;
-            width: 30%;
-        } */
-        .chatContainer {
-            float: left;
-            width: 100%;
-            height: 85%;
-        }
-        .chatBox {
-            position: sticky;
-            position: -webkit-sticky;
-            height: 94%;
-        }
-        /* .sendInput {
-            min-height: 30px;
-        } */
-    </style>
+    <script src="js/peerjs.min.js"></script>
+    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
+    <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
 
@@ -59,9 +12,9 @@
     <div class="container">
         <div class="box">
             <!-- Receiver -->
-            <div style="font-weight: bold; font-size: 32px;">Root Node <a href="./e.g.P2PLiveindex.html" target="_blank">Go to index</a></div>
-            <div id="myid" style="font-weight: bold;">Your ID:</div>
-            </div>
+            <div style="font-weight: bold; font-size: 32px;">Root Node <a href="./P2PLiveIndex.html" target="_blank">Go to index</a></div>
+            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div>
+        </div>
         <div class="box">
             <!-- <div>Custome Name<input type="text" id="name" placeholder="Input your name here..." /></div><br/> -->
             <a href="https://github.com/aiksxd/P2P-Live-Web" target="_blank">View P2P-Live-Web on GitHub</a><br/>
@@ -86,19 +39,25 @@
                 peerjs --port 9000 --key peerjs --path /myapp Started PeerServer on ::, port: 9000, path: /myapp
             "
 		*/
+        
+        
+        let params = new URLSearchParams(document.location.search.substring(1));
+        let id = params.get("id");
         // choose one of both
-        // const peer = new Peer("root", { host: 'localhost', port: 9000, path: '/myapp', debug: 2})     //if you use local peer server
-        const peer = new Peer({ debug: 2})      //use PeerJS official server
+        // const peer = new Peer("P2P-Live-Web-default-Id", { host: 'localhost', port: 9000, path: '/myapp', debug: 2});     //if you use local peer server
+        
+        // const peer = new Peer("P2P-Live-Web-default-Id", { debug: 2});      //use PeerJS official server with default Id
+        const peer = new Peer({ debug: 2});
 
-        var host = null;
+        var conn = null;
         var myid = null;
         
         let ifAutoScroll = true;
         // let predecessorHost = null;
-        let hosts = new Array();
-        let hostsPeers = new Array();
-        let nodesMap = new Array();
-        let liveHostsPeers = new Array();
+        let conns = new Array();
+        let connIds = new Array();
+        let liveHostIds = new Array();
+        let liveHostInfos = new Array();
 
 
         // Listen for the event when a Peer connection is successfully opened
@@ -109,31 +68,32 @@
         });
 
         // When a new connection request is received, this code creates a data channel and sends the local or remote stream (if available) and text messages.
-        peer.on('connection', (hostPort) => {
-            hostsPeers.push(hostPort.peer);
-            hosts.push(hostPort);
-            host = hostPort;
+        peer.on('connection', (connPort) => {
+            conn = connPort;
 
-            host.on('open', () => {
-                console.log("Be connected to: " + host.peer);
-                rootSend([null, null, null, null, liveHostsPeers]);
+            conn.on('open', () => {
+                connIds.push(conn.peer);
+                conns.push(conn);
+                console.log("Be connected to: " + conn.peer);
+                conn.send(liveHostInfos);
             });
 
-            host.on('close', () => {
-                for (var i = 0; i< hosts.length; i++){
-                    if(hosts[i]){
-                        if (hosts[i].open){
+            conn.on('close', () => {
+                for (var i = 0; i < conns.length; i++){
+                    if(conns[i]){
+                        if (conns[i].open){
                             continue;
                         }else{
-                            var disconnectedHost = hostsPeers.indexOf(hosts[i].peer);
-                            var disconnectedLiveHost = liveHostsPeers.indexOf(hosts[i].peer);
+                            var disconnectedHost = connIds.indexOf(conns[i].peer);
+                            var disconnectedLiveHost = liveHostIds.indexOf(conns[i].peer);
                             if (disconnectedHost !== -1){
-                                console.log("Disconnected and deleted: " + hosts[i].peer);     //DEBUG
-                                hosts.splice(disconnectedHost, 1);
-                                hostsPeers.splice(disconnectedHost, 1);
+                                console.log("Disconnected and deleted: " + conns[i].peer);     //DEBUG
+                                conns.splice(disconnectedHost, 1);
+                                connIds.splice(disconnectedHost, 1);
                             }
                             if (disconnectedLiveHost !== -1){
-                                liveHostsPeers.splice(disconnectedLiveHost, 1);
+                                liveHostIds.splice(disconnectedLiveHost, 1);
+                                liveHostInfos.splice(disconnectedLiveHost, 1);
                             }
                         }
                     }else{break;}
@@ -141,38 +101,45 @@
             })
 
             // Receive the text: Host <-- Guest
-            host.on('data', (data) => {
-                if(data[4]){
-                    liveHostsPeers.push(data[0]);
-                    console.log("Live rooms update");  //debug
-                    rootSend([null, null, null, null, liveHostsPeers]);
+            conn.on('data', (data) => {
+                // data[0]:
+                //  0: msg
+                //  1: room NodeInfo
+                //  2: roomInfoModfied
+                switch (data[0]) {
+                    case 0:
+                        console.log('Received data:', data);
+                        appearMsg(data);
+                        break;
+                    case 1:
+                        if( liveHostIds.includes(data[7]) ){
+                            liveHostInfos[ liveHostIds.indexOf(data[7]) ] = data;
+                        } else {
+                            liveHostIds.push(data[7]);
+                            liveHostInfos.push(data); // record child nodesMap
+                        }
+                        console.log("Live rooms update");  // DEBUG
+                        rootSend(liveHostInfos);
+                        break;
+                    default:
+                        console.log("unknown data: " + data);
                 }
-                else if(data[2]){
-                    console.log('Received data:', data);
-                    // predecessorHost = data[2];
-                    // data[2] = peer.id;
-                    // if ( liveSend(data) > 0 ) {
-                    //     console.log("Msg delivered successfully: " + data);
-                    // }else{console.log('Msg delivered failed');}
-                    appearMsg(data);
-                }else{recorder(data)}
             });
         });
 
         // Root Send Massage
         function rootSend (rooms){
-            console.log("deliver rooms update");  //debug
+            console.log("deliver rooms update");  // DEBUG
+            // var disconnectedHost = null;         // todo
+            // var audiences = connIds.filter(function(t){ return liveHostIds.indexOf(t) == -1 })
             // var aims = 0;     // count successful times
             // var temp = null;    // to avoid encountering errors, ensure that null.peer is not existed.
-            if (hosts){
-                for(var i=0; i<hosts.length; i++){
-                    if( ! hostsPeers.includes(liveHostsPeers[i])){
-                        if(hosts[i].open){
-                            console.log("send " + hosts[i].peer + " to " + rooms);    //DEBUG
-                            hosts[i].send(rooms);
-                            // aims++;
-                        }
-                    }
+            for(var i=0; i<conns.length; i++){
+                if(liveHostIds.includes(connIds[i])){continue;}
+                if(conns[i].open){
+                    // console.log("send " + conns[i].peer + " to " + rooms);    //DEBUG
+                    conns[i].send(rooms);
+                    // aims++;
                 }
             }
             // avoid losing text when sending
@@ -197,32 +164,16 @@
         // add msg to box
         function appearMsg(msg) {
             var now = new Date();
-            document.getElementById("message").innerHTML =  document.getElementById("message").innerHTML + "<br><span class=\"time\">[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]</span>" + "<span class=\"usr\">"+ msg[0] + ": </span>" + msg[1];
+            document.getElementById("message").innerHTML =  document.getElementById("message").innerHTML + "<br><span class=\"time\">[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]</span>" + "<span class=\"origin\">From RoomId of "+ msg[1] + "</span>" + "<span class=\"usr\">"+ msg[2] + ": </span>" + msg[3];
             if (ifAutoScroll){
                 document.getElementById('message').scrollTop = document.getElementById('message').scrollHeight;
             }
         }
 
-
-        // display the local stream for debug
-        // function displayLocalStream(stream) {
-        //     const localVideo = document.getElementById('localVideo');
-        //     localVideo.srcObject = stream;
-        // }
-
         // autoScroll the scrollbar
         function autoScroll(){ ifAutoScroll = true;}
         function autoScrollStop(){ ifAutoScroll = false;}
 
-        function recorder(data){
-            var sameID = liveHostsPeers.indexOf(data[0]);   // locate old data
-            if(data[3] === 0){  // 0 means unfinished
-                console.log('New node joined:', data);
-                var idTemp = Object.assign({}, liveHostsPeers);     // make hostsPeers value stable
-                idTemp[sameID] = data;      // replace old data
-                nodesMap = idTemp;  //record this node's info
-            }
-        }
     </script>
 </body>
 </html>

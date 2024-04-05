@@ -2,8 +2,8 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <!--script src="js/peerjs.min.js"></script-->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="js/peerjs.min.js"></script>
+    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <style>
         #message {
             margin-bottom: 10px;
@@ -70,20 +70,26 @@
             <div style="font-weight: bold;">Receiver(host)
                 <button type="button" id="shareLocalStreamButton">Start Local Stream</button>
             </div>
-            </div>
+            <div id="myid" style="font-weight: bold;">Your ID:</div>
+            <a href="https://peerjs.com/" target="_blank">View PeerJS official web</a>
+        </div>
         <div class="box">
-            <a href="https://peerjs.com/" target="_blank">View PeerJS official web</a><br/>
-            <a href="https://github.com/aiksxd/P2P-Live-Web" target="_blank">View P2P-Live-Web on GitHub</a>
+            <!-- Sender -->
+            <div style="font-weight: bold;">Sender(guest)</div>
+            <!-- Connect box -->
+            <input type="text" id="peerID" placeholder="Input counterpart's ID" autofocus="true">
+            <button id="connectButton">Connect</button><br/><br/>
         </div>
         <div class="custome">
             <div>Custome Name<input type="text" id="name" placeholder="Input your name here..." /></div><br/>
-            </div>
+            <a href="https://github.com/aiksxd/P2P-Live-Web" target="_blank">View P2P-Live-Web on GitHub</a>
+        </div>
     </div>
     
     <!-- Live interaction-->
     <div class="videoBox">
     <!--PS: if no video(maybe leaded by autoplay), try to click it to play(or F12 check the stream)-->
-    <video id="localVideo" width="100%" height="100%" controls autoplay></video></div>
+    <video id="remoteVideo" width="100%" height="100%" controls autoplay></video></div>
     <!-- Message box -->
     <div class="chatContainer">
         <div class="chatBox" id="message" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
@@ -94,6 +100,11 @@
         </div>
     </div>
 
+    <!-- 2.3 Local video debug>
+    <h2>Local Video</h2>
+    <video id="localVideo" autoplay></video-->
+    <!--if you want to check the availability of localStream, there are <2.3localvideo>, desplayLocalStream(), -->
+    
     <script>
         /* PS(ignore it if you don't run peerjs server locally):
             Need to install nodejs and use its npm to install peerjs(npm install peer -g)(-g is selective if you only want to use in a folder) at first 
@@ -103,10 +114,12 @@
             "
 		*/
         // choose one of both
-        // const peer = new Peer({ host: 'localhost', port: 9000, path: '/myapp', debug: 2})     //if you use local peer server
-        const peer = new Peer({ debug: 2})      //use PeerJS official server
+        const peer = new Peer({ host: 'localhost', port: 9000, path: '/myapp', debug: 2})     //if you use local peer server
+        // const peer = new Peer({ debug: 2})      //use PeerJS official server
 
+        var remoteStream = null;
         var host = null;
+        var myid = null;
         var mediaGuest = null;
         
         let guest = null;
@@ -118,9 +131,7 @@
         let hostsPeers = new Array();
         let nodesMap = new Array();
         let thereMap = new Array();
-        const localVideo = document.getElementById('localVideo');
-        let params = new URLSearchParams(document.location.search.substring(1));
-        let id = params.get("id");
+        const remoteVideo = document.getElementById('remoteVideo');
 
         // the function of getting local stream(It can't work on most of mobile phone)
         // Please note! In order for the getDisplayMedia() method to work properly, you need to use the HTTPS protocol or run it on localhost in a local development environment.
@@ -133,7 +144,7 @@
         // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
         peer.on('open', (id) => {
             console.log(id);
-            init();
+            document.getElementById("myid").innerHTML = "Your ID:<br/>" + peer.id;
         });
 
         // When a new connection request is received, this code creates a data channel and sends the local or remote stream (if available) and text messages.
@@ -145,7 +156,7 @@
             host.on('open', () => {
                 console.log("Msg Connected to: " + host.peer);
                 if(mediaGuest){
-                    peer.call(host.peer, localVideo.srcObject);
+                    peer.call(host.peer, document.getElementById('remoteVideo').srcObject);
                     console.log("Media delivered successfully: ");
                 }else if(localStream){
                     peer.call(host.peer, localStream);
@@ -173,8 +184,13 @@
                         }
                     }else{break;}
                 }
+                if (guest){
+                    if (guest.open){
+                        guest.send([peer.id, hostsPeers, null, 0]);
+                    }
+                }
             })
-
+            
             // Receive the text: Host <-- Guest
             host.on('data', (data) => {
                 if(data[2]){
@@ -189,38 +205,40 @@
             });
         });
 
-        function init(){
+        peer.on('call', (mediaGuestPort) => {
+            mediaGuest = mediaGuestPort;
+            // Receive the stream
+            mediaGuest.on('stream', (stream) = displayRemoteStream);
+            mediaGuest.answer(null);
+        });
+
+        // Click event for the send message button && guest uploads, host receives the reply from the receiving party.
+        // *Explanation: In the given code snippet, there is an event listener attached to the "connectButton" element, which triggers a function when the button is clicked.
+        // *Inside the function, the "guest" variable is assigned the value of the connection made with the peer using the peer ID obtained from the input field with the ID "peerID".
+        document.getElementById('connectButton').addEventListener('click', () => {
             // Close old connection
             if (guest) {
                 guest.close();
             }
-            guest = peer.connect(id);
+            guest = peer.connect(document.getElementById("peerID").value);
 
             guest.on('open', () => {
-                guest.send([peer.id, null, null, 0, 1]);    // ("0" means unfinished) collect information about the connection map and send to parent node and then remind root that I had already shared my local steam.
+                guest.send([peer.id, hostsPeers, null, 0]);    // ("0" means unfinished) collect information about the connection map and send to parent node
             });
 
-            // // Receive the reply of text: Host --> Guset
-            // guest.on('data', (data) => {
-            //     if (data[2]){
-            //         console.log('Received data:', data);
-            //         predecessorGuest = data[2];
-            //         data[2] = peer.id;
-            //         if ( liveSend(data) > 0 ) {
-            //             console.log("Msg delivered successfully: " + data);
-            //         }else{console.log('Msg delivered failed');}
-            //         appearMsg(data);
-            //     }else{recorder(data)}
-            // });
-        }
-
-        // peer.on('call', (mediaGuestPort) => {
-        //     mediaGuest = mediaGuestPort;
-        //     // Receive the stream
-        //     mediaGuest.on('stream', (stream) = displayRemoteStream);
-        //     mediaGuest.answer(null);
-        // });
-
+            // Receive the reply of text: Host --> Guset
+            guest.on('data', (data) => {
+                if (data[2]){
+                    console.log('Received data:', data);
+                    predecessorGuest = data[2];
+                    data[2] = peer.id;
+                    if ( liveSend(data) > 0 ) {
+                        console.log("Msg delivered successfully: " + data);
+                    }else{console.log('Msg delivered failed');}
+                    appearMsg(data);
+                }else{recorder(data)}
+            });
+        });
         // Send Massage and avoid delivering repeatedly
         function liveSend (msg){
             var aims = 0;     // count successful times
@@ -280,7 +298,7 @@
             getLocalStream()
                 .then((stream) => {
                     // After successfully obtaining the local stream, display it on the page.
-                    displayLocalStream(stream);  //for debug
+                    // displayLocalStream(stream);  //for debug
                     localStream = stream;
                     console.log("Local stream shared");
                 })
@@ -290,10 +308,16 @@
         });
 
         // display the local stream for debug
-        function displayLocalStream(stream) {
-            console.log('Catched stream:', stream);
-            localVideo.srcObject = stream;
-            localVideo.play();
+        // function displayLocalStream(stream) {
+        //     const localVideo = document.getElementById('localVideo');
+        //     localVideo.srcObject = stream;
+        // }
+
+        // display the remote stream and try to play it(if usr didn't do anything on web maybe be prohibited)
+        function displayRemoteStream(stream) {
+            console.log('Received stream:', stream);
+            remoteVideo.srcObject = stream;
+            remoteVideo.play();
         }
 
         // autoScroll the scrollbar
@@ -311,17 +335,46 @@
 
         function recorder(data){
             var sameID = hostsPeers.indexOf(data[0]);   // locate old data
-            console.log('New node joined:', data);
-            var idTemp = Object.assign({}, hostsPeers);     // make hostsPeers value stable
-            idTemp[sameID] = data;      // replace old data
-            thereMap = [peer.id, idTemp, null, 0];  //record this node's info
-            nodesMap = thereMap;
-            for(var i=0; i<hosts.length; i++){  // send nodesMap to all of child nodes
-                if(hosts[i] == null){
-                    continue;
+            if(data[3] === 0){  // 0 means unfinished
+                console.log('New node joined:', data);
+                var idTemp = Object.assign({}, hostsPeers);     // make hostsPeers value stable
+                idTemp[sameID] = data;      // replace old data
+                thereMap = [peer.id, idTemp, null, 0];  //record this node's info
+                if(guest){
+                    if(guest.open){       // collect information about the connection map and send to parent node
+                        if (hostsPeers.includes(guest.peer)){    // fix connect mutually
+                            for(var i=0; i<hosts.length; i++){  // send nodesMap to all of child nodes
+                                if(hosts[i] == null || hosts[i].peer == guest.peer){
+                                    continue;
+                                }
+                                if(hosts[i].open){
+                                    hosts[i].send([peer.id, idTemp, null, 1]);    // set 0 keep mutable
+                                }
+                            }
+                        }else{
+                            guest.send(thereMap);   // if not root node
+                        }
+                    }
+                } else {    // if there is root node
+                    nodesMap = thereMap;
+                    for(var i=0; i<hosts.length; i++){  // send nodesMap to all of child nodes
+                        if(hosts[i] == null){
+                            continue;
+                        }
+                        if(hosts[i].open){
+                            hosts[i].send([peer.id, idTemp, null, 1]);    // set 0 keep mutable
+                        }
+                    }
                 }
-                if(hosts[i].open){
-                    hosts[i].send([peer.id, idTemp, null, 1]);    // set 0 keep mutable
+            } else {    // once collection is completed
+                 nodesMap = data;
+                 for(var i=0; i<hosts.length; i++){     // send nodesMap to everyone
+                    if(hosts[i] == null){
+                        continue;
+                    }
+                    if(hosts[i].open){
+                        hosts[i].send(data);
+                    }
                 }
             }
         }
