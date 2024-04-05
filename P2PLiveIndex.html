@@ -11,7 +11,7 @@
     <div id="openRoomInfo">
         <img id="roomCover" src="">
         <div id="roomText">
-            <div id="roomTitle">Test Title</div>
+            <div id="roomTitle"></div>
             <div id="roomSummary"></div>
             <div id="nodeInfo">
                 <div id="stable">
@@ -300,9 +300,9 @@
                 if(arr[i] && arr[i + 2] instanceof Array){
                     if(arr[i + 2][2] < t){
                         if(ifConnectedAim){break;}
-                        console.log("try connect to"+ arr[i]);
+                        // console.log("try connect to"+ arr[i]);
                         tryConnect(1, arr[i], true);    // for index version
-                    } else { console.log("give up connecting to "+ arr[i]); }
+                    }// else { console.log("give up connecting to "+ arr[i]); }
                 }
             }
             for (var m = 9; m < arr.length; m=m+3) {

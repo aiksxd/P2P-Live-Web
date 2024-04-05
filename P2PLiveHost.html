@@ -26,7 +26,7 @@
     <div id="openRoomInfo">
         <img id="roomCover" src="">
         <div id="roomText">
-            <div id="roomTitle">Test Title</div>
+            <div id="roomTitle"></div>
             <div id="roomSummary"></div>
             <div id="nodeInfo">
                 <div id="stable">
@@ -278,9 +278,7 @@
                         if(document.getElementById("ifAutoReconnect").checked && changingParentConnection){
                             document.getElementById("status").innerHTML="Status: Reconnecting to last Root Node...";
                             
-                            if(! tryConnect(0, urlInfo[0], false)){
-                                document.getElementById("status").innerHTML="Status: Root Reconnection Failed!";
-                            }
+                            tryConnect(0, urlInfo[0], false);
                         }
                     });
                     break;
