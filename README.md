@@ -1,10 +1,10 @@
 - [中文文档](README_CN.md)
 
 ### **About P2P & PeerJS**:
-> P2P is a distributed network architecture where each participant (also known as a node) acts as both a client and a server
-> Unlike the traditional client-server model, P2P allows direct communication between nodes without the need for relay through a central server
+P2P is a distributed network architecture where each participant (also known as a node) acts as both a client and a server
+Unlike the traditional client-server model, P2P allows direct communication between nodes without the need for relay through a central server
 
-> PeerJS: PeerJS is a JavaScript library based on WebRTC for simplifying P2P communication implementation
+PeerJS: PeerJS is a JavaScript library based on WebRTC for simplifying P2P communication implementation
 
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 
@@ -12,7 +12,7 @@
 + Auto-join & Auto-reconnect
 + custome room title, summary, cover
 + Nodes Map display(displayed alternately on the left and right & Double-click to join)
-+ By default, Root request the id of "P2P-Live-Web-Default-Id" and others connect to it(It made better index connection. if your root id has already been occupied, you need to delete or modify it)
++ By default, index request the id of "P2P-Live-Web-Default-Id" (It made better index connection. if your root id has already been occupied, you need to modify it)
 
 ### Next Version Plan:
 + refresh fn redo!
@@ -30,17 +30,19 @@
 ## [Multi-Room Type (URL->ROOT)](https://aiksxd.github.io/P2PLiveRoot.html)
 *if someone has already opened root page on the Internet, you can directly use [URL -> Index](https://aiksxd.github.io/P2PLiveIndex.html)*
 + Instructions of files:
-+ P2PLiveindex.html serves as the website homepage (displaying rooms ready for live streaming and providing entry points)
++ P2PLiveIndex.html serves as the website homepage (displaying rooms ready for live streaming and providing entry points)
 + P2PLiveRoot.html acts as the website's root node (responsible for monitoring and providing all IDs of live stream initiators to the homepage)
 + P2PLiveHost.html & P2PLiveAudience.html are auxiliary pages placed in the same directory
 ### Instructions:
 + [For Server]
-1. open the root node page & share it to users(modify deafult_Id in files. it may has already been occupied)
-
-+ [For users]
-1. Visit the homepage(P2PLiveindex.html) (the root node page contains hyperlinks), [enter the **root node's ID**, and click the **Connect** button(deafault connect id can be modified in file)]
-2. The broadcaster clicks **Go To Live** and then **Share Local Stream**
-3. After completing step one, audience members can view all active live streaming rooms under the root node (based on the connectivity status of the live streaming pages)
+1. open the root node page(P2PLiveRoot.html)
+2. share it to users
++ [For Audiences]
+1. Visit the homepage(P2PLiveIndex.html), [enter the **root node's ID**, and click the **Connect** button(deafault connect id can be modified in file)]
+2. After completing step one, audience members can view all active live streaming rooms under the root node (based on the connectivity status of the live streaming pages)
++ [For Streamers]
+1. Visit the homepage(P2PLiveIndex.html), [enter the **root node's ID**, and click the **Connect** button(deafault connect id can be modified in file)]
+2. Clicks **Go To Live** and then clicks **Stream Source** button
 
 ## **Considerations**:
 1. The **root node** has the **highest priority for streaming**, overriding all child nodes and their subsequent children's live streams
@@ -49,7 +51,7 @@
 4. This file combines **sender and receiver into one**, relying solely on the frontend. This means that everyone's permissions are equal. If deployed in a development or insecure environment, content should be encapsulated and permission levels set
 5. In the event of the host losing connection, the information from the host's child nodes will not be transmitted to other host's child nodes
 6. Video quality may initially be blurry when passed from child nodes to sub-child nodes; waiting for synchronization may resolve this (quality synchronization observed after 26 seconds in a test)
-7. By default, Root request the id of "P2P-Live-Web-Default-Id" and others connect to it(It made better index connection. if your root id has already been occupied, you need to delete or modify it)
+7. By default, index request the id of "P2P-Live-Web-Default-Id" (It made better index connection. if your root id has already been occupied, you need to modify it)
 
 ### Extensions:
 1. For the multi-room type, by creating a root node on your own device, deploying the remaining pages on the web site, and specifying the root node connection, you can implement a simple live streaming website
