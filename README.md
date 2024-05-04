@@ -46,7 +46,7 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 4. By default, index request the id of "P2P-Live-Web-Default-Id" (It made better index connection. if your root id has already been occupied, you need to modify it)
 
 
-## [Single Room Type Live Streaming](https://aiksxd.github.io/P2PLiveWeb.html)
+## [Single Room Type Live Streaming](https://aiksxd.github.io/SingleP2PLiveVersion.html)
 ### Instructions:
 1. Load the file **locally** or **access directly** via the following links
 2. The broadcaster clicks the **Start Local Stream** button and shares their ID with the audience

@@ -48,7 +48,7 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 4. 通常，主页会默认尝试连接id"P2P-Live-Web-Default-Id" (可以使得连接到持有此id的页面更加便捷，但是如果被占用，自己的root页面就无法再持有，所以可以修改成自己的再转发给别人)
 
 
-## [单文件版本](https://aiksxd.github.io/P2PLiveWeb.html)
+## [单文件版本](https://aiksxd.github.io/SingleP2PLiveVersion.html)
 ### 用法:
 1. 将文件在**本地读取**或**直接访问**现成网址等
 2. 直播方点击**共享本地流**按钮，并且分享自己的ID给观众
