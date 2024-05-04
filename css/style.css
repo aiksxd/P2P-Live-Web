@@ -1,13 +1,12 @@
-html {
-    background-color: #ffffff;
-}
 #message {
     margin-bottom: 10px;
-    border-bottom: 2px solid #000000;
     overflow: auto;
 }
 html, body {
-    height:99%;
+    height: 100%;
+	margin: 0; 
+	padding: 0;
+	border: 0;
 }
 .time {
     color: rgb(63, 63, 63);
@@ -17,6 +16,8 @@ html, body {
 }
 .video {
     object-fit: fill;
+    position: absolute;
+    z-index: 999;
 }
 .container {
     display: flex;
@@ -53,6 +54,13 @@ html, body {
 .sendInput {
     min-height: 30px;
 }
+#sendMessageBox {
+    width: 130px;
+}
+#msgImgInput {
+    height: 20px;
+    width: 100px;
+}
 .indexContainer {
     border: 1px solid black;
     display: flex;
@@ -63,14 +71,15 @@ html, body {
     width: 50%;
 }
 .rooms {
+    position: relative;
     border: 1px solid black;
     display: block;
     float: left;
     height: 200px;
     width: 200px;
     font-size: 20px;
-    color: #ffffff;
-    text-shadow: -1px 1px 0 #000000, 1px 1px 0 #000000;
+    color: #000000;
+    text-shadow: -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
     overflow: hidden;
 }
 #openRoomInfo {
@@ -194,3 +203,17 @@ html, body {
     transition: 0.5s;
     height: 0px;
 }
+
+video::-webkit-media-controls-fullscreen-button {
+  display: none;
+}
+video::-webkit-media-controls-timeline {
+  display: none;
+}
+video::-webkit-media-controls-current-time-display {
+  display: none;
+}
+video::-webkit-media-controls-time-remaining-display {
+  display: none;
+}
+body::-webkit-scrollbar { display: none }

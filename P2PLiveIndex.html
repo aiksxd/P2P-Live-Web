@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <script src="js/peerjs.min.js"></script>
+    <script src="js/fn.js"></script>
     <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
@@ -15,8 +16,8 @@
             <div id="roomSummary"></div>
             <div id="nodeInfo">
                 <div id="stable">
-                    <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7])">Host Node</button>
-                    <button id="refreshMap" onclick="refreshMap()">Refresh</button>
+                    <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">Host Node</button>
+                    <button id="refreshMap" onclick="indexRefreshMap(1)">Refresh</button>
                 </div>
                 <div id="block0"></div>
                 <div id="block1"></div>
@@ -34,11 +35,11 @@
         </div>
         <div style="height: 100%; width: 30%; margin-top: 2%;">
             <input type="text" id="liveCoverURL" class="liveInput" placeholder="URL of img served as Cover"><br />
+            Upload local img: only be available after creating room
             <input type="checkbox" id="ifPravite">pravite(whitout Root node)
         </div>
-        <!--input type="file" name="files" style="margin-top: 2%; width: 14%;"-->
-        <button id="closeLiveMenu" class="actionButton" onclick="showLive()">Close</button>
         <button id="goToLive" class="actionButton">GoToLive</button>
+        <button id="closeLiveMenu" class="actionButton" onclick="showLive()">Close</button>
     </div>
     <!-- Control Panel -->
     <div class="indexContainer" id="control">
@@ -52,40 +53,34 @@
             <button id="live" onclick="showLive()">Go To Live</button><br />
             <div id="status" style="font-weight: bold;">Status: Connecting to PeerServer...</div>
             <input type="text" id="directConnectId" placeholder="Input room Id">
-            <button id="directConnectButton">GoTo</button><!--todo-->
+            <button id="directConnectButton">GoTo</button>
             <div style="font-weight: bold; font-size: 32px;">Rooms List:</div>
         </div>
         <div class="indexBox">
-            <a href="https://peerjs.com/" target="_blank">View PeerJS official web</a><br />
-            <a href="https://github.com/aiksxd/P2P-Live-Web" target="_blank">View P2P-Live-Web on GitHub</a><br />
             <button onclick="changeTheme()">Dark - Light Mode</button><br />
             <button onclick="echoHistoricalConnectedId()">console.log( HistoricalConnectedId )</button><br />
             <button onclick="defaultConnect()">Click me to connect the deafult Root Id</button><br />
-            <input type="checkbox" id="ifAutoReconnect" checked="checked">Auto Reconnect when connection closed
+            <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnect when connection closed
         </div>
     </div>
     <div id="rooms">
     </div>
 
     <script>
-        // choose one of both
-        // const peer = new Peer({ host: 'localhost', port: 9000, path: '/myapp', debug: 2})     //if you use local peer server
-        const peer = new Peer({ debug: 2})      //use PeerJS official server
-        
         var openInfoTimes = 0;
         var openLiveTimes = 0;
         var defaultId = 'P2P-Live-Web-default-Id';
         var myid = null;
+        var ifIndex = true;
         let root = null;
-        let conn = null;
         let ifConnectedAim = false;
         let lastAimId = null;
         let nodesMap = new Array();
-        let conns = new Array();
         let rooms = new Array();
         let layers = [0];
         let roomPosition = null;
         let lastLayerNumber = null;
+        const MyName = null;
 
         let switchDeg = 180;
         let connectHistroy = [];
@@ -102,95 +97,7 @@
             if (root) {
                 root.close();
             }
-            tryConnect(0, defaultId, false);
-        }
-
-        function tryConnect(object, id, ifJump){
-            switch (object) {
-                case 0:
-                    root = peer.connect(id);
-                    
-                    root.on('open', () => {
-                        document.getElementById('connectButton').innerHTML="Refresh";
-                        document.getElementById('peerId').value=id;
-                        document.getElementById("status").innerHTML="Status: Connected to Root Node Successfully!"
-                    });
-
-                    document.getElementById("peerId").addEventListener(
-                        "focusout",
-                        () => {
-                            if (document.getElementById('peerId').value != id){
-                                document.getElementById('connectButton').innerHTML="Connect";
-                            }
-                        },
-                        true,
-                    );
-
-                    // Receive the reply of text: Host --> Guset
-                    root.on('data', (data) => {
-                        // data[0]:
-                        //  0: msg
-                        //  1: nodeInfo or indexRoomInfo 
-                        //  2: roomInfoModfied
-                        //
-                        // Info of rooms from root received
-                        appearRooms(data);
-                        rooms = data;
-                        console.log("Room list received");
-                    });
-
-                    // root.on('error', (err) => {
-                    //     document.getElementById("status").innerHTML="Status: Connecting Failed!" + err;
-                    // });
-
-                    root.on('close', () => {
-                        // root = null;
-                        document.getElementById("status").innerHTML="Status: Root Connection Closed!";
-                        document.getElementById('connectButton').innerHTML="Connect";
-                        
-                        if(document.getElementById("ifAutoReconnect").checked && changingParentConnection){
-                            document.getElementById("status").innerHTML="Status: Reconnecting to last Root Node...";
-                            
-                            // autoJoin(nodesMap, 2, 0);
-                            tryConnect(0, connectHistroy.slice(-1)[0], false);
-                            // document.getElementById("status").innerHTML="Status: Root Reconnection Failed!";
-                        }
-                    });
-                    break;
-                case 1:
-                    if(conn){if(conn.open){
-                        conn.close();
-                    }}
-                    conn = peer.connect(id);
-
-                    if(ifJump){
-                        conn.on('open', () => {
-                            document.location.href = "./P2PLiveAudience.html?id=" + id;
-                        });
-                    }
-
-                    conn.on('data', (data) => {
-                        nodesMap = data;
-                        ifConnectedAim = true;
-                        for(var i=0; i<conns.length; i++){
-                            if(conns[i].open){
-                                conn = conns[i];
-                            }
-                        }
-                        conns = null;   // break all of conn
-                    });
-
-                    conn.on('close', ()=> {
-                        document.getElementById("status").innerHTML="Status: Connection of "+ title +"closed";
-                        ifConnectedAim = false;
-                    });
-
-                    conns.push(conn);
-                    break;
-                default:
-                    console.log("tryConnect Error");
-                    break;
-            }
+            tryConnect(4, defaultId, false);
         }
 
         // Click event for the send message button && root uploads, host receives the reply from the receiving party.
@@ -201,7 +108,7 @@
             
             if (document.getElementById("peerId").value){
                 connectHistroy.push(document.getElementById("peerId").value);
-                tryConnect(0, connectHistroy.slice(-1)[0], false);
+                tryConnect(4, connectHistroy.slice(-1)[0], false);
             } else {
                 defaultConnect();
             }
@@ -221,7 +128,9 @@
             console.log("Rooms list upated");
             document.getElementById("rooms").innerHTML = "";
             for (var i = 0; i < data.length; i++){
-                document.getElementById("rooms").innerHTML = document.getElementById("rooms").innerHTML + "<div class=\"rooms\" onclick=displayRoomInfo("+ i +") alt=\"img Error\" style=\"background-image: url(\'"+data[i][6]+"\'); background-size: contain;\">"+ data[i][4] +"</div>";
+                document.getElementById("rooms").innerHTML = document.getElementById("rooms").innerHTML + 
+                "<div class=\"rooms\" onclick=displayRoomInfo("+ i +") alt=\"img Error\" style=\"background-image: url(\'"+ data[i][6] +"\'); background-size: contain;\">"+ data[i][4] +
+                "<span style=\"position: absolute; bottom: 0;\">sum:"+ data[i][3].length +" </span></div>";
             }
         }
 
@@ -231,87 +140,24 @@
             if(openInfoTimes===0){
                 openRoomInfo();
             }
-            refreshMap();
         }
 
         function openRoomInfo() {       // top menu for showing the detail of room
             if(openInfoTimes==0){
                 openInfoTimes++;
                 document.getElementById('openRoomInfo').style.height = "25%";
+                indexRefreshMap(1);
             }else{
                 openInfoTimes=0;
                 document.getElementById('openRoomInfo').style.height = "0px";
             }
-            refreshMap();
         }
 
-        function refreshMap(){
+        function indexRefreshMap(fnOfEcho){
             nodesMap = rooms[roomPosition];
-            document.getElementById("roomTitle").innerHTML = nodesMap[4];
-            document.getElementById("roomSummary").innerHTML = nodesMap[5];
-            document.getElementById("roomCover").src = nodesMap[6];
-            echoNodesMap(nodesMap[9], 0, undefined);    // refresh the menu
+            refreshMap(fnOfEcho);
         }
 
-        function echoNodesMap(arr, layerNumber, aimId){
-            if(arr == nodesMap[9]){      // refresh Map for "refresh" & hostNode button
-                layers = [0];
-                lastAimId = null;
-                lastLayerNumber = null;
-                document.getElementById("block0").innerHTML = "";
-                document.getElementById("block1").innerHTML = "";
-            }
-            if(lastAimId === aimId){  // if second click on same button
-                document.location.href = "./P2PLiveAudience.html?id=" + aimId;
-            }else{
-                document.getElementById("block"+ layerNumber % 2).innerHTML = "";
-                if(lastLayerNumber === layerNumber ){
-                    layers.splice(lastLayerNumber + 1);  // remove all of old layers
-                }
-                if(arr){
-                    for(var i = 7; i < arr.length; i=i+3){
-                        if(arr[i + 2] instanceof Array){
-                            document.getElementById("block"+ layerNumber % 2).innerHTML = document.getElementById("block"+ layerNumber % 2).innerHTML + "<button class=\"childNodes\" onclick=\"echoNodesMap(layers["+ (layerNumber + 1) +"]["+ (i+2) +"], "+ (layerNumber + 1) +", layers["+ (layerNumber + 1) +"]["+ i +"] )\">"+ arr[i + 1] +"</button><br />";
-                        }
-                    }
-                }
-                layers.push(arr);
-                lastLayerNumber = layerNumber;
-                lastAimId = aimId; // original id of this layer
-                // feedback todo
-            }
-        }
-        
-        function autoJoin(t){
-            if(nodesMap[1] === 0){
-                console.log("Error: try autoJoin() by the nodesMap which wasn't from Root of Room"+ nodesMap);
-                return;
-            }
-            if(nodesMap[2] < t){
-                tryConnect(1, nodesMap[7], true);
-            } else {
-                deeplySearch(nodesMap[9], t);
-            }
-        }
-
-        function deeplySearch(arr ,t){
-            for (var i = 7; i < arr.length; i=i+3) {
-                console.log("i = "+ i);
-                if(arr[i] && arr[i + 2] instanceof Array){
-                    if(arr[i + 2][2] < t){
-                        if(ifConnectedAim){break;}
-                        // console.log("try connect to"+ arr[i]);
-                        tryConnect(1, arr[i], true);    // for index version
-                    }// else { console.log("give up connecting to "+ arr[i]); }
-                }
-            }
-            for (var m = 9; m < arr.length; m=m+3) {
-                if(arr[m] && arr[m] instanceof Array){
-                    deeplySearch(arr[m], t);
-                }
-            }
-        }
-        
         function showLive() {       // if usr want to live
             if(openLiveTimes==0){
                 openLiveTimes++;

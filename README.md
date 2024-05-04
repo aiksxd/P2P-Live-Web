@@ -4,28 +4,23 @@
 P2P is a distributed network architecture where each participant (also known as a node) acts as both a client and a server
 Unlike the traditional client-server model, P2P allows direct communication between nodes without the need for relay through a central server
 
-PeerJS: PeerJS is a JavaScript library based on WebRTC for simplifying P2P communication implementation
+PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication implementation
 
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 
-### Update(only multi-room Version):
-+ Auto-join & Auto-reconnect
-+ custome room title, summary, cover
-+ Nodes Map display(displayed alternately on the left and right & Double-click to join)
-+ By default, index request the id of "P2P-Live-Web-Default-Id" (It made better index connection. if your root id has already been occupied, you need to modify it)
+### Update:
++ Better Auto-join(number for setting)
++ upload image as cover & message
++ function of refresh redo
++ new media source(support more devices)
++ display the number of persons in the room
++ repair the bug of tab closed but connection active
++ video full screen & better style
++ auto-clean message
++ single version update
 
 ### Next Version Plan:
-+ refresh fn redo!
-+ Auto-clean message
-+ single file update
-+ new media source
-+ css, rename...
-
-## [Single Room Type Live Streaming](https://aiksxd.github.io/P2PLiveWeb.html)
-### Instructions:
-1. Load the file **locally** or **access directly** via the following links
-2. The broadcaster clicks the **Start Local Stream** button and shares their ID with the audience
-3. The audience can connect to any broadcaster's ID, but the connection must remain uninterrupted If the connection is broken in the middle, a new connection object is required
++ clean bug
 
 ## [Multi-Room Type (URL->ROOT)](https://aiksxd.github.io/P2PLiveRoot.html)
 *if someone has already opened root page on the Internet, you can directly use [URL -> Index](https://aiksxd.github.io/P2PLiveIndex.html)*
@@ -35,31 +30,31 @@ PeerJS: PeerJS is a JavaScript library based on WebRTC for simplifying P2P commu
 + P2PLiveHost.html & P2PLiveAudience.html are auxiliary pages placed in the same directory
 ### Instructions:
 + [For Server]
-1. open the root node page(P2PLiveRoot.html)
-2. share it to users
+1. use browser to load the root node page(P2PLiveRoot.html) with available Internet
+2. share id to users
 + [For Audiences]
-1. Visit the homepage(P2PLiveIndex.html), [enter the **root node's ID**, and click the **Connect** button(deafault connect id can be modified in file)]
+1. Use browser to load the homepage(P2PLiveIndex.html) with available Internet, [enter the **root node's ID**, and click the **Connect** button(deafault connect id can be modified in file)]
 2. After completing step one, audience members can view all active live streaming rooms under the root node (based on the connectivity status of the live streaming pages)
 + [For Streamers]
 1. Visit the homepage(P2PLiveIndex.html), [enter the **root node's ID**, and click the **Connect** button(deafault connect id can be modified in file)]
 2. Clicks **Go To Live** and then clicks **Stream Source** button
 
-## **Considerations**:
+### **Considerations**:
+1. If the connection is established before the host starts sharing the media stream, clicking the button again will **refresh the received media stream**(or refresh web)
+2. In the event of the host losing connection, the information from the host's child nodes will not be transmitted to other host's child nodes
+3. Video quality may initially be blurry when passed from child nodes to sub-child nodes; waiting for synchronization may resolve this (quality synchronization observed after 26 seconds in a test)
+4. By default, index request the id of "P2P-Live-Web-Default-Id" (It made better index connection. if your root id has already been occupied, you need to modify it)
+
+
+## [Single Room Type Live Streaming](https://aiksxd.github.io/P2PLiveWeb.html)
+### Instructions:
+1. Load the file **locally** or **access directly** via the following links
+2. The broadcaster clicks the **Start Local Stream** button and shares their ID with the audience
+3. The audience can connect to any broadcaster's ID, but the connection must remain uninterrupted If the connection is broken in the middle, a new connection object is required
+
+### **Considerations**:
 1. The **root node** has the **highest priority for streaming**, overriding all child nodes and their subsequent children's live streams
 2. **Live media streams are only pushed to child nodes**, unlike the information channel where messages can be received from any node. Therefore, it is advisable for the connected root node to be a live streaming node or monitor (**unidirectional media streaming, bidirectional text messaging**).
-3. If the connection is established before the host starts sharing the media stream, clicking the button again will **refresh the received media stream**
-4. This file combines **sender and receiver into one**, relying solely on the frontend. This means that everyone's permissions are equal. If deployed in a development or insecure environment, content should be encapsulated and permission levels set
-5. In the event of the host losing connection, the information from the host's child nodes will not be transmitted to other host's child nodes
-6. Video quality may initially be blurry when passed from child nodes to sub-child nodes; waiting for synchronization may resolve this (quality synchronization observed after 26 seconds in a test)
-7. By default, index request the id of "P2P-Live-Web-Default-Id" (It made better index connection. if your root id has already been occupied, you need to modify it)
-
-### Extensions:
-1. For the multi-room type, by creating a root node on your own device, deploying the remaining pages on the web site, and specifying the root node connection, you can implement a simple live streaming website
-2. For the single live room type, similarly, create a page on your own, start streaming after obtaining the ID, deploy another page on the web, and specify the ID connection to achieve a specific live room
-
-### Adapting and Expanding Streaming Sources
-+ The desktop stream is obtained by default using MediaDevices.getDisplayMedia(), which means that it only shares the desktop. This also implies that **most mobile devices** are unable to initiate live streams and can **only receive media streams and text information**. Additionally, this functionality requires operation in a local development environment or under HTTPS to function properly
-+ If there is a need for mobile screen streaming, accessing the camera, taking photos, etc., you can refer to the getUserMedia() API and modify the page's getLocalStream() function
 
 ### For **P2P-Live-web**
  it employs a **node-based delivery** that allows data to be passed directly from one node to another, enabling the same text interaction message to be received by anyone connected without relying on a central server, thus significantly reducing network latency
@@ -67,12 +62,12 @@ PeerJS: PeerJS is a JavaScript library based on WebRTC for simplifying P2P commu
  ![DeliverGIF](https://github.com/aiksxd/material/blob/main/img/DeliverGIF.gif)
 
 ### Commonly used arrays
-+ nodesMap[ **msgClass** -> 1, **source**: 0(child)/1(host), **Total number of child nodes**: number, **all of ids in room**: **todo**, **Live_Title**, **Live_Summary**, **Live_CoverURL**, **host_Id**, **host_Name**, **child_Nodes**, **root_Id**]
++ nodesMap[ **msgClass** -> 1, **source**: 0(child)/1(host), **Total number of child nodes**: number, **all of ids in room**, **Live_Title**, **Live_Summary**, **Live_CoverURL**, **host_Id**, **host_Name**, **child_Nodes**, **root_Id**]
 
-+ child_Nodes[ **msgClass** -> 1, **source**: 0(child)/1(host), **Total number of child nodes**: number, **all of ids in room**: **todo**, **own_Id**, **own_Name**, **temp_recorder**, **child_A_Id**, **child_A_name**, **child_Nodes_Of_Child_A**, **child_B_Id**...]
++ child_Nodes[ **msgClass** -> 1, **source**: 0(child)/1(host), **Total number of child nodes**: number, **all of ids in room**, **own_Id**, **own_Name**, **useless array for extension**, **child_A_Id**, **child_A_name**, **child_Nodes_Of_Child_A**, **child_B_Id**...]
 
 ### mark
-+ msgClass: 0 -> msg, 1 -> nodes Collecter, 2 -> streaming request, 3 -> remingder of replacing the parent node
++ msgClass: 0 -> msg, 1 -> nodes Collecter, 2 -> streaming request, 3 -> remingder of replacing the parent node, 4 -> application of refresh media stream
 
 ## Issue: 
 ### Connect without feedback(failed):

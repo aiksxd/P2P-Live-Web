@@ -11,7 +11,7 @@
     <!-- ID interaction -->
     <div class="container">
         <div class="box">
-            <!-- Receiver -->
+            <!-- Root -->
             <div style="font-weight: bold; font-size: 32px;">Root Node <a href="./P2PLiveIndex.html" target="_blank">Go to index</a></div>
             <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div>
         </div>
@@ -19,6 +19,7 @@
             <!-- <div>Custome Name<input type="text" id="name" placeholder="Input your name here..." /></div><br/> -->
             <a href="https://github.com/aiksxd/P2P-Live-Web" target="_blank">View P2P-Live-Web on GitHub</a><br/>
             <a href="https://peerjs.com/" target="_blank">View PeerJS official web</a>
+            <input type="checkbox" id="ifStopCleanMsg" checked="checked">Stop Clean Message
         </div>
     </div>
     
@@ -46,8 +47,8 @@
         // choose one of both
         // const peer = new Peer("P2P-Live-Web-default-Id", { host: 'localhost', port: 9000, path: '/myapp', debug: 2});     //if you use local peer server
         
-        // const peer = new Peer("P2P-Live-Web-default-Id", { debug: 2});      //use PeerJS official server with default Id
-        const peer = new Peer({ debug: 2});
+        const peer = new Peer("P2P-Live-Web-default-Id", { debug: 2});      //use PeerJS official server with default Id
+        // const peer = new Peer({ debug: 2});
 
         var conn = null;
         var myid = null;
@@ -104,8 +105,10 @@
             conn.on('data', (data) => {
                 // data[0]:
                 //  0: msg
-                //  1: room NodeInfo
+                //  1: nodeInfo or indexRoomInfo 
                 //  2: roomInfoModfied
+                //  3: for reconnect: Remind the child node to replace the parent node
+                //  4: for refresh: apply to the new media Stream for daliver to child
                 switch (data[0]) {
                     case 0:
                         console.log('Received data:', data);
