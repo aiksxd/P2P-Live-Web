@@ -9,16 +9,12 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 
 ### 更新:
-+ 刷新功能重做
-+ 显式房间人数(roomIds数组)
-+ 自动清除信息
-+ 流媒体源扩展(更多设备支持)
-+ 图片上传封面与图片消息
-+ 修复关闭标签页但连接仍然保留的BUG
-+ 直播网页全屏
-+ 单文件版本更新
-+ 自动连接优化(参数可自调autoJoin(每个节点推荐人数))
-+ 视频标签样式优化
++ In index to choose your room type(Live & FiveOnline)
++ P2PGameFiveOnLineHost.html 主办方文件
++ P2PGameFiveOnLineHost.html 玩家/观众文件
++ 暗色主题
++ 头像与信息
++ 速度更快的代码方式
 
 ### 下个版本的计划:
 + Redraw()
@@ -39,7 +35,7 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 1. 联网并使用浏览器读取主页(P2PLiveIndex.html)，**填入根节点的ID**并按下**连接**按钮
 3. 观众在执行第一步后可以看到该根节点下的所有活跃直播间(列入标准不在于是否推流，而是直播页面的连接情况)
 + [ 对于主播 ]
-1. 联网并使用浏览器读取主页(P2PLiveIndex.html)，**填入根节点的ID**并按下**连接**按钮
+1. 联网并使用浏览器读取主页(P2PLiveIndex.html)，**填入根节点的ID**并按下**连接**按钮(In index to choose your room type(Live & FiveOnline))
 2. 点击**去开播**之后点击**共享本地流**
 
 ### **注意事项**：

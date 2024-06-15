@@ -9,15 +9,12 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 
 ### Update:
-+ Better Auto-join(number for setting)
-+ upload image as cover & message
-+ function of refresh redo
-+ new media source(support more devices)
-+ display the number of persons in the room
-+ repair the bug of tab closed but connection active
-+ video full screen & better style
-+ auto-clean message
-+ single version update
++ In index to choose your room type(Live & FiveOnline)
++ P2PGameFiveOnLineHost.html For Host
++ P2PGameFiveOnLineHost.html For Players/Audiences
++ dark theme update
++ Better Msg with icon
++ better effective code
 
 ### Next Version Plan:
 + Redraw()
@@ -38,7 +35,7 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 + [For Audiences]
 1. Use browser to load the homepage(P2PLiveIndex.html) with available Internet, [enter the **root node's ID**, and click the **Connect** button(deafault connect id can be modified in file)]
 2. After completing step one, audience members can view all active live streaming rooms under the root node (based on the connectivity status of the live streaming pages)
-+ [For Streamers]
++ [For Host] Noticed: In index to choose your room type(Live & FiveOnline)
 1. Visit the homepage(P2PLiveIndex.html), [enter the **root node's ID**, and click the **Connect** button(deafault connect id can be modified in file)]
 2. Clicks **Go To Live** and then clicks **Stream Source** button
 
