@@ -18,6 +18,7 @@ let msgImgBase64 = null;
 let fullWebVideoTimes = 0;
 let deliverId = null;
 let myIcon = "";
+let root = null;
 
 function tryConnect(object, id, ifJump, ifAskForMediaStream){
     // object:
@@ -365,6 +366,11 @@ function liveSend (msg){
     if(msg instanceof Array){
         if(msg[0] && msg[0] instanceof Number && (!msg[1] instanceof Number)){
             source = msg[1];
+        }
+    }
+    if(root){
+        if(root.open){     // check the data channel
+            root.send(msg);
         }
     }
     if(parent){

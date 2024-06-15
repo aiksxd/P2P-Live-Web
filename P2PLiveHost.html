@@ -92,7 +92,6 @@
             </div>
         </div>
         <div class="box" style="width: 30%;">
-            <div>Custome Name<input type="text" id="name" placeholder="Input your name here..." /></div><br />
             <span id="sumOfRoom">Members: 1</span><br />
             <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max to 100]<br />
         </div>
@@ -104,7 +103,7 @@
         <video id="webVideo" controls autoplay></video>
         <!-- Message box -->
         <div id="chatContainer">
-            <div id="chatBox" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
+            <div id="chatBox"></div>
             <div class="sendInput">
                 <!-- Send box -->
                 <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
@@ -123,8 +122,7 @@
         let mediaOpen = null;
         let openInfoTimes = 0;
         let openLiveTimes = 0;
-        let parent = null;       
-        let root = null;
+        let parent = null;
         let ifAutoScroll = true;
         let localStream = null;
         let remoteStream = null;
@@ -175,11 +173,9 @@
 
             conn.on('open', () => {
                 // for guest in index
-                // let sendNodesMap = nodesMap;
-                // sendNodesMap[2] = -1;
-                // conn.send(sendNodesMap);
+                let sendNodesMap = nodesMap;
+                sendNodesMap[2] = -1;
                 conn.send(sendNodesMap);
-                conn.send(gameInfo);
             });
             
             // Receive the text: Host <-- Guest
@@ -311,8 +307,8 @@
         }
         
         // autoScroll the scrollbar
-        function autoScroll(){ ifAutoScroll = true;}
-        function autoScrollStop(){ ifAutoScroll = false;}
+        document.getElementById("chatBox").addEventListener('onmouseover', ()=>{ ifAutoScroll = false;});
+        document.getElementById("chatBox").addEventListener('onmouseout', ()=>{ ifAutoScroll = true;});
 
         // Listen for press enter in message box
         document.getElementById("sendMessageBox").addEventListener('keypress', enter);

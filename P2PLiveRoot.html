@@ -12,17 +12,17 @@
             <div style="font-weight: bold; font-size: 32px;">Root Node <a href="./P2PLiveIndex.html" target="_blank">Go to index</a></div>
             <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div>
         </div>
-        <div class="box">
+        <div class="box" style="width: 70%;">
             <!-- <div>Custome Name<input type="text" id="name" placeholder="Input your name here..." /></div><br/> -->
             <a href="https://github.com/aiksxd/P2P-Live-Web" target="_blank">View P2P-Live-Web on GitHub</a><br/>
             <a href="https://peerjs.com/" target="_blank">View PeerJS official web</a>
-            <input type="checkbox" id="ifStopCleanMsg" checked="checked">Stop Clean Message
+            <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max to 100]
         </div>
     </div>
     
     <!-- Message box -->
     <div class="chatContainer">
-        <div id="chatBox" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
+        <div id="chatBox"></div>
         <!--div class="sendInput">
             <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
             <button type="button" id="sendButton">Send</button>
@@ -46,8 +46,8 @@
         // choose one of both
         // const peer = new Peer("P2P-Live-Web-default-Id", { host: 'localhost', port: 9000, path: '/myapp', debug: 2});     //if you use local peer server
         
-        const peer = new Peer("P2P-Live-Web-default-Id", { debug: 2});      //use PeerJS official server with default Id
-        // const peer = new Peer({ debug: 2});
+        // const peer = new Peer("P2P-Live-Web-default-Id", { debug: 2});      //use PeerJS official server with default Id
+        const peer = new Peer({ debug: 2});
 
         let conn = null;
         let myid = null;
@@ -166,15 +166,86 @@
         // add msg to box
         function appearMsg(msg) {
             let now = new Date();
-            document.getElementById("chatBox").innerHTML =  document.getElementById("chatBox").innerHTML + "<br><span class=\"time\">[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]</span>" + "<span class=\"origin\">From RoomId of "+ msg[1] + "</span>" + "<span class=\"usr\">"+ msg[2] + ": </span>" + msg[3];
-            if (ifAutoScroll){
+
+            let newMsg = document.createElement("div");
+            newMsg.classList.add("msgs");
+            let newMsgContent = document.createElement("div");
+
+            if(msg[5]){
+                let newMsgIcon = document.createElement("img");
+                newMsgIcon.setAttribute("src", msg[5]);
+                newMsgIcon.classList.add("icon");
+                newMsgContent.appendChild(newMsgIcon);
+            }
+
+            let newMsgTime = document.createElement("span");
+            newMsgTime.appendChild(document.createTextNode("[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]"));
+            newMsgTime.classList.add("time");
+            newMsgContent.appendChild(newMsgTime);
+
+            let newMsgUser = document.createElement("span");
+            newMsgUser.appendChild(document.createTextNode(msg[2] + ":"));
+            newMsgUser.classList.add("usr");
+            newMsgContent.appendChild(newMsgUser);
+
+            newMsg.appendChild(newMsgContent);
+            
+            // let newMsgContent = document.createElement("div");
+            // newMsgContent.setAttribute("style", "vertical-align: middle; display: inline-block;");
+
+            // let newMsgTime = document.createElement("span");
+            // newMsgTime.appendChild(document.createTextNode("[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]"));
+            // newMsgTime.classList.add("time");
+            // newMsgContent.appendChild(newMsgTime);
+
+            // let newMsgUser = document.createElement("span");
+            // newMsgUser.appendChild(document.createTextNode(msg[2] + ":"));
+            // newMsgUser.classList.add("usr");
+            // newMsgContent.appendChild(newMsgUser);
+            // newMsgContent.appendChild(document.createElement("br"));
+
+            let newMsgTextContent = document.createElement("span");
+            newMsgTextContent.appendChild(document.createTextNode(msg[3]));
+            newMsgTextContent.classList.add("chatText");
+            newMsg.appendChild(newMsgTextContent);
+
+            if(msg[4]){
+                let newMsgImgContent = document.createElement("img");
+                newMsgImgContent.setAttribute("src", msg[4]);
+                newMsgImgContent.classList.add("chatImg");
+                newMsg.appendChild(newMsgImgContent);
+            }
+
+            document.getElementById("chatBox").appendChild(newMsg);
+            // original msg appear mode(only one line but low effective)
+            // document.getElementById("chatBox").innerHTML =  document.getElementById("chatBox").innerHTML + "<div class=\"msgs\"><span class=\"time\">[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]</span>" + "<span class=\"usr\">"+ msg[2] + ": </span>" + msg[3] + img +"</div>";
+            
+            if(ifAutoScroll){
                 document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+            }
+            if(document.getElementById("ifAutoClean").checked){
+                let msgs = document.getElementsByClassName("msgs");
+                let numberOfMsgs = msgs.length;
+                if(numberOfMsgs > 100){
+                    let deltaNumber = numberOfMsgs - 100;
+                    for(let i=0; i <= deltaNumber; i++){
+                        msgs[i].remove();
+                        numberOfMsgs--;
+                    }
+                }
+            }
+        }
+
+        function cleanMsg(){    // DEBUG
+            let msgs = document.getElementsByClassName("msgs");
+            while(msgs.length){
+                msgs[0].remove();
             }
         }
 
         // autoScroll the scrollbar
-        function autoScroll(){ ifAutoScroll = true;}
-        function autoScrollStop(){ ifAutoScroll = false;}
+        document.getElementById("chatBox").addEventListener('onmouseover', ()=>{ ifAutoScroll = false;});
+        document.getElementById("chatBox").addEventListener('onmouseout', ()=>{ ifAutoScroll = true;});
 
         // destroy connection when someone closed the web
         window.addEventListener("beforeunload", (event) => {

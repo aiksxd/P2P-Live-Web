@@ -22,6 +22,8 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 ### Next Version Plan:
 + Redraw()
 + Game Mode -> 2&3 update
++ better root msg
++ single Version update
 
 ## [Multi-Room Type (URL->ROOT)](https://aiksxd.github.io/P2PLiveRoot.html)
 *if someone has already opened root page on the Internet, you can directly use [URL -> Index](https://aiksxd.github.io/P2PLiveIndex.html)*

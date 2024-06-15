@@ -76,7 +76,7 @@
             </div>
         </div>
         <div class="box" style="width: 30%;">
-            <span id="sumOfRoom">Members: 1</span>
+            <span id="sumOfRoom">Members: 1</span>><br />
             <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max to 100]<br />
             <button onclick="cleanMsg()">CleanMsgs</button><br />
         </div>
@@ -88,7 +88,7 @@
         <video id="webVideo" controls autoplay></video>
         <!-- Message box -->
         <div id="chatContainer">
-            <div id="chatBox" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
+            <div id="chatBox"></div>
             <div class="sendInput">
                 <!-- Send box -->
                 <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
@@ -334,8 +334,8 @@
         }
 
         // autoScroll the scrollbar
-        function autoScroll(){ ifAutoScroll = true;}
-        function autoScrollStop(){ ifAutoScroll = false;}
+        document.getElementById("chatBox").addEventListener('onmouseover', ()=>{ ifAutoScroll = false;});
+        document.getElementById("chatBox").addEventListener('onmouseout', ()=>{ ifAutoScroll = true;});
 
         // Listen for press enter in message box
         document.getElementById("sendMessageBox").addEventListener('keypress', enter);
