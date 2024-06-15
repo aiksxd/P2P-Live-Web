@@ -2,9 +2,6 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <script src="js/peerjs.min.js"></script>
-    <script src="js/fn.js"></script>
-    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
@@ -29,7 +26,7 @@
         <img id="roomCover" src="">
         <div id="roomText">
             <div id="roomTitle"></div>
-            <div id="roomSummary"></div>
+            <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea>
             <div id="nodeInfo">
                 <div id="stable">
                     <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 0)">me</button>
@@ -79,52 +76,58 @@
     <div class="container">
         <div class="box">
             <!-- Receiver -->
-            <div style="font-weight: bold;">Host
-                <button id="refreshButton" onclick="refreshMedia()">Refresh</button>
-                <button type="button" id="chooseStreamSource" onclick="streamSourceMenu()">Stream Source</button>
-                <button id="openRoomInfoButton" onclick="openRoomInfo()">Room Info</button>
-                <button type="button" id="roomSetting" onclick="showLive()">Room Setting</button>
-                <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div><br />
-                </div>
-        </div>
-        <div class="box">
-            <button onclick="fullWebVideo()">Full Web Video</button><br />
+            <div style="font-weight: bold;">Host</div>
+            <button id="refreshButton" onclick="refreshMap()">Refresh</button>
+            <button id="openRoomInfoButton" onclick="openRoomInfo()">Room Info</button>
+            <button type="button" id="chooseStreamSource" onclick="streamSourceMenu()">Stream Source</button><button type="button" id="roomSetting" onclick="showLive()">Room Setting</button>
+            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div><br />
             <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br />
             <div id="status" style="font-weight: bold;">Status: Waiting to Connecting to PeerServer...</div>
         </div>
-        <div class="custome">
+        <div class="box">
+            <button onclick="fullWebVideo()">Full Web Video</button><br />
+            <div>
+                <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Icon & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br />
+                <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
+            </div>
+        </div>
+        <div class="box" style="width: 30%;">
             <div>Custome Name<input type="text" id="name" placeholder="Input your name here..." /></div><br />
-            <div id="sumOfRoom">Audiences: 0</div><br />
+            <span id="sumOfRoom">Members: 1</span><br />
             <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max to 100]<br />
         </div>
     </div>
     
     <!-- Live interaction-->
     <div class="videoBox">
-    <!--PS: if no video(maybe leaded by autoplay), try to click it to play(or F12 check the stream)-->
-    <video id="localVideo" width="100%" height="100%" controls autoplay></video></div>
-    <!-- Message box -->
-    <div class="chatContainer">
-        <div class="chatBox" id="message" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
-        <div class="sendInput">
-            <!-- Send box -->
-            <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
-            <button type="button" id="sendButton" onclick="sendMsg()">Send</button>
-            <input id="msgImgInput" type="file" onchange="sendImg()"><br />
+        <!--PS: if no video(maybe leaded by autoplay), try to click it to play(or F12 check the stream)-->
+        <video id="webVideo" controls autoplay></video>
+        <!-- Message box -->
+        <div id="chatContainer">
+            <div id="chatBox" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
+            <div class="sendInput">
+                <!-- Send box -->
+                <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
+                <button type="button" id="sendButton" onclick="sendMsg()">Send</button>
+                <button type="button" id="uploadImgButton">Img</button><br />
+                <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
+            </div>
         </div>
     </div>
 
+    <script src="js/peerjs.min.js"></script>
+    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
+    <script src="js/fn.js"></script>
     <script>
-        var conn = null;
-        var mediaOpen = null;
-        var openInfoTimes = 0;
-        var openLiveTimes = 0;
+        let conn = null;
+        let mediaOpen = null;
+        let openInfoTimes = 0;
+        let openLiveTimes = 0;
         let parent = null;       
         let root = null;
         let ifAutoScroll = true;
         let localStream = null;
         let remoteStream = null;
-        let deliverId = null;
         let ifHitAim = null;
         let lastAimId = null;
         let layers = [0];
@@ -135,22 +138,24 @@
         let connIds = new Array();
         let nodesMap = new Array();     // init later
         let childNodes = new Array();
-        const WebVideo = document.getElementById('localVideo');
+        const WebVideo = document.getElementById('webVideo');
         let params = new URLSearchParams(document.location.search.substring(1));
         let urlInfo = [params.get("rootId"), params.get("title"), params.get("summary"), params.get("coverURL")]
         const LiveTitle = document.getElementById("LiveTitle");
         const LiveSummary = document.getElementById("LiveSummary");
-        const LiveCoverURL= document.getElementById("LiveCoverURL");
+        const LiveCoverURL = document.getElementById("LiveCoverURL");
         const MyName = document.getElementById("name");
 
         // Listen for the event when a Peer connection is successfully opened
         // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
         peer.on('open', (id) => {
-            if (LiveTitle.value || LiveSummary.innerHTML || LiveCoverURL.value){
-                nodesMap = [ 1, 1, 0, [], LiveTitle.value, LiveSummary.innerHTML, LiveCoverURL.value, id, getMyName(), childNodes, urlInfo[0]];
+            if (LiveTitle.value || LiveCoverURL.value || LiveCoverURL.value){
+                nodesMap = [ 1, 1, [id], 0, LiveTitle.value, LiveCoverURL.value, LiveCoverURL.value, id, getMyName(), childNodes, urlInfo[0]];
             } else {
+                //childNodes=[0.dataType, 1.sourceMark, 2.NumberOfchildNodes, 3.unused for you ]
                 childNodes = [ 1, 1, 0, [], id, getMyName(), []];
-                nodesMap = [ 1, 1, 0, [], urlInfo[1], urlInfo[2], urlInfo[3], id, getMyName(), childNodes, urlInfo[0]];
+                //nodesMap=[0.dataType, 1.sourceMark, 2.idsOfMembersInRoom, 3.roomType]
+                nodesMap = [ 1, 1, [id], 0, urlInfo[1], urlInfo[2], urlInfo[3], id, getMyName(), childNodes, urlInfo[0]];
             }
             console.log(id);
             document.getElementById("myid").innerHTML = "Your ID:<br/>" + id;
@@ -170,9 +175,11 @@
 
             conn.on('open', () => {
                 // for guest in index
-                var sendNodesMap = nodesMap;
-                sendNodesMap[2] = -1;
+                // let sendNodesMap = nodesMap;
+                // sendNodesMap[2] = -1;
+                // conn.send(sendNodesMap);
                 conn.send(sendNodesMap);
+                conn.send(gameInfo);
             });
             
             // Receive the text: Host <-- Guest
@@ -204,7 +211,7 @@
                         break;
                     case 1:
                         if ( ! audienceIds.includes(data[4])){
-                            var aimPosition = connIds.indexOf(data[4]);
+                            let aimPosition = connIds.indexOf(data[4]);
                             audienceIds.push(connIds[aimPosition]);
                             audiences.push(conns[aimPosition]);
 
@@ -214,7 +221,7 @@
                                 peer.call(data[4], localStream);
                                 console.log("Media sent successfully: "+ data[4]);
                                 // If you want to receive the reply of the stream
-                                // usage: var temp peer.call(conn.peer, localStream);
+                                // usage: let temp peer.call(conn.peer, localStream);
                                 // temp.on('stream', (stream) = displayStream);
                                 // PS:
                                 // It can only receive the previous one, so you need to deliver a new stream. 
@@ -255,30 +262,25 @@
             });
 
             conn.on('close', () => {
-                for (var i = 0; i< conns.length; i++){
+                for (let i = 0; i< conns.length; i++){
                     if(conns[i]){
                         if (conns[i].open){
                             continue;
                         }else{
-                            var disconnectedGuest = connIds.indexOf(conns[i].peer);   // locate old data
+                            let disconnectedGuest = connIds.indexOf(conns[i].peer);   // locate old data
                             if (disconnectedGuest !== -1){
                             
-                                var disconnectedAudience = audienceIds.indexOf(conns[i].peer);
+                                let disconnectedAudience = audienceIds.indexOf(conns[i].peer);
                                 if (disconnectedAudience !== -1){
                                     console.log("Disconnected and deleted: " + audienceIds[disconnectedAudience]);     //DEBUG
                                     audiences.splice(disconnectedAudience, 1);
                                     audienceIds.splice(disconnectedAudience, 1);
                                 
-                                    var sameId = childNodes.indexOf(conns[i].peer);
+                                    let sameId = childNodes.indexOf(conns[i].peer);
                                     if(sameId !== -1){
                                         childNodes.splice(sameId, 3);     // remove disconnected audiences
-                                        nodesMap[2] = audienceIds.length;
                                         nodesMap[3] = getRoomIds();
-                                        // faster but problem fn:
-                                        // var removeIdPosition = nodesMap[3].indexOf(conns[i].peer);
-                                        // if(removeIdPosition !== -1){
-                                        //     nodesMap[3].splice(removeIdPosition, 1);
-                                        // }
+                                        childNodes[3] = audienceIds.length;
                                     }
                                     // child nodes of host closed the connection
                                     console.log("nodesMap update after somebody closed")    // DEBUG
@@ -315,7 +317,7 @@
         // Listen for press enter in message box
         document.getElementById("sendMessageBox").addEventListener('keypress', enter);
         function enter(e) {
-            var event = e && window.event;
+            let event = e && window.event;
             if (event.which && event.keyCode == '13'){
                 document.getElementById("sendButton").click();
             }
@@ -326,7 +328,7 @@
                 openLiveTimes++;
                 document.getElementById('liveSetting').style.height = "25%";
                 LiveTitle.value = nodesMap[4];
-                LiveSummary.innerHTML = nodesMap[5];
+                LiveSummary.value = nodesMap[5];
                 LiveCoverURL.value = nodesMap[6];
             }else{
                 openLiveTimes=0;
@@ -336,7 +338,7 @@
 
         function modify(){
             nodesMap[4] = LiveTitle.value;   // nodesMap update
-            nodesMap[5] = LiveSummary.innerHTML;
+            nodesMap[5] = LiveCoverURL.value;
             if(liveCoverBase64){
                 nodesMap[6] = liveCoverBase64;
             } else {
@@ -379,9 +381,9 @@
         );
 
         function recorder(data){
-            var sameId = childNodes.indexOf(data[4]);   // locate old data
+            let sameId = childNodes.indexOf(data[4]);   // locate old data
             console.log('Info of nodes updated:', data);
-            // var idTemp = Object.assign({}, audienceIds);     // make audiencesPeers value stable
+            // let idTemp = Object.assign({}, audienceIds);     // make audiencesPeers value stable
             if(sameId === -1){
                 childNodes.push(data[4]);
                 childNodes.push(data[5]);
@@ -391,20 +393,21 @@
                 childNodes[ sameId + 2 ] = data;      // replace old data
             }
             // [0] => format, [1] => if from Root of room, [2] => numbers of child nodes from parent node
-            nodesMap = [ 1, 1, audienceIds.length, getRoomIds(), LiveTitle.value, LiveSummary.value, LiveCoverURL.value, peer.id, getMyName(), childNodes, urlInfo[0]];  //record this node's info
+            childNodes[2] = audienceIds.length;
+            nodesMap = [ 1, 1, getRoomIds(), 0, LiveTitle.value, LiveSummary.value, LiveCoverURL.value, peer.id, getMyName(), childNodes, urlInfo[0]];  //record this node's info
             if(root){
                 if(root.open){
                     root.send(nodesMap);
                 }
             }
             liveSend(nodesMap);
-            document.getElementById("sumOfRoom").innerHTML = "Audiences: "+ nodesMap[3].length;
+            document.getElementById("sumOfRoom").innerHTML = "Members: "+ nodesMap[2].length;
         }
 
         // destroy connection when someone closed the web
         window.addEventListener("beforeunload", (event) => {
             if(audiences[0]){
-                for(var i=0; i<audiences.length; i++){
+                for(let i=0; i<audiences.length; i++){
                     audiences[i].send([5]);
                     audiences[i].close();
                 }

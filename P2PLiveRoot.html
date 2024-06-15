@@ -2,12 +2,9 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <script src="js/peerjs.min.js"></script>
-    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
-
     <!-- ID interaction -->
     <div class="container">
         <div class="box">
@@ -25,13 +22,15 @@
     
     <!-- Message box -->
     <div class="chatContainer">
-        <div class="chatBox" id="message" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
+        <div id="chatBox" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
         <!--div class="sendInput">
             <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
             <button type="button" id="sendButton">Send</button>
         </div -->
     </div>
 
+    <script src="js/peerjs.min.js"></script>
+    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <script>
         /* PS(ignore it if you don't run peerjs server locally):
             Need to install nodejs and use its npm to install peerjs(npm install peer -g)(-g is selective if you only want to use in a folder) at first 
@@ -50,8 +49,8 @@
         const peer = new Peer("P2P-Live-Web-default-Id", { debug: 2});      //use PeerJS official server with default Id
         // const peer = new Peer({ debug: 2});
 
-        var conn = null;
-        var myid = null;
+        let conn = null;
+        let myid = null;
         
         let ifAutoScroll = true;
         // let predecessorHost = null;
@@ -80,13 +79,13 @@
             });
 
             conn.on('close', () => {
-                for (var i = 0; i < conns.length; i++){
+                for (let i = 0; i < conns.length; i++){
                     if(conns[i]){
                         if (conns[i].open){
                             continue;
                         }else{
-                            var disconnectedHost = connIds.indexOf(conns[i].peer);
-                            var disconnectedLiveHost = liveHostIds.indexOf(conns[i].peer);
+                            let disconnectedHost = connIds.indexOf(conns[i].peer);
+                            let disconnectedLiveHost = liveHostIds.indexOf(conns[i].peer);
                             if (disconnectedHost !== -1){
                                 console.log("Disconnected and deleted: " + conns[i].peer);     //DEBUG
                                 conns.splice(disconnectedHost, 1);
@@ -133,11 +132,11 @@
         // Root Send Massage
         function rootSend (rooms){
             console.log("deliver rooms update");  // DEBUG
-            // var disconnectedHost = null;         // todo
-            // var audiences = connIds.filter(function(t){ return liveHostIds.indexOf(t) == -1 })
-            // var aims = 0;     // count successful times
-            // var temp = null;    // to avoid encountering errors, ensure that null.peer is not existed.
-            for(var i=0; i<conns.length; i++){
+            // let disconnectedHost = null;         // todo
+            // let audiences = connIds.filter(function(t){ return liveHostIds.indexOf(t) == -1 })
+            // let aims = 0;     // count successful times
+            // let temp = null;    // to avoid encountering errors, ensure that null.peer is not existed.
+            for(let i=0; i<conns.length; i++){
                 if(liveHostIds.includes(connIds[i])){continue;}
                 if(conns[i].open){
                     // console.log("send " + conns[i].peer + " to " + rooms);    //DEBUG
@@ -152,7 +151,7 @@
         // *Explanation: This comment indicates that the following code block is responsible for sending a message.
         // *It serves as a brief description of the purpose of the code.
         // document.getElementById("sendButton").addEventListener('click', function () {   //*This line of code adds an event listener to the element with the ID "sendButton". It listens for a click event on the button and triggers the provided function when the event occurs.
-        //     var msg = [ document.getElementById("name").value, document.getElementById("sendMessageBox").value, peer.id];   //*This line of code creates an array called "msg" and assigns it two values. The first value is the value of the element with the ID "name", and the second value is the value of the element with the ID "sendMessageBox". These values are used to construct the message that will be sent.
+        //     let msg = [ document.getElementById("name").value, document.getElementById("sendMessageBox").value, peer.id];   //*This line of code creates an array called "msg" and assigns it two values. The first value is the value of the element with the ID "name", and the second value is the value of the element with the ID "sendMessageBox". These values are used to construct the message that will be sent.
         //     if (msg[1]){    // *This condition checks if the second element of the "msg" array (i.e., the message content) exists and is not empty.
         //         if ( liveSend(msg) > 0 ) {   // *This condition checks if the "liveSend" function returns a value greater than 0 when called with the "msg" array and 0 as arguments. If it does, it means the message was sent successfully.
         //             appearMsg(msg);     // This function is responsible for displaying the own sent message
@@ -166,16 +165,26 @@
 
         // add msg to box
         function appearMsg(msg) {
-            var now = new Date();
-            document.getElementById("message").innerHTML =  document.getElementById("message").innerHTML + "<br><span class=\"time\">[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]</span>" + "<span class=\"origin\">From RoomId of "+ msg[1] + "</span>" + "<span class=\"usr\">"+ msg[2] + ": </span>" + msg[3];
+            let now = new Date();
+            document.getElementById("chatBox").innerHTML =  document.getElementById("chatBox").innerHTML + "<br><span class=\"time\">[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]</span>" + "<span class=\"origin\">From RoomId of "+ msg[1] + "</span>" + "<span class=\"usr\">"+ msg[2] + ": </span>" + msg[3];
             if (ifAutoScroll){
-                document.getElementById('message').scrollTop = document.getElementById('message').scrollHeight;
+                document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
             }
         }
 
         // autoScroll the scrollbar
         function autoScroll(){ ifAutoScroll = true;}
         function autoScrollStop(){ ifAutoScroll = false;}
+
+        // destroy connection when someone closed the web
+        window.addEventListener("beforeunload", (event) => {
+            if(conns[0]){
+                for(let i=0; i<conns.length; i++){
+                    conns[i].close();
+                }
+            }
+            // event.preventDefault();
+        });
 
     </script>
 </body>

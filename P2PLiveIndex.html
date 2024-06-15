@@ -2,9 +2,6 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <script src="js/peerjs.min.js"></script>
-    <script src="js/fn.js"></script>
-    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
@@ -35,8 +32,13 @@
         </div>
         <div style="height: 100%; width: 30%; margin-top: 2%;">
             <input type="text" id="liveCoverURL" class="liveInput" placeholder="URL of img served as Cover"><br />
-            Upload local img: only be available after creating room
-            <input type="checkbox" id="ifPravite">pravite(whitout Root node)
+            Notice: Upload Room Cover only become available after created room<br />
+            <input type="checkbox" id="ifPravite">pravite(whitout Root node)<br />
+            Room Type:<select id="roomType">
+                <option value="0" selected="selected">Live</option>
+                <option value="1">FiveOnline</option>
+                <option value="2">Multiplay</option>
+            </select>
         </div>
         <button id="goToLive" class="actionButton">GoToLive</button>
         <button id="closeLiveMenu" class="actionButton" onclick="showLive()">Close</button>
@@ -57,7 +59,7 @@
             <div style="font-weight: bold; font-size: 32px;">Rooms List:</div>
         </div>
         <div class="indexBox">
-            <button onclick="changeTheme()">Dark - Light Mode</button><br />
+            <!-- <button onclick="changeTheme()">Dark - Light Mode</button><br /> -->
             <button onclick="echoHistoricalConnectedId()">console.log( HistoricalConnectedId )</button><br />
             <button onclick="defaultConnect()">Click me to connect the deafult Root Id</button><br />
             <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnect when connection closed
@@ -66,12 +68,15 @@
     <div id="rooms">
     </div>
 
+    <script src="js/peerjs.min.js"></script>
+    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
+    <script src="js/fn.js"></script>
     <script>
-        var openInfoTimes = 0;
-        var openLiveTimes = 0;
-        var defaultId = 'P2P-Live-Web-default-Id';
-        var myid = null;
-        var ifIndex = true;
+        let openInfoTimes = 0;
+        let openLiveTimes = 0;
+        let defaultId = 'P2P-Live-Web-default-Id';
+        let myid = null;
+        let ifIndex = true;
         let root = null;
         let ifConnectedAim = false;
         let lastAimId = null;
@@ -127,10 +132,10 @@
         function appearRooms(data) {
             console.log("Rooms list upated");
             document.getElementById("rooms").innerHTML = "";
-            for (var i = 0; i < data.length; i++){
+            for (let i = 0; i < data.length; i++){
                 document.getElementById("rooms").innerHTML = document.getElementById("rooms").innerHTML + 
                 "<div class=\"rooms\" onclick=displayRoomInfo("+ i +") alt=\"img Error\" style=\"background-image: url(\'"+ data[i][6] +"\'); background-size: contain;\">"+ data[i][4] +
-                "<span style=\"position: absolute; bottom: 0;\">sum:"+ data[i][3].length +" </span></div>";
+                "<br /><span style=\"background-color: rgb(46, 46, 46, 0.5); position: absolute; bottom: 0;\">Members:"+ data[i][2].length +" </span></div>";
             }
         }
 
@@ -169,30 +174,30 @@
         }
 
         document.getElementById('goToLive').addEventListener('click', () => {
-            if(document.getElementById("ifPravite").checked){
-                document.location.href = "./P2PLiveHost.html?rootId=&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("liveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value;
-            } else {
+            let rootId = "";
+            if(! document.getElementById("ifPravite").checked){
                 if(root){
                     if(root.open){
-                        document.location.href = "./P2PLiveHost.html?rootId="+ root.peer +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("liveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value;
-                    } else { alert("Please join a Root Node at first!"); }
-                } else { alert("Please join a Root Node at first!"); }
+                        rootId = root.peer;
+                    } else { alert("Please join a Root Node at first!"); return; }
+                } else { alert("Please join a Root Node at first!"); return; }
+            }
+            switch (document.getElementById("roomType").selectedIndex) {
+                case 0:
+                    document.location.href = "./P2PLiveHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("liveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value;
+                    break;
+                case 1:
+                    document.location.href = "./P2PGameFiveOnLineHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("liveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value;
+                    break;
+                case 2:
+                    // TODO
+                    break;
+                default:
+                    console.log("Error type of room");
+                    break;
             }
         });
 
-        function changeTheme(){
-            document.querySelector('html').style.cssText = "filter: invert(1) hue-rotate("+ switchDeg +"deg);";
-            if (document.querySelector('img')){
-                document.querySelector('img').style.cssText = "filter: invert(1) hue-rotate("+ switchDeg +"deg);";
-            }
-            if(switchDeg == 180){
-                switchDeg = 0;
-            } else {
-                switchDeg = 180;
-                document.querySelector('html').style.cssText = "";
-                if (document.querySelector('img')){document.querySelector('img').style.cssText = "";}
-            }
-        }
     </script>
 </body>
 </html>

@@ -13,9 +13,11 @@ let bridge = null;
 let guest = null;
 let guests = new Array();
 let temporaryChosedNodes = new Array();
-var liveCoverBase64 = null;
-var msgImgBase64 = null;
-var fullWebVideoTimes = 0;
+let liveCoverBase64 = null;
+let msgImgBase64 = null;
+let fullWebVideoTimes = 0;
+let deliverId = null;
+let myIcon = "";
 
 function tryConnect(object, id, ifJump, ifAskForMediaStream){
     // object:
@@ -48,8 +50,8 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             // Receive the reply of text: Host --> Guset
             parent.on('data', (data) => {
                 // data[0]:
-                //  0: nodeInfo or indexRoomInfo 
-                //  1: msg
+                //  0: msg
+                //  1: nodeInfo or indexRoomInfo
                 //  2: streaming request
                 //  3: for reconnect: Remind the child node to replace the parent node
                 //  4: for refresh: apply to the new media Stream for daliver to child
@@ -142,11 +144,20 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             
             if(ifJump){
                 guest.on('open', () => {
-                    for(var i=0; i<guests.length; i++){
+                    for(let i=0; i<guests.length; i++){
                         guest = guests[i];
                         guests = new Array();   // break all of conn
                         ifConnectedAim = true;
-                        document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName();
+                        switch (nodesMap[3]) {
+                            case 0:
+                                document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName();       
+                                break;
+                            case 1:
+                                document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName();       
+                                break;
+                            default:
+                                break;
+                        }
                         // console.log("aim id of node: "+ guest.peer)  // DEBUG
                         break;
                     }
@@ -173,7 +184,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                     });
                 } else {
                     guest.on('data', (data) => {
-                        for(var i=0; i<guests.length; i++){
+                        for(let i=0; i<guests.length; i++){
                             if(guests[i].open){     // maybe useless
                                 guest = guests[i];
                                 guests = new Array();   // break all of conn
@@ -279,11 +290,11 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
 }
 
 function autoJoin(t){
-    if(nodesMap[1] !== 1){
+    if(nodesMap[1] !== 1 || ifConnectedAim){
         console.log("Error: try autoJoin() by the nodesMap which wasn't from Root of Room"+ nodesMap);
         return;
     }
-    if(nodesMap[2] < t){        // host node has low child nodes
+    if(nodesMap[9][3] < t){        // host node has low child nodes
         tryConnect(1, nodesMap[7], true);
     } else {
         recursiveSearch(nodesMap[9], t, 1);   // search for the node with low child nodes
@@ -292,21 +303,22 @@ function autoJoin(t){
 
 function getRoomIds(){
     roomIds = new Array();
-    recursiveSearch(nodesMap[9], 999, 0);
+    recursiveSearch(nodesMap[9], 999, 0);       // DEBUG 999 -> + infinite
+    roomIds.push(nodesMap[7]);   // host id
     return roomIds;
 }
 
 function recursiveSearch(arr, t, fnOfSearch){
     switch(fnOfSearch){
         case 0:     // search for getting ids of room
-            for (var i = 7; i < arr.length; i=i+3) {
+            for (let i = 7; i < arr.length; i=i+3) {
                 if(arr[i] && arr[i + 2] instanceof Array){
                     if(arr[i + 2][2] < t){
                         roomIds.push(arr[i]);
                     }
                 }
             }
-            for (var m = 9; m < arr.length; m=m+3) {    // After checked out suited nodes in thid layer, search their suited child nodes
+            for (let m = 9; m < arr.length; m=m+3) {    // After checked out suited nodes in thid layer, search their suited child nodes
                 if(arr[m] && arr[m] instanceof Array){
                     recursiveSearch(arr[m], t, 0);
                 }
@@ -315,7 +327,7 @@ function recursiveSearch(arr, t, fnOfSearch){
         case 1:
             shallowSearch(arr, t);
             while (temporaryChosedNodes[0] !== undefined) {
-                deepSearch(temporaryChosedNodes, t);
+                deeplySearch(temporaryChosedNodes, t);
             }
             break;
         default:
@@ -324,7 +336,7 @@ function recursiveSearch(arr, t, fnOfSearch){
 }
 
 function shallowSearch(arr, t){
-    for (var i = 7; i < arr.length; i=i+3) {
+    for (let i = 7; i < arr.length; i=i+3) {
         if(arr[i] && arr[i + 2] instanceof Array){
             if(arr[i + 2][2] < t){
                 if(ifConnectedAim){break;}
@@ -337,20 +349,26 @@ function shallowSearch(arr, t){
     }   // else { console.log("give up connecting to "+ arr[i]); }
 }
 
-function deepSearch(arr, t){
-    var counter = arr.length;
+function deeplySearch(arr, t){
+    let counter = arr.length;
     lastTemporaryChosedNodes = arr;
     temporaryChosedNodes = new Array();
-    for (var w = 0; w < counter; w=w+1) {
+    for (let w = 0; w < counter; w=w+1) {
         shallowSearch(lastTemporaryChosedNodes[w], t);
     }
 }
 
 // Send Massage and avoid delivering repeatedly
 function liveSend (msg){
-    var aims = 0;     // count successful times
+    let aims = 0;     // count successful times
+    let source = NaN;
+    if(msg instanceof Array){
+        if(msg[0] && msg[0] instanceof Number && (!msg[1] instanceof Number)){
+            source = msg[1];
+        }
+    }
     if(parent){
-        if( ! [msg[1], deliverId].includes(parent.peer)){    // Promise a stable sending
+        if( ! [source, deliverId].includes(parent.peer)){    // Promise a stable sending
             if(parent.open){     // check the data channel
                 parent.send(msg);
                 aims++;  // count successful times
@@ -358,9 +376,9 @@ function liveSend (msg){
         }
     }
     if(audiences){
-        for(var i=0; i<audiences.length; i++){
+        for(let i=0; i<audiences.length; i++){
             if(audiences[i]){
-                if( ! [msg[1], deliverId /*, parent.id */].includes(audiences[i].peer)){
+                if( ! [source, deliverId /*, parent.id */].includes(audiences[i].peer)){
                     if(audiences[i].open){
                         audiences[i].send(msg);
                         aims++;
@@ -375,7 +393,7 @@ function liveSend (msg){
 
 function refreshMap(fnOfEcho){
     document.getElementById("roomTitle").innerHTML = nodesMap[4];
-    document.getElementById("roomSummary").innerHTML = nodesMap[5];
+    document.getElementById("roomSummary").value = nodesMap[5];
     document.getElementById("roomCover").src = nodesMap[6];
     echoNodesMap(nodesMap[9], 0, undefined, fnOfEcho);    // refresh the menu
 }
@@ -401,6 +419,10 @@ function echoNodesMap(arr, layerNumber, aimId, fnOfEcho){
                 if(aimId == peer.id){alert(aimId);break;}
                 document.location.href = "./P2PLiveAudience.html?id=" + aimId +"&name="+ getMyName();
                 break;
+            case 2:     // button for joining a node
+                if(aimId == peer.id){alert(aimId);break;}
+                document.location.href = "./P2PGameFiveOnLinePlayer.html?id=" + aimId +"&name="+ getMyName();
+                break;
         }
     }else{
         document.getElementById("block"+ layerNumber % 2).innerHTML = "";
@@ -408,7 +430,7 @@ function echoNodesMap(arr, layerNumber, aimId, fnOfEcho){
             layers.splice(lastLayerNumber + 1);  // remove all of old layers
         }
         if(arr){
-            for(var i = 7; i < arr.length; i=i+3){
+            for(let i = 7; i < arr.length; i=i+3){
                 if(arr[i + 2] instanceof Array){    // create buttons linking to child nodes of object which was delivered by clicked button
                     document.getElementById("block"+ layerNumber % 2).innerHTML = document.getElementById("block"+ layerNumber % 2).innerHTML + "<button class=\"childNodes\" onclick=\"echoNodesMap(layers["+ (layerNumber + 1) +"]["+ (i+2) +"], "+ (layerNumber + 1) +", layers["+ (layerNumber + 1) +"]["+ i +"], "+ fnOfEcho +" )\">"+ arr[i + 1] +"</button><br />";
                 }
@@ -423,8 +445,8 @@ function echoNodesMap(arr, layerNumber, aimId, fnOfEcho){
 // *Explanation: This comment indicates that the following code block is responsible for sending a message.
 // *It serves as a brief description of the purpose of the code.
 function sendMsg() {   //*This line of code adds an event listener to the element with the ID "sendButton". It listens for a click event on the button and triggers the provided function when the event occurs.
-    var msg = [ 0, peer.id, document.getElementById("name").value, document.getElementById("sendMessageBox").value, msgImgBase64];   //*This line of code creates an array called "msg" and assigns it two values. The first value is the value of the element with the ID "name", and the second value is the value of the element with the ID "sendMessageBox". These values are used to construct the message that will be sent.
-    if (msg[3]){    // *This condition checks if the second element of the "msg" array (i.e., the message content) exists and is not empty.
+    let msg = [ 0, peer.id, document.getElementById("name").value, document.getElementById("sendMessageBox").value, msgImgBase64, myIcon];   //*This line of code creates an array called "msg" and assigns it two values. The first value is the value of the element with the ID "name", and the second value is the value of the element with the ID "sendMessageBox". These values are used to construct the message that will be sent.
+    if (msg[3] || msg[4]){    // DEBUG *This condition checks if the second element of the "msg" array (i.e., the message content) exists and is not empty.
         if ( liveSend(msg) > 0 ) {   // *This condition checks if the "liveSend" function returns a value greater than 0 when called with the "msg" array and 0 as arguments. If it does, it means the message was sent successfully.
             appearMsg(msg);     // This function is responsible for displaying the own sent message
             document.getElementById("sendMessageBox").value = "";
@@ -438,8 +460,8 @@ function sendMsg() {   //*This line of code adds an event listener to the elemen
 }
 
 function sendImg(){
-    var file = document.getElementById("msgImgInput").files[0];
-    var reader = new FileReader();
+    let file = document.getElementById("msgImgInput").files[0];
+    let reader = new FileReader();
     if(file){
         if(file.size <= 1048576){
             reader.readAsDataURL(file);
@@ -456,26 +478,85 @@ function sendImg(){
 
 // add msg to box
 function appearMsg(msg) {
-    var now = new Date();
-    if(msg[4]){
-        var img = "<img style=\"max-width: 100px; max-height: 100px; object-fit: contain;\" src=\""+ msg[4] +"\">";
-    } else {
-        var img = "";
+    let now = new Date();
+
+    let newMsg = document.createElement("div");
+    newMsg.classList.add("msgs");
+    let newMsgContent = document.createElement("div");
+
+    if(msg[5]){
+        let newMsgIcon = document.createElement("img");
+        newMsgIcon.setAttribute("src", msg[5]);
+        newMsgIcon.classList.add("icon");
+        newMsgContent.appendChild(newMsgIcon);
     }
-    document.getElementById("message").innerHTML =  document.getElementById("message").innerHTML + "<div class=\"msgs\"><span class=\"time\">[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]</span>" + "<span class=\"usr\">"+ msg[2] + ": </span>" + msg[3] + img +"</div>";
+
+    let newMsgTime = document.createElement("span");
+    newMsgTime.appendChild(document.createTextNode("[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]"));
+    newMsgTime.classList.add("time");
+    newMsgContent.appendChild(newMsgTime);
+
+    let newMsgUser = document.createElement("span");
+    newMsgUser.appendChild(document.createTextNode(msg[2] + ":"));
+    newMsgUser.classList.add("usr");
+    newMsgContent.appendChild(newMsgUser);
+
+    newMsg.appendChild(newMsgContent);
+    
+    // let newMsgContent = document.createElement("div");
+    // newMsgContent.setAttribute("style", "vertical-align: middle; display: inline-block;");
+
+    // let newMsgTime = document.createElement("span");
+    // newMsgTime.appendChild(document.createTextNode("[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]"));
+    // newMsgTime.classList.add("time");
+    // newMsgContent.appendChild(newMsgTime);
+
+    // let newMsgUser = document.createElement("span");
+    // newMsgUser.appendChild(document.createTextNode(msg[2] + ":"));
+    // newMsgUser.classList.add("usr");
+    // newMsgContent.appendChild(newMsgUser);
+    // newMsgContent.appendChild(document.createElement("br"));
+
+    let newMsgTextContent = document.createElement("span");
+    newMsgTextContent.appendChild(document.createTextNode(msg[3]));
+    newMsgTextContent.classList.add("chatText");
+    newMsg.appendChild(newMsgTextContent);
+
+    if(msg[4]){
+        let newMsgImgContent = document.createElement("img");
+        newMsgImgContent.setAttribute("src", msg[4]);
+        newMsgImgContent.classList.add("chatImg");
+        newMsg.appendChild(newMsgImgContent);
+    }
+
+    document.getElementById("chatBox").appendChild(newMsg);
+    // original msg appear mode(only one line but low effective)
+    // document.getElementById("chatBox").innerHTML =  document.getElementById("chatBox").innerHTML + "<div class=\"msgs\"><span class=\"time\">[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]</span>" + "<span class=\"usr\">"+ msg[2] + ": </span>" + msg[3] + img +"</div>";
+    
     if(ifAutoScroll){
-        document.getElementById('message').scrollTop = document.getElementById('message').scrollHeight;
+        document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
     }
     if(ifAutoClean.checked){
-        var msgs = document.getElementsByClassName("msgs");
-        var numberOfMsgs = msgs.length;
+        let msgs = document.getElementsByClassName("msgs");
+        let numberOfMsgs = msgs.length;
         if(numberOfMsgs > 100){
-            var deltaNumber = numberOfMsgs - 100;
-            for(var i=0; i <= deltaNumber; i++){
+            let deltaNumber = numberOfMsgs - 100;
+            for(let i=0; i <= deltaNumber; i++){
                 msgs[i].remove();
                 numberOfMsgs--;
             }
         }
+    }
+    if(fullWebVideoTimes === 1){
+        document.getElementById("chatBox").style.visibility="true";
+        setTimeout(function(){document.getElementById("chatBox").style.visibility="false";}, 5000)
+    }
+}
+
+function cleanMsg(){    // DEBUG
+    let msgs = document.getElementsByClassName("msgs");
+    while(msgs.length){
+        msgs[0].remove();
     }
 }
 
@@ -509,7 +590,7 @@ function useDisplayMedia() {
 }
 
 function askNavigatorMediaDevices(){
-    var constraints = { audio: document.getElementById("ifUseCamera").checked, video: document.getElementById("ifUseMicrophone").checked };
+    let constraints = { audio: document.getElementById("ifUseCamera").checked, video: document.getElementById("ifUseMicrophone").checked };
     navigator.mediaDevices
         .getUserMedia(constraints)
         .then(function (stream) {
@@ -549,8 +630,8 @@ function refreshMedia(){
 
 // transform Img into Base64
 function liveCoverInput(){
-    var file = document.getElementById("LiveCoverInput").files[0];
-    var reader = new FileReader();
+    let file = document.getElementById("LiveCoverInput").files[0];
+    let reader = new FileReader();
     if(file){
         if(file.size <= 1048576){
             reader.readAsDataURL(file);
@@ -565,6 +646,27 @@ function liveCoverInput(){
     }
 }
 
+// transform Img into Base64
+function iconInput(){
+    let file = document.getElementById("uploadIcon").files[0];
+    let reader = new FileReader();
+    if(file){
+        if(file.size <= 1048576){
+            reader.readAsDataURL(file);
+            reader.onloadend = () => {
+                myIcon = reader.result;
+                document.getElementById("myIcon").src = myIcon;
+            }
+        } else {
+            alert("it can't over 1MB");
+        }
+    } else {
+        console.log("img transformed Error!");
+    }
+}
+
+
+
 function fullWebVideo(){
     if(fullWebVideoTimes === 0){
         WebVideo.style.height = window.innerHeight + "px";
@@ -574,10 +676,30 @@ function fullWebVideo(){
             behavior: "smooth",
         });
         fullWebVideoTimes++;
+        setTimeout(
+            function(){
+            if(fullWebVideoTimes === 1){
+                document.getElementById("chatBox").style.visibility="hidden";
+            }
+        }, 3000);
     } else {
-        WebVideo.style.height = "100%";
-        WebVideo.style.width = "100%";
+        WebVideo.style.height = "85%";
+        WebVideo.style.width = "70%";
         fullWebVideoTimes = 0;
+        document.getElementById("chatBox").style.visibility="visible";
     }
     
 }
+
+// window.onload=function(){
+if(document.getElementById("uploadImgButton")){
+    document.getElementById("uploadImgButton").addEventListener("click", function (){
+        document.getElementById("msgImgInput").click();
+    });
+}
+if(document.getElementById("myIcon")){
+    document.getElementById("myIcon").addEventListener("click", function (){
+        document.getElementById("uploadIcon").click();
+    });
+}
+// }

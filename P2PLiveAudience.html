@@ -2,9 +2,6 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <script src="js/peerjs.min.js"></script>
-    <script src="js/fn.js"></script>
-    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
@@ -13,7 +10,7 @@
         <img id="roomCover" src="">
         <div id="roomText">
             <div id="roomTitle"></div>
-            <div id="roomSummary"></div>
+            <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea>
             <div id="nodeInfo">
                 <div id="stable">
                     <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">Host Node</button>
@@ -64,35 +61,41 @@
         <div class="box">
             <!-- Sender -->
             <div style="font-weight: bold;">Audience</div>
-            <!-- Connect box -->
-            <button id="refreshButton" onclick="refreshMedia()">Refresh</button>
-            <button id="openRoomInfoButton" onclick="openRoomInfo()">Room Info</button>
-            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div>
+                <!-- Connect box -->
+                <button id="refreshButton" onclick="refreshMedia()">Refresh</button>
+                <button id="openRoomInfoButton" onclick="openRoomInfo()">Room Info</button>
+                <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div>
+                <div id="status" style="font-weight: bold;">Status: Waiting to Connecting to PeerServer...</div>
+                <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br />
         </div>
         <div class="box">
             <button onclick="fullWebVideo()">Full Web Video</button><br />
-            <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br />
-            <div id="status" style="font-weight: bold;">Status: Waiting to Connecting to PeerServer...</div>
+            <div>
+                <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Icon & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br />
+                <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
+            </div>
         </div>
-        <div class="custome">
-            <div>Custome Name<input type="text" id="name" placeholder="Input your name here..." /></div><br />
-            <div id="sumOfRoom">Audiences: 0</div>
+        <div class="box" style="width: 30%;">
+            <span id="sumOfRoom">Members: 1</span>
             <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max to 100]<br />
+            <button onclick="cleanMsg()">CleanMsgs</button><br />
         </div>
     </div>
     
     <!-- Live interaction-->
     <div class="videoBox">
-    <!--PS: if no video(maybe leaded by autoplay), try to click it to play(or F12 check the stream)-->
-    <video id="RemoteVideo" width="100%" height="100%" controls autoplay></video></div>
-    <!-- Message box -->
-    <div class="chatContainer">
-        <div class="chatBox" id="message" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
-        <div class="sendInput">
-            <!-- Send box -->
-            <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
-            <button type="button" id="sendButton" onclick="sendMsg()">Send</button>
-            <input id="msgImgInput" type="file" onchange="sendImg()"><br />
+        <!--PS: if no video(maybe leaded by autoplay), try to click it to play(or F12 check the stream)-->
+        <video id="webVideo" controls autoplay></video>
+        <!-- Message box -->
+        <div id="chatContainer">
+            <div id="chatBox" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
+            <div class="sendInput">
+                <!-- Send box -->
+                <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
+                <button type="button" id="sendButton" onclick="sendMsg()">Send</button>
+                <button type="button" id="uploadImgButton">Img</button><br />
+                <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
+            </div>
         </div>
     </div>
 
@@ -101,8 +104,11 @@
     <video id="localVideo" autoplay></video-->
     <!--if you want to check the availability of localStream, here are <2.3localvideo>, desplayLocalStream(), -->
     
+    <script src="js/peerjs.min.js"></script>
+    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
+    <script src="js/fn.js"></script>
     <script>
-        var openInfoTimes = 0;
+        let openInfoTimes = 0;
         let lastAimId = null;
         let layers = [0];
         let mediaOpen = null;
@@ -111,7 +117,6 @@
         let ifConnectedAim = false;
         let remoteStream = null;
         let localStream = null;
-        let deliverId = null;
         let audiences = new Array();
         let audienceIds = new Array();
         let conn = null;
@@ -127,7 +132,7 @@
         let lastLayerNumber = null;
         let awaitedNodeId = null;
         const MyName = document.getElementById("name");
-        const WebVideo = document.getElementById('RemoteVideo');
+        const WebVideo = document.getElementById('webVideo');
 
         // the function of getting local stream(It can't work on most of mobile phone)
         // Please note! In order for the getDisplayMedia() method to work properly, you need to use the HTTPS protocol or run it on localconn in a local development environment.
@@ -155,7 +160,7 @@
 
             conn.on('open', () => {
                 // for guest in index
-                var sendNodesMap = nodesMap;
+                let sendNodesMap = nodesMap;
                 sendNodesMap[2] = -1;
                 conn.send(sendNodesMap);
             });
@@ -182,7 +187,7 @@
                         break;
                     case 1:
                         if ( ! audienceIds.includes(data[4])){
-                            var aimPosition = connIds.indexOf(data[4]);
+                            let aimPosition = connIds.indexOf(data[4]);
                             audienceIds.push(connIds[aimPosition]);
                             audiences.push(conns[aimPosition]);
 
@@ -195,7 +200,7 @@
                                 peer.call(data[4], localStream);
                                 console.log("Media sent successfully: "+ data[4]);
                                 // If you want to receive the reply of the stream
-                                // usage: var temp peer.call(conn.peer, localStream);
+                                // usage: let temp peer.call(conn.peer, localStream);
                                 // temp.on('stream', (stream) = displayStream);
                                 // PS:
                                 // It can only receive the previous one, so you need to deliver a new stream. 
@@ -240,21 +245,21 @@
 
             
             conn.on('close', () => {
-                for (var i = 0; i< conns.length; i++){
+                for (let i = 0; i< conns.length; i++){
                     if(conns[i]){
                         if (conns[i].open){
                             continue;
                         }else{
-                            var disconnectedGuest = connIds.indexOf(conns[i].peer);   // locate old data
+                            let disconnectedGuest = connIds.indexOf(conns[i].peer);   // locate old data
                             if (disconnectedGuest !== -1){
 
-                                var disconnectedAudience = audienceIds.indexOf(conns[i].peer);
+                                let disconnectedAudience = audienceIds.indexOf(conns[i].peer);
                                 if (disconnectedAudience !== -1){
                                     console.log("Disconnected and deleted: " + audienceIds[disconnectedAudience]);     //DEBUG
                                     audiences.splice(disconnectedAudience, 1);
                                     audienceIds.splice(disconnectedAudience, 1);
                                     
-                                    var sameId = hereNode.indexOf(conns[i].peer);
+                                    let sameId = hereNode.indexOf(conns[i].peer);
                                     if(sameId !== -1){
                                         hereNode.splice(sameId, 3);     // remove disconnected audiences
                                         hereNode[2] = audienceIds.length;
@@ -335,7 +340,7 @@
         // Listen for press enter in message box
         document.getElementById("sendMessageBox").addEventListener('keypress', enter);
         function enter(e) {
-            var event = e && window.event;
+            let event = e && window.event;
             if (event.which && event.keyCode == '13'){
                 document.getElementById("sendButton").click();
             }
@@ -355,9 +360,9 @@
         function recorder(data){    // todo :debug
             switch (data[1]){
                 case 0:     // 0 means unfinished
-                    var sameId = hereNode.indexOf(data[4]);   // locate old data
+                    let sameId = hereNode.indexOf(data[4]);   // locate old data
                     console.log('Info of nodes updated:', data);
-                    // var idTemp = Object.assign({}, connPeers);     // make connIds value stable
+                    // let idTemp = Object.assign({}, connPeers);     // make connIds value stable
                     if(sameId === -1){
                         hereNode.push(data[4]);
                         hereNode.push(data[5]);
@@ -366,19 +371,19 @@
                         hereNode[ sameId + 1 ] = data[5];
                         hereNode[ sameId + 2 ] = data;      // replace old data
                     }
-                    // var idTemp = Object.assign({}, connIds);     // make connIds value stable
+                    // let idTemp = Object.assign({}, connIds);     // make connIds value stable
                     // idTemp[sameId] = data;      // replace old data
                     // hereMap = [1, peer.id, idTemp, null, 0];  //record this node's info
                     hereNode[2] = audienceIds.length;
                     if(parent){
                         if(parent.open){       // collect information about the connection map and send to parent node
                             if (audienceIds.includes(parent.peer)){    // fix connect mutually
-                                for(var i=0; i<audiences.length; i++){  // send nodesMap to all of child nodes
+                                for(let i=0; i<audiences.length; i++){  // send nodesMap to all of child nodes
                                     if(audiences[i] || audienceIds[i] == parent.peer){
                                         continue;
                                     }
                                     if(audiences[i].open){
-                                        audiences[i].send([ 1, 1, audienceIds.length, [], null, null, null, peer.id, getMyName(), hereNode, null]);
+                                        audiences[i].send([ 1, 1, audienceIds.length, 0, null, null, null, peer.id, getMyName(), hereNode, null]);
                                     }
                                 }
                             } else {
@@ -388,7 +393,7 @@
                     }
                     break;
                 case 1:    // once collection of data is completed            
-                    for(var i=0; i<audiences.length; i++){     // send nodesMap to everyone
+                    for(let i=0; i<audiences.length; i++){     // send nodesMap to everyone
                         if(audiences[i]){
                             if(audiences[i].open){
                                 audiences[i].send(data);
@@ -396,7 +401,7 @@
                         }
                     }
                     nodesMap = data;
-                    document.getElementById("sumOfRoom").innerHTML = "Audiences: "+ nodesMap[3].length;
+                    document.getElementById("sumOfRoom").innerHTML = "Members: "+ nodesMap[9][3].length;
                     break;
                 default:
                     console.log("unknown data" + data);
@@ -407,7 +412,7 @@
         // destroy connection when someone closed the web
         window.addEventListener("beforeunload", (event) => {
             if(audiences[0]){
-                for(var i=0; i<audiences.length; i++){
+                for(let i=0; i<audiences.length; i++){
                     audiences[i].close();
                 }
             }

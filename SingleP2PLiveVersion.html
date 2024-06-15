@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <script src="js/peerjs.min.js"></script>
-    <script src="js/fn.js"></script>
+    <!-- <script src="js/fn.js"></script> -->
     <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
@@ -94,12 +94,12 @@
     <video id="RemoteVideo" width="100%" height="100%" controls autoplay></video></div>
     <!-- Message box -->
     <div class="chatContainer">
-        <div class="chatBox" id="message" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
+        <div id="chatBox" onmouseover = "autoScrollStop()" onmouseout="autoScroll()"></div>
         <div class="sendInput">
             <!-- Send box -->
             <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
             <button type="button" id="sendButton" onclick="sendMsg()">Send</button>
-            <input id="msgImgInput" type="file" onchange="sendImg()"><br />
+            <input id="msgImgInput" type="file" onchange="msgImgBase64 = imgTransformer(this)"><br />
         </div>
     </div>
 
@@ -109,9 +109,18 @@
     <!--if you want to check the availability of localStream, here are <2.3localvideo>, desplayLocalStream(), -->
     
     <script>
-        var openInfoTimes = 0;
-        var openLiveTimes = 0;
-        var ifIndex = false;
+        const peer = new Peer({ debug: 2})      //use PeerJS official server
+        let roomIds = new Array();
+        let bridge = null;
+        let guest = null;
+        let guests = new Array();
+        let temporaryChosedNodes = new Array();
+        let liveCoverBase64 = null;
+        let msgImgBase64 = null;
+        let fullWebVideoTimes = 0;
+        let openInfoTimes = 0;
+        let openLiveTimes = 0;
+        let ifIndex = false;
         let lastAimId = null;
         let layers = [0];
         let mediaOpen = null;
@@ -208,7 +217,7 @@
                         break;
                     case 1:
                         if ( ! audienceIds.includes(data[4])){
-                            var aimPosition = connIds.indexOf(data[4]);
+                            let aimPosition = connIds.indexOf(data[4]);
                             audienceIds.push(connIds[aimPosition]);
                             audiences.push(conns[aimPosition]);
 
@@ -273,21 +282,21 @@
 
             
             conn.on('close', () => {
-                for (var i = 0; i< conns.length; i++){
+                for (let i = 0; i< conns.length; i++){
                     if(conns[i]){
                         if (conns[i].open){
                             continue;
                         }else{
-                            var disconnectedGuest = connIds.indexOf(conns[i].peer);   // locate old data
+                            let disconnectedGuest = connIds.indexOf(conns[i].peer);   // locate old data
                             if (disconnectedGuest !== -1){
 
-                                var disconnectedAudience = audienceIds.indexOf(conns[i].peer);
+                                let disconnectedAudience = audienceIds.indexOf(conns[i].peer);
                                 if (disconnectedAudience !== -1){
                                     console.log("Disconnected and deleted: " + audienceIds[disconnectedAudience]);     //DEBUG
                                     audiences.splice(disconnectedAudience, 1);
                                     audienceIds.splice(disconnectedAudience, 1);
                                     
-                                    var sameId = hereNode.indexOf(conns[i].peer);
+                                    let sameId = hereNode.indexOf(conns[i].peer);
                                     if(sameId !== -1){
                                         hereNode.splice(sameId, 3);     // remove disconnected audiences
                                         hereNode[2] = audienceIds.length;
@@ -372,7 +381,7 @@
         // Listen for press enter in message box
         document.getElementById("sendMessageBox").addEventListener('keypress', enter);
         function enter(e) {
-            var event = e && window.event;
+            let event = e && window.event;
             if (event.which && event.keyCode == '13'){
                 document.getElementById("sendButton").click();
             }
@@ -424,6 +433,307 @@
             } else {
                 recursiveSearch(hereNode, 999, 0);}
             return roomIds;
+        }
+
+        function recursiveSearch(arr, t, fnOfSearch){
+            switch(fnOfSearch){
+                case 0:     // search for getting ids of room
+                    for (let i = 7; i < arr.length; i=i+3) {
+                        if(arr[i] && arr[i + 2] instanceof Array){
+                            if(arr[i + 2][2] < t){
+                                roomIds.push(arr[i]);
+                            }
+                        }
+                    }
+                    for (let m = 9; m < arr.length; m=m+3) {    // After checked out suited nodes in thid layer, search their suited child nodes
+                        if(arr[m] && arr[m] instanceof Array){
+                            recursiveSearch(arr[m], t, 0);
+                        }
+                    }
+                    break;
+                case 1:
+                    shallowSearch(arr, t);
+                    while (temporaryChosedNodes[0] !== undefined) {
+                        deeplySearch(temporaryChosedNodes, t);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function shallowSearch(arr, t){
+            for (let i = 7; i < arr.length; i=i+3) {
+                if(arr[i] && arr[i + 2] instanceof Array){
+                    if(arr[i + 2][2] < t){
+                        if(ifConnectedAim){break;}
+                        // console.log("tried connect to: "+ arr[i]);  // DEBUG
+                        tryConnect(1, arr[i], true, false);
+                    } else {
+                        temporaryChosedNodes.push(arr[i+2]);    // record inapporpriate nodes for deep search
+                    }
+                }
+            }   // else { console.log("give up connecting to "+ arr[i]); }
+        }
+
+        function deeplySearch(arr, t){
+            let counter = arr.length;
+            lastTemporaryChosedNodes = arr;
+            temporaryChosedNodes = new Array();
+            for (let w = 0; w < counter; w=w+1) {
+                shallowSearch(lastTemporaryChosedNodes[w], t);
+            }
+        }
+
+        // Send Massage and avoid delivering repeatedly
+        function liveSend (msg){
+            let aims = 0;     // count successful times
+            if(parent){
+                if( ! [msg[1], deliverId].includes(parent.peer)){    // Promise a stable sending
+                    if(parent.open){     // check the data channel
+                        parent.send(msg);
+                        aims++;  // count successful times
+                    }
+                }
+            }
+            if(audiences){
+                for(let i=0; i<audiences.length; i++){
+                    if(audiences[i]){
+                        if( ! [msg[1], deliverId /*, parent.id */].includes(audiences[i].peer)){
+                            if(audiences[i].open){
+                                audiences[i].send(msg);
+                                aims++;
+                            }
+                        }
+                    }
+                }
+            }
+            deliverId = null;    // avoid losing text when sending
+            return aims;    //if == zero => send failed
+        }
+
+        function refreshMap(fnOfEcho){
+            document.getElementById("roomTitle").innerHTML = nodesMap[4];
+            document.getElementById("roomSummary").innerHTML = nodesMap[5];
+            document.getElementById("roomCover").src = nodesMap[6];
+            echoNodesMap(nodesMap[9], 0, undefined, fnOfEcho);    // refresh the menu
+        }
+
+        function echoNodesMap(arr, layerNumber, aimId, fnOfEcho){
+            if(arr == nodesMap[9]){      // refresh Map for "refresh" & hostNode button
+                layers = [0];
+                if(aimId === undefined){     // hostNode button provide the channel connecting to host
+                    lastAimId = null;
+                }
+                lastLayerNumber = null;
+                document.getElementById("block0").innerHTML = "";
+                document.getElementById("block1").innerHTML = "";
+            }
+            if(lastAimId === aimId){  // if second click on same button
+                switch (fnOfEcho) {
+                    case 0:     // button for getting id
+                        if(aimId){
+                            alert(aimId);
+                        }
+                        break;
+                    case 1:     // button for joining a node
+                        if(aimId == peer.id){alert(aimId);break;}
+                        document.location.href = "./P2PLiveAudience.html?id=" + aimId +"&name="+ getMyName();
+                        break;
+                    case 2:     // button for joining a node
+                        if(aimId == peer.id){alert(aimId);break;}
+                        document.location.href = "./P2PGameFiveOnLinePlayer.html?id=" + aimId +"&name="+ getMyName();
+                        break;
+                }
+            }else{
+                document.getElementById("block"+ layerNumber % 2).innerHTML = "";
+                if(lastLayerNumber === layerNumber ){
+                    layers.splice(lastLayerNumber + 1);  // remove all of old layers
+                }
+                if(arr){
+                    for(let i = 7; i < arr.length; i=i+3){
+                        if(arr[i + 2] instanceof Array){    // create buttons linking to child nodes of object which was delivered by clicked button
+                            document.getElementById("block"+ layerNumber % 2).innerHTML = document.getElementById("block"+ layerNumber % 2).innerHTML + "<button class=\"childNodes\" onclick=\"echoNodesMap(layers["+ (layerNumber + 1) +"]["+ (i+2) +"], "+ (layerNumber + 1) +", layers["+ (layerNumber + 1) +"]["+ i +"], "+ fnOfEcho +" )\">"+ arr[i + 1] +"</button><br />";
+                        }
+                    }
+                }
+                layers.push(arr);
+                lastLayerNumber = layerNumber;
+                lastAimId = aimId; // original id of this layer
+            }
+        }
+
+        // *Explanation: This comment indicates that the following code block is responsible for sending a message.
+        // *It serves as a brief description of the purpose of the code.
+        function sendMsg() {   //*This line of code adds an event listener to the element with the ID "sendButton". It listens for a click event on the button and triggers the provided function when the event occurs.
+            let msg = [ 0, peer.id, document.getElementById("name").value, document.getElementById("sendMessageBox").value, msgImgBase64];   //*This line of code creates an array called "msg" and assigns it two values. The first value is the value of the element with the ID "name", and the second value is the value of the element with the ID "sendMessageBox". These values are used to construct the message that will be sent.
+            if (msg[3] || msg[4]){    // DEBUG *This condition checks if the second element of the "msg" array (i.e., the message content) exists and is not empty.
+                if ( liveSend(msg) > 0 ) {   // *This condition checks if the "liveSend" function returns a value greater than 0 when called with the "msg" array and 0 as arguments. If it does, it means the message was sent successfully.
+                    appearMsg(msg);     // This function is responsible for displaying the own sent message
+                    document.getElementById("sendMessageBox").value = "";
+                    // console.log("Sent successfully: " + msg);    // DEBUG
+                    msgImgBase64 = null;
+                    document.getElementById("msgImgInput").files = null;
+                }else{console.log('Connection is closed');}
+            }else{
+                document.getElementById("sendMessageBox").setAttribute("placeholder","Void content!!!!!!!!!!!!!!"); //*This line of code sets the placeholder attribute of the element with the ID "sendMessageBox" to display a message indicating that the content should not be empty.
+            }
+        }
+
+        function sendImg(){
+            let file = document.getElementById("msgImgInput").files[0];
+            let reader = new FileReader();
+            if(file){
+                if(file.size <= 1048576){
+                    reader.readAsDataURL(file);
+                    reader.onloadend = () => {
+                        msgImgBase64 = reader.result;
+                    }
+                } else {
+                    alert("it can't over 1MB");
+                }
+            } else {
+                console.log("img transformed Error!");
+            }
+        }
+
+        // add msg to box
+        function appearMsg(msg) {
+            let now = new Date();
+            if(msg[4]){
+                let img = "<img style=\"max-width: 100px; max-height: 100px; object-fit: contain;\" src=\""+ msg[4] +"\">";
+            } else {
+                let img = "";
+            }
+            document.getElementById("chatBox").innerHTML =  document.getElementById("chatBox").innerHTML + "<div class=\"msgs\"><span class=\"time\">[" + now.getHours() +":"+ now.getMinutes() +":"+ now.getSeconds() + "]</span>" + "<span class=\"usr\">"+ msg[2] + ": </span>" + msg[3] + img +"</div>";
+            if(ifAutoScroll){
+                document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+            }
+            if(ifAutoClean.checked){
+                let msgs = document.getElementsByClassName("msgs");
+                let numberOfMsgs = msgs.length;
+                if(numberOfMsgs > 100){
+                    let deltaNumber = numberOfMsgs - 100;
+                    for(let i=0; i <= deltaNumber; i++){
+                        msgs[i].remove();
+                        numberOfMsgs--;
+                    }
+                }
+            }
+            if(fullWebVideoTimes === 1){
+                document.getElementById("chatBox").style.visibility="true";
+                setTimeout(function(){document.getElementById("chatBox").style.visibility="false";}, 5000)
+            }
+        }
+
+        function cleanMsg(){    // DEBUG
+            let msgs = document.getElementsByClassName("msgs");
+            while(msgs.length){
+                msgs[0].remove();
+            }
+        }
+
+        function getMyName(){
+            if(MyName){
+                if (MyName.value){
+                    return MyName.value;
+                } else {
+                    return peer.id;
+                }
+            }
+        }
+
+        // the function of getting local stream(It can't work on most of mobile phone)
+        // Please note! In order for the getDisplayMedia() method to work properly, you need to use the HTTPS protocol or run it on localhost in a local development environment.
+        // Otherwise, the browser may restrict access to the camera and microphone.
+        function useDisplayMedia() {
+            navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }).then((stream) => {
+                    // After successfully obtaining the local stream, display it on the page.
+                    if( ! document.getElementById("ifNotDisplayLocalStream").checked){
+                        displayStream(stream);  // for debug
+                    } else {
+                        WebVideo.srcObject = null;
+                    }
+                    localStream = stream;
+                    console.log("Local stream shared");
+                })
+                .catch((error) => {
+                    console.error('Error getting local stream:', error);
+                });
+        }
+
+        function askNavigatorMediaDevices(){
+            let constraints = { audio: document.getElementById("ifUseCamera").checked, video: document.getElementById("ifUseMicrophone").checked };
+            navigator.mediaDevices
+                .getUserMedia(constraints)
+                .then(function (stream) {
+                    // After successfully obtaining the local stream, display it on the page.
+                    if( ! document.getElementById("ifNotDisplayLocalStream").checked){
+                        displayStream(stream);  // for debug
+                    } else {
+                        WebVideo.srcObject = null;
+                    }
+                    localStream = stream;
+                    console.log("Local stream shared");
+                })
+                .catch(function (err) {
+                    console.error('Error getting local stream:', err);
+                });
+        }
+                
+        // display the remote stream and try to play it(if usr didn't do anything on web maybe be prohibited)
+        function displayStream(stream) {
+            if(WebVideo.srcObject){
+                WebVideo.srcObject = null;
+            }
+            WebVideo.srcObject = stream;
+        }
+
+        function refreshMedia(){
+            if(remoteStream){
+                displayStream(remoteStream);
+            } else if(parent){
+                if(parent.open){
+                    parent.send([4, peer.id]);
+                }
+            } else if(localStream){
+                displayStream(localStream);
+            }
+        }
+
+        // transform Img into Base64
+        function liveCoverInput(){
+            let file = document.getElementById("LiveCoverInput").files[0];
+            let reader = new FileReader();
+            if(file){
+                if(file.size <= 1048576){
+                    reader.readAsDataURL(file);
+                    reader.onloadend = () => {
+                        liveCoverBase64 = reader.result;
+                    }
+                } else {
+                    alert("it can't over 1MB");
+                }
+            } else {
+                console.log("img transformed Error!");
+            }
+        }
+
+        function fullWebVideo(){
+            if(fullWebVideoTimes === 0){
+                WebVideo.style.height = window.innerHeight + "px";
+                WebVideo.style.width = window.innerWidth + "px";
+                window.scrollBy({
+                    top: document.documentElement.scrollHeight,
+                    behavior: "smooth",
+                });
+                fullWebVideoTimes++;
+            } else {
+                WebVideo.style.height = "100%";
+                WebVideo.style.width = "100%";
+                fullWebVideoTimes = 0;
+            }
+            
         }
 
         function tryConnect(object, id, ifJump, ifAskForMediaStream){
@@ -551,7 +861,7 @@
                     
                     if(ifJump){
                         guest.on('open', () => {
-                            for(var i=0; i<guests.length; i++){
+                            for(let i=0; i<guests.length; i++){
                                 guest = guests[i];
                                 guests = new Array();   // break all of conn
                                 ifConnectedAim = true;
@@ -582,7 +892,7 @@
                             });
                         } else {
                             guest.on('data', (data) => {
-                                for(var i=0; i<guests.length; i++){
+                                for(let i=0; i<guests.length; i++){
                                     if(guests[i].open){     // maybe useless
                                         guest = guests[i];
                                         guests = new Array();   // break all of conn
@@ -633,7 +943,7 @@
                     layers.splice(lastLayerNumber + 1);  // remove all of old layers
                 }
                 if(arr){
-                    for(var i = 7; i < arr.length; i=i+3){
+                    for(let i = 7; i < arr.length; i=i+3){
                         if(arr[i + 2] instanceof Array){    // create buttons linking to child nodes of object which was delivered by clicked button
                             document.getElementById("block"+ layerNumber % 2).innerHTML = document.getElementById("block"+ layerNumber % 2).innerHTML + "<button class=\"childNodes\" onclick=\"echoNodesMap(layers["+ (layerNumber + 1) +"]["+ (i+2) +"], "+ (layerNumber + 1) +", layers["+ (layerNumber + 1) +"]["+ i +"])\">"+ arr[i + 1] +"</button><br />";
                         }
@@ -648,9 +958,9 @@
         function recorder(data){
             switch (data[1]){
                 case 0:     // 0 means unfinished
-                    var sameId = hereNode.indexOf(data[4]);   // locate old data
+                    let sameId = hereNode.indexOf(data[4]);   // locate old data
                     console.log('Info of nodes updated:', data);
-                    // var idTemp = Object.assign({}, connPeers);     // make connIds value stable
+                    // let idTemp = Object.assign({}, connPeers);     // make connIds value stable
                     if(sameId === -1){
                         hereNode.push(data[4]);
                         hereNode.push(data[5]);
@@ -659,7 +969,7 @@
                         hereNode[ sameId + 1 ] = data[5];
                         hereNode[ sameId + 2 ] = data;      // replace old data
                     }
-                    // var idTemp = Object.assign({}, connIds);     // make connIds value stable
+                    // let idTemp = Object.assign({}, connIds);     // make connIds value stable
                     // idTemp[sameId] = data;      // replace old data
                     // hereMap = [1, peer.id, idTemp, null, 0];  //record this node's info
                     hereNode[2] = audienceIds.length;
@@ -672,11 +982,11 @@
                         nodesMap = Object.assign([], hereNode);
                         nodesMap[1] = 1;
                         liveSend(nodesMap);
-                        document.getElementById("sumOfRoom").innerHTML = "Audiences: "+ nodesMap[3].length;
+                        document.getElementById("sumOfRoom").innerHTML = "Audiences: "+ nodesMap[9][3].length;
                     }
                     break;
                 case 1:    // once collection of data is completed            
-                    for(var i=0; i<audiences.length; i++){     // send nodesMap to everyone
+                    for(let i=0; i<audiences.length; i++){     // send nodesMap to everyone
                         if(audiences[i]){
                             if(audiences[i].open){
                                 audiences[i].send(data);
@@ -684,7 +994,7 @@
                         }
                     }
                     nodesMap = data;
-                    document.getElementById("sumOfRoom").innerHTML = "Audiences: "+ nodesMap[3].length;
+                    document.getElementById("sumOfRoom").innerHTML = "Audiences: "+ nodesMap[9][3].length;
                     break;
                 default:
                     console.log("unknown data" + data);

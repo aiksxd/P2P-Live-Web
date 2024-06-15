@@ -20,7 +20,8 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 + single version update
 
 ### Next Version Plan:
-+ clean bug
++ Redraw()
++ Game Mode -> 2&3 update
 
 ## [Multi-Room Type (URL->ROOT)](https://aiksxd.github.io/P2PLiveRoot.html)
 *if someone has already opened root page on the Internet, you can directly use [URL -> Index](https://aiksxd.github.io/P2PLiveIndex.html)*
@@ -62,12 +63,17 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
  ![DeliverGIF](https://github.com/aiksxd/material/blob/main/img/DeliverGIF.gif)
 
 ### Commonly used arrays
-+ nodesMap[ **msgClass** -> 1, **source**: 0(child)/1(host), **Total number of child nodes**: number, **all of ids in room**, **Live_Title**, **Live_Summary**, **Live_CoverURL**, **host_Id**, **host_Name**, **child_Nodes**, **root_Id**]
++ nodesMap[ **0.dataTypes**: 1, **1.sourceMark**: 0(child)/1(host), **2.ids Of Members In Room**, **3.roomType**, **Live_Title**, **Live_Summary**, **Live_CoverURL**, **host_Id**, **host_Name**, **child_Nodes**, **root_Id**]
 
-+ child_Nodes[ **msgClass** -> 1, **source**: 0(child)/1(host), **Total number of child nodes**: number, **all of ids in room**, **own_Id**, **own_Name**, **useless array for extension**, **child_A_Id**, **child_A_name**, **child_Nodes_Of_Child_A**, **child_B_Id**...]
++ childNodes[ **0.dataTypes**: 1, **1.sourceMark**: 1(host), **2.Number Of child Nodes**: number, **3.unused for your extension**, **4.own_Id**, **5.own_Name**, **6.unused for your extension**, **7.here_A_Id**, **8.here_A_name**, **9.here_Nodes_Of_Child_A**, **10.here_B_Id**...]
+
++ hereNodes[ **0.dataTypes**: 1, **1.sourceMark**: 0(child), **2.Number Of child Nodes**: number, **3.unused for your extension**, **4.own_Id**, **5.own_Name**, **6.unused for your extension**, **7.here_A_Id**, **8.here_A_name**, **9.here_Nodes_Of_Child_A**, **10.here_B_Id**...]
 
 ### mark
-+ msgClass: 0 -> msg, 1 -> nodes Collecter, 2 -> streaming request, 3 -> remingder of replacing the parent node, 4 -> application of refresh media stream
++ dataTypes: 0 -> msg, 1 -> nodes Collecter, 2 -> streaming request, 3 -> remingder of replacing the parent node, 4 -> application of refresh media stream
+> for game+: 6 -> Game Info, 7 -> Game Chessman, 8 -> Game Player
+
++ Connection Mark: 0: parent, 1: guest(for the index), 2: bridge(when connect circle), 3: root, 4: indexRoot(for the index)
 
 ## Issue: 
 ### Connect without feedback(failed):
@@ -75,7 +81,7 @@ Due to the inherent limitations of P2P,establishing connections between some net
 
 ### Regarding **exchange**
 it is **only used for bilateral** exchange of media streams rather than transmission. Both the connecting and receiving parties need to submit media streams. If a third party is added, one person's media stream will be **overwritten**
-- [e.g.Exchange](https://aiksxd.github.io/e.g.exchange.html)
+- [Exchange](https://aiksxd.github.io/exchange.html)
 
 ## **About Local Peer Server**:
 
