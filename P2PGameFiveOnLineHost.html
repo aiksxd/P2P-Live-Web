@@ -552,15 +552,15 @@
                     }
 
                     [(-maxWidth)+1, 1, maxWidth+1, maxWidth].forEach(direction => {
-                        let i = -5;
+                        let i = -4;
                         let t = 1;
                         while (i<5) {
                             if(i==0){i++;}
                             let aimPosition = chessman[1]+(i*direction);
-                            console.log(aimPosition);
+                            // console.log(aimPosition);
                             if(unavailablePosition.includes(aimPosition) && positionOwners[unavailablePosition.indexOf(aimPosition)] == chessman[2]){
                                 t++;
-                                console.log(chessman[2]+"th<------->"+aimPosition+"------------->"+t);
+                                // console.log(chessman[2]+"th<------->"+aimPosition+"------------->"+t);
                                 if (t>=5){        // 5 on line
                                     lastGameMap = gameMap;
                                     // gameMap = null;
