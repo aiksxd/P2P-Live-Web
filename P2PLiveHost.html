@@ -147,8 +147,8 @@
         // Listen for the event when a Peer connection is successfully opened
         // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
         peer.on('open', (id) => {
-            if (LiveTitle.value || LiveCoverURL.value || LiveCoverURL.value){
-                nodesMap = [ 1, 1, [id], 0, LiveTitle.value, LiveCoverURL.value, LiveCoverURL.value, id, getMyName(), childNodes, urlInfo[0]];
+            if (LiveTitle.value || LiveSummary.innerHTML || LiveCoverURL.value){
+                nodesMap = [ 1, 1, [id], 0, LiveTitle.value, LiveSummary.innerHTML, LiveCoverURL.value, id, getMyName(), childNodes, urlInfo[0]];
             } else {
                 //childNodes=[0.dataType, 1.sourceMark, 2.NumberOfchildNodes, 3.unused for you ]
                 childNodes = [ 1, 1, 0, [], id, getMyName(), []];
@@ -324,7 +324,7 @@
                 openLiveTimes++;
                 document.getElementById('liveSetting').style.height = "25%";
                 LiveTitle.value = nodesMap[4];
-                LiveSummary.value = nodesMap[5];
+                LiveSummary.innerHTML = nodesMap[5];
                 LiveCoverURL.value = nodesMap[6];
             }else{
                 openLiveTimes=0;
@@ -334,7 +334,7 @@
 
         function modify(){
             nodesMap[4] = LiveTitle.value;   // nodesMap update
-            nodesMap[5] = LiveCoverURL.value;
+            nodesMap[5] = LiveSummary.innerHTML;
             if(liveCoverBase64){
                 nodesMap[6] = liveCoverBase64;
             } else {
@@ -390,7 +390,7 @@
             }
             // [0] => format, [1] => if from Root of room, [2] => numbers of child nodes from parent node
             childNodes[2] = audienceIds.length;
-            nodesMap = [ 1, 1, getRoomIds(), 0, LiveTitle.value, LiveSummary.value, LiveCoverURL.value, peer.id, getMyName(), childNodes, urlInfo[0]];  //record this node's info
+            nodesMap = [ 1, 1, getRoomIds(), 0, LiveTitle.value, LiveSummary.innerHTML, LiveCoverURL.value, peer.id, getMyName(), childNodes, urlInfo[0]];  //record this node's info
             if(root){
                 if(root.open){
                     root.send(nodesMap);
