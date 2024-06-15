@@ -133,8 +133,8 @@
             document.getElementById("rooms").innerHTML = "";
             for (let i = 0; i < data.length; i++){
                 document.getElementById("rooms").innerHTML = document.getElementById("rooms").innerHTML + 
-                "<div class=\"rooms\" onclick=displayRoomInfo("+ i +") alt=\"img Error\" style=\"background-image: url(\'"+ data[i][6] +"\'); background-size: contain;\">"+ data[i][4] +
-                "<br /><span style=\"background-color: rgb(46, 46, 46, 0.5); position: absolute; bottom: 0;\">Members:"+ data[i][2].length +" </span></div>";
+                "<div class=\"rooms\" onclick=displayRoomInfo("+ i +") alt=\"img Error\" style=\"background-image: url(\'"+ data[i][6] +"\'); background-size: contain;\"><span style=\"background-color: rgb(46, 46, 46, 0.5);\">"+ data[i][4] +
+                "</span><br /><span style=\"background-color: rgb(46, 46, 46, 0.5); position: absolute; bottom: 0;\">Members:"+ data[i][2].length +" </span></div>";
             }
         }
 

@@ -259,7 +259,7 @@
                             if (players.length == players[0]){
                                 let msg = [ 0, peer.id, "Setting", "The room is up to Full", null];
                                 liveSend(msg);
-                                appearMsg(msg); 
+                                appearMsg(msg);
                             }
                             let i = 1;
                             let position = false;
@@ -267,7 +267,13 @@
                                 if(players[i] instanceof Array){
                                     if(position){
                                         players[i][0]--;
+                                        player = players[i];
                                         document.getElementsByClassName("playersInfo")[i-1].children[0].innerHTML = i+": ";
+                                        if(!player[2]){
+                                            let colour = 255*((player[0] + 2)/(player[0] + 4));
+                                            document.getElementsByClassName("playersInfo")[i-1].children[1].setAttribute("style", "background-color: rgb("+parseInt(((((player[0]+1) % 5) + 1)/5)*colour)+", "+parseInt(((((player[0]+1) % 4) + 1)/4)*colour)+", "+parseInt(((((player[0]+1) % 3) + 1)/3)*colour)+")");
+                                        }
+                                        document.getElementsByClassName("playersInfo")[i-1].children[0].setAttribute("onclick", "kick("+ player[0] +")");
                                     }
                                     if(players[i][1] == data[2]){   // refer to id
                                         players.splice(i, 1);
@@ -493,6 +499,7 @@
                     switch (gameInfo[3][0]) {
                         case 0:
                             if(turn === myNumber){
+                                document.getElementById("myIcon").classList.remove("inverted");
                                 if(parent){     // noticed: No circuit protection
                                     parent.send([7, 0, [1, positionId, myNumber, now.getTime()]]);
                                 } else {
@@ -531,6 +538,9 @@
 
         function drawChessman(chessman, effect){
             turn++;
+            if (turn == myNumber) {
+                document.getElementById("myIcon").classList.add("inverted");
+            }
             switch (chessman[0]) {
                 case 1:
                     if(turn >= players.length){
@@ -550,7 +560,13 @@
                         let colour = 255*((player[0] + 2)/(player[0] + 4));
                         aimCell.setAttribute("style", "background-color: rgb("+parseInt(((((player[0]+1) % 5) + 1)/5)*colour)+", "+parseInt(((((player[0]+1) % 4) + 1)/4)*colour)+", "+parseInt(((((player[0]+1) % 3) + 1)/3)*colour)+")");
                     }
-
+                    if (unavailablePosition.length === maxHeight*maxWidth) {
+                        lastGameMap = gameMap;
+                        // gameMap = null;
+                        alert("No Winner!");   // style TODO
+                        turn = null;
+                        return;
+                    }
                     [(-maxWidth)+1, 1, maxWidth+1, maxWidth].forEach(direction => {
                         let i = -4;
                         let t = 1;
@@ -610,18 +626,28 @@
         function kick(number) {
             if(confirm("Do you want to kick the "+number+"th player?")){
                 liveSend([8, 2, Number(number)]);
-            }
-            let i = number;
-            players.splice(i, 1);
-            document.getElementsByClassName("playersInfo")[i-1].remove();
-            while(i<players.length){
-                if(players[i] instanceof Array){
-                    if(i=myNumber){
-                        myNumber--;
+                let i = number;
+                players.splice(i, 1);
+                document.getElementsByClassName("playersInfo")[i-1].remove();
+                while(i<players.length){
+                    if(players[i] instanceof Array){
+                        players[i][0]--;
+                        let player = players[i];
+                        if(!player[2]){
+                            let colour = 255*((player[0] + 2)/(player[0] + 4));
+                            document.getElementsByClassName("playersInfo")[i-1].children[1].setAttribute("style", "background-color: rgb("+parseInt(((((player[0]+1) % 5) + 1)/5)*colour)+", "+parseInt(((((player[0]+1) % 4) + 1)/4)*colour)+", "+parseInt(((((player[0]+1) % 3) + 1)/3)*colour)+")");
+                        }
+                        document.getElementsByClassName("playersInfo")[i-1].children[0].setAttribute("onclick", "kick("+ player[0] +")");
+                        document.getElementsByClassName("playersInfo")[i-1].children[0].innerHTML = i+": ";
                     }
-                    players[i][0]--;
-                    document.getElementsByClassName("playersInfo")[i-1].children[0].innerHTML = i+": ";
                     i++;
+                }
+                if(number < myNumber){
+                    myNumber--;
+                }
+                if(turn >= players.length){
+                    turn = 1;
+                    document.getElementById("nowTurn").innerHTML = "Now Turn: "+turn+" ";
                 }
             }
         }

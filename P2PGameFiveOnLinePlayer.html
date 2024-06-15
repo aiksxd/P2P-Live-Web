@@ -505,20 +505,31 @@
                                         while(i<players.length){
                                             if(players[i] instanceof Array){
                                                 if(position){
-                                                    if(i=myNumber){
-                                                        myNumber--;
-                                                    }
                                                     players[i][0]--;
                                                     document.getElementsByClassName("playersInfo")[i-1].children[0].innerHTML = i+": ";
+                                                    if(!players[i][2]){
+                                                        player = players[i];
+                                                        let colour = 255*((player[0] + 2)/(player[0] + 4));
+                                                        document.getElementsByClassName("playersInfo")[i-1].children[1].setAttribute("style", "background-color: rgb("+parseInt(((((player[0]+1) % 5) + 1)/5)*colour)+", "+parseInt(((((player[0]+1) % 4) + 1)/4)*colour)+", "+parseInt(((((player[0]+1) % 3) + 1)/3)*colour)+")");
+                                                    }
                                                 }
                                                 if(players[i][0] == data[2] && (!position)){   // refer to number
                                                     players.splice(i, 1);
                                                     document.getElementsByClassName("playersInfo")[i-1].remove();
-                                                    position = true;   // changed
+                                                    position = i;   // changed
                                                 } else {
                                                     i++;
                                                 }
+                                            } else {i++;}
+                                        }
+                                        if(position){
+                                            if(position < myNumber){
+                                                myNumber--;
                                             }
+                                        }
+                                        if(turn >= players.length){
+                                            trun = 1;
+                                            document.getElementById("nowTurn").innerHTML = "Now Turn: "+turn+" ";
                                         }
                                         // if(data[3] == peer.id){
                                         //     peer.distory();
@@ -818,6 +829,7 @@
                     switch (gameInfo[3][0]) {
                         case 0:
                             if(turn === myNumber){
+                                document.getElementById("myIcon").classList.remove("inverted");
                                 if(parent){     // noticed: No circuit protection
                                     parent.send([7, 0, [1, positionId, myNumber, now.getTime()]]);
                                 } else {
@@ -856,6 +868,9 @@
 
         function drawChessman(chessman, effect){
             turn++;
+            if (turn == myNumber) {
+                document.getElementById("myIcon").classList.add("inverted");
+            }
             switch (chessman[0]) {
                 case 1:
                     if(turn >= players.length){
@@ -875,7 +890,13 @@
                         let colour = 255*((player[0] + 2)/(player[0] + 4));
                         aimCell.setAttribute("style", "background-color: rgb("+parseInt(((((player[0]+1) % 5) + 1)/5)*colour)+", "+parseInt(((((player[0]+1) % 4) + 1)/4)*colour)+", "+parseInt(((((player[0]+1) % 3) + 1)/3)*colour)+")");
                     }
-
+                    if (unavailablePosition.length === maxHeight*maxWidth) {
+                        lastGameMap = gameMap;
+                        // gameMap = null;
+                        alert("No Winner!");   // style TODO
+                        turn = null;
+                        return;
+                    }
                     [(-maxWidth)+1, 1, maxWidth+1, maxWidth].forEach(direction => {
                         let i = -4;
                         let t = 1;
