@@ -1,5 +1,3 @@
-- [English doc](README.md)
-
 ### **关于P2P & PeerJS**：
 P2P 是一种分布式网络架构，其中每个参与者（也称为节点）充当客户端和服务器的角色。
 与传统的客户端-服务器模型不同，P2P 允许直接的节点之间通信，而无需通过中央服务器进行转发。
@@ -9,40 +7,31 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 
 ### 更新:
-+ In index to choose your room type(Live & FiveOnline)
-+ P2PGameFiveOnLineHost.html 主办方文件
-+ P2PGameFiveOnLineHost.html 玩家/观众文件
-+ 暗色主题
-+ 头像与信息
-+ 速度更快的代码方式
++ 手机端界面优化
++ 抛弃Root节点设计方案
 
 ### 下个版本的计划:
-+ Redraw()
++ Redraw() & better kick with color
 + Game Mode -> 2&3 update
 + 汉化工作
 
-## [多房间型(URL->ROOT)](https://aiksxd.github.io/P2PLiveRoot.html)
-*如果在互联网上已经有人访问了root网页并持有了上述的默认id，可以直接访问[URL -> Index](https://aiksxd.github.io/P2PLiveIndex.html)*
+## [多房间型(URL->ROOT)](https://aiksxd.github.io/P2PLiveIndex.html)
 + 文件说明：
-+ P2PLiveIndex.html 为网站主页（用于展示准备发起直播的房间，并为之提供入口）
-+ P2PLiveRoot.html 为网站根节点（根节点为监听器，负责获取发起直播的所有ID，并递交给主页）
++ P2PLiveIndex.html 为网站主页（用于传输并展示发起直播的房间信息）
 + P2PLiveHost.html & P2PLiveAudience.html 为附属页面，置于同目录下即可
 ### 用法：
-+ [ 对于站长 ]
-1. 联网并使用浏览器读取根节点页面(P2PLiveRoot.html)
-2. 分享根节点页面的id给用户
 + [ 对于观众 ]
-1. 联网并使用浏览器读取主页(P2PLiveIndex.html)，**填入根节点的ID**并按下**连接**按钮
+1. 联网并使用浏览器读取主页(P2PLiveIndex.html)，(若根节点连接不成功，则填入房间id直接连接)
 3. 观众在执行第一步后可以看到该根节点下的所有活跃直播间(列入标准不在于是否推流，而是直播页面的连接情况)
 + [ 对于主播 ]
-1. 联网并使用浏览器读取主页(P2PLiveIndex.html)，**填入根节点的ID**并按下**连接**按钮(In index to choose your room type(Live & FiveOnline))
+1. 联网并使用浏览器读取主页(P2PLiveIndex.html)，(若根节点连接不成功，则创建不公开房间 或 填个根节点的ID连接)
 2. 点击**去开播**之后点击**共享本地流**
 
 ### **注意事项**：
 1. 如果建立连接发生在主机开始共享流媒体之前，再次点击刷新按钮会**刷新接收的流媒体**（如不可用则刷新整个页面）
 2. 在主播丢失连接时，则无法将主播子节点的信息传递给其他主播子节点
 3. 子节点在传递给子子节点时视频质量开始可能模糊，尝试等待即可(一次测试26s后画质同步)
-4. 通常，主页会默认尝试连接id"P2P-Live-Web-Default-Id" (可以使得连接到持有此id的页面更加便捷，但是如果被占用，自己的root页面就无法再持有，所以可以修改成自己的再转发给别人)
+4. 通常，主页会默认尝试连接id"P2P-Live-Web-Default-Id"
 
 
 ## [单文件版本](https://aiksxd.github.io/SingleP2PLiveVersion.html)

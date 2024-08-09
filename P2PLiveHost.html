@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
@@ -18,8 +19,10 @@
             <button onclick="peer.disconnect()">Lock the room(can not restore!)</button>
             <button onclick="peer.reconnect()">reconnect with original Id</button>
         </div>
-        <button id="closeLiveMenu" class="actionButton" onclick="showLive()">Close</button>
-        <button id="modify" class="actionButton" onclick="modify()">modify</button>
+        <div>
+            <button id="closeLiveMenu" class="actionButton" onclick="showLive()">Close</button>
+            <button id="modify" class="actionButton" onclick="modify()">modify</button>
+        </div>
     </div>
     <!-- Detail of Room -->
     <div id="openRoomInfo">
@@ -41,7 +44,7 @@
 
     <!-- Stream Source -->
     <div id="streamSource">
-        <div class="box" style="margin-top: 10px;">
+        <div class="box" id="onlyPC" style="margin-top: 10px;">
             <div style="font-weight: bold;">
                 Share PC Desktop:<br />
                 <button type="button" id="browserDisplayMedia" onclick="useDisplayMedia()">Use Display Stream</button>
@@ -49,7 +52,7 @@
         </div>
         <div class="box" style="margin-top: 10px;">
             <div style="font-weight: bold;">
-                Share Local Devices(PE, PC...):
+                Share Local Devices:
                 <button type="button" id="browserNavigatorMediaDevices" onclick="askNavigatorMediaDevices()">Upload Local Device</button><br />
                 <input type="checkbox" id="ifUseCamera">Camera
                 <input type="checkbox" id="ifUseMicrophone">Microphone
@@ -78,20 +81,25 @@
             <!-- Receiver -->
             <div style="font-weight: bold;">Host</div>
             <button id="refreshButton" onclick="refreshMap()">Refresh</button>
-            <button id="openRoomInfoButton" onclick="openRoomInfo()">Room Info</button>
-            <button type="button" id="chooseStreamSource" onclick="streamSourceMenu()">Stream Source</button><button type="button" id="roomSetting" onclick="showLive()">Room Setting</button>
-            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div><br />
-            <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br />
+            <button id="openRoomInfoButton" onclick="openRoomInfo()">Room Info</button><br />
+            <button type="button" id="chooseStreamSource" onclick="streamSourceMenu()">Stream Source</button>
+            <button type="button" id="roomSetting" onclick="showLive()">Room Setting</button>
+            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div>
+            <div id="connectRoot" style="visibility: hidden;">
+                Join a root node:<input type="text" id="peerId" placeholder="Input counterpart's Id" autofocus="true">
+                <button id="connectButton">Connect</button>
+            </div>
             <div id="status" style="font-weight: bold;">Status: Waiting to Connecting to PeerServer...</div>
+            <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br /> -->
         </div>
         <div class="box">
-            <button onclick="fullWebVideo()">Full Web Video</button><br />
+            <button onclick="fullWebVideo()" id="fullScreen">Full Web Video</button><br />
             <div>
                 <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Icon & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br />
                 <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
             </div>
         </div>
-        <div class="box" style="width: 30%;">
+        <div class="box">
             <span id="sumOfRoom">Members: 1</span><br />
             <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max to 100]<br />
         </div>
@@ -107,8 +115,8 @@
             <div class="sendInput">
                 <!-- Send box -->
                 <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
-                <button type="button" id="sendButton" onclick="sendMsg()">Send</button>
-                <button type="button" id="uploadImgButton">Img</button><br />
+                <button type="button" id="uploadImgButton">Img</button>
+                <button type="button" id="sendButton" onclick="sendMsg()">Send</button><br />
                 <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
             </div>
         </div>
@@ -116,6 +124,9 @@
 
     <script src="js/peerjs.min.js"></script>
     <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
+    <script>
+        const peer = new Peer({ debug: 2})      //use PeerJS official server
+    </script>
     <script src="js/fn.js"></script>
     <script>
         let conn = null;
@@ -376,6 +387,10 @@
             true,
         );
 
+        document.getElementById("connectButton").addEventListener("click", () => {
+            tryConnect(3, document.getElementById("peerId").value, false, false);
+        });
+
         function recorder(data){
             let sameId = childNodes.indexOf(data[4]);   // locate old data
             console.log('Info of nodes updated:', data);
@@ -411,7 +426,9 @@
             root.close();
             // event.preventDefault();
         });
-
+    if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+        document.getElementById("onlyPC").remove();
+    }
     </script>
 </body>
 </html>

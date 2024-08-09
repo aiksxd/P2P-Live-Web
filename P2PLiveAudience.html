@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
@@ -20,13 +21,15 @@
                 <div id="block1"></div>
             </div>
         </div>
-        <button id="autoJoin" class="actionButton" onclick="autoJoin(3)">auto<br />Join</button>
-        <button id="closeInfo" class="actionButton" onclick="openRoomInfo()">Close</button>
+        <div>
+            <button id="autoJoin" class="actionButton" onclick="autoJoin(3)">auto<br />Join</button>
+            <button id="closeInfo" class="actionButton" onclick="openRoomInfo()">Close</button>
+        </div>
     </div>
     
     <!-- Stream Source -->
     <div id="streamSource">
-        <div class="box" style="margin-top: 10px;">
+        <div class="box" id="onlyPC" style="margin-top: 10px;">
             <div style="font-weight: bold;">
                 Share PC Desktop:<br />
                 <button type="button" id="browserDisplayMedia" onclick="useDisplayMedia()">Use Display Stream</button>
@@ -69,13 +72,13 @@
                 <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br />
         </div>
         <div class="box">
-            <button onclick="fullWebVideo()">Full Web Video</button><br />
+            <button onclick="fullWebVideo()" id="fullScreen">Full Web Video</button><br />
             <div>
                 <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Icon & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br />
                 <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
             </div>
         </div>
-        <div class="box" style="width: 30%;">
+        <div class="box">
             <span id="sumOfRoom">Members: 1</span><br />
             <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max to 100]<br />
             <button onclick="cleanMsg()">CleanMsgs</button><br />
@@ -92,8 +95,8 @@
             <div class="sendInput">
                 <!-- Send box -->
                 <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
-                <button type="button" id="sendButton" onclick="sendMsg()">Send</button>
-                <button type="button" id="uploadImgButton">Img</button><br />
+                <button type="button" id="uploadImgButton">Img</button>
+                <button type="button" id="sendButton" onclick="sendMsg()">Send</button><br />
                 <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
             </div>
         </div>
@@ -106,6 +109,9 @@
     
     <script src="js/peerjs.min.js"></script>
     <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
+    <script>
+        const peer = new Peer({ debug: 2})      //use PeerJS official server
+    </script>
     <script src="js/fn.js"></script>
     <script>
         let openInfoTimes = 0;
@@ -419,6 +425,9 @@
             // event.preventDefault();
         });
 
+    if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+        document.getElementById("onlyPC").remove();
+    }
     </script>
 </body>
 </html>

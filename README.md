@@ -9,41 +9,31 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 
 ### Update:
-+ In index to choose your room type(Live & FiveOnline)
-+ P2PGameFiveOnLineHost.html For Host
-+ P2PGameFiveOnLineHost.html For Players/Audiences
-+ dark theme update
-+ Better Msg with icon
-+ better effective code
++ Mobile UI support
++ give up design of root mode
 
 ### Next Version Plan:
-+ Redraw()
++ Redraw() & better kick with color
 + Game Mode -> 2&3 update
-+ better root msg
 + single Version update
 
-## [Multi-Room Type (URL->ROOT)](https://aiksxd.github.io/P2PLiveRoot.html)
-*if someone has already opened root page on the Internet, you can directly use [URL -> Index](https://aiksxd.github.io/P2PLiveIndex.html)*
+## [Multi-Room Type (URL->ROOT)](https://aiksxd.github.io/P2PLiveIndex.html)
 + Instructions of files:
 + P2PLiveIndex.html serves as the website homepage (displaying rooms ready for live streaming and providing entry points)
-+ P2PLiveRoot.html acts as the website's root node (responsible for monitoring and providing all IDs of live stream initiators to the homepage)
 + P2PLiveHost.html & P2PLiveAudience.html are auxiliary pages placed in the same directory
 ### Instructions:
-+ [For Server]
-1. use browser to load the root node page(P2PLiveRoot.html) with available Internet
-2. share id to users
 + [For Audiences]
-1. Use browser to load the homepage(P2PLiveIndex.html) with available Internet, [enter the **root node's ID**, and click the **Connect** button(deafault connect id can be modified in file)]
-2. After completing step one, audience members can view all active live streaming rooms under the root node (based on the connectivity status of the live streaming pages)
-+ [For Host] Noticed: In index to choose your room type(Live & FiveOnline)
-1. Visit the homepage(P2PLiveIndex.html), [enter the **root node's ID**, and click the **Connect** button(deafault connect id can be modified in file)]
+1. Use browser to load the homepage(P2PLiveIndex.html) with available Internet, [if can't connect to the root node, directly enter and connect room ID]
+2. After completing step one, audience members can view all active live streaming rooms(or directly jump to audience in room page)
++ [For Host] Noticed: In index to choose your room type(Live | FiveOnline)
+1. Visit the homepage(P2PLiveIndex.html), [create pravite room or enter and connect a root ID]
 2. Clicks **Go To Live** and then clicks **Stream Source** button
 
 ### **Considerations**:
 1. If the connection is established before the host starts sharing the media stream, clicking the button again will **refresh the received media stream**(or refresh web)
 2. In the event of the host losing connection, the information from the host's child nodes will not be transmitted to other host's child nodes
 3. Video quality may initially be blurry when passed from child nodes to sub-child nodes; waiting for synchronization may resolve this (quality synchronization observed after 26 seconds in a test)
-4. By default, index request the id of "P2P-Live-Web-Default-Id" (It made better index connection. if your root id has already been occupied, you need to modify it)
+4. By default, index request the id of "P2P-Live-Web-Default-Id"
 
 
 ## [Single Room Type Live Streaming](https://aiksxd.github.io/SingleP2PLiveVersion.html)

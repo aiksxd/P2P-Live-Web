@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
@@ -18,8 +19,10 @@
             <button onclick="peer.disconnect()">Lock the room(can not restore!)</button>
             <button onclick="peer.reconnect()">reconnect with original Id</button>
         </div>
-        <button id="closeLiveMenu" class="actionButton" onclick="showLive()">Close</button>
-        <button id="modify" class="actionButton" onclick="modify()">modify</button>
+        <div>
+            <button id="closeLiveMenu" class="actionButton" onclick="showLive()">Close</button>
+            <button id="modify" class="actionButton" onclick="modify()">modify</button>
+        </div>
     </div>
     <!-- Detail of Room -->
     <div id="openRoomInfo">
@@ -47,19 +50,23 @@
             <button id="refreshButton" onclick="refreshMap()">Refresh</button>
             <button id="openRoomInfoButton" onclick="openRoomInfo()">Room Info</button>
             <button type="button" id="roomSetting" onclick="showLive()">Room Setting</button>
-            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div><br />
-            <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br />
+            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div>
+            <div id="connectRoot" style="visibility: hidden;">
+                Join a root node:<input type="text" id="peerId" placeholder="Input counterpart's Id" autofocus="true">
+                <button id="connectButton">Connect</button><br />
+            </div>
             <div id="status" style="font-weight: bold;">Status: Waiting to Connecting to PeerServer...</div>
+            <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br /> -->
         </div>
         <div class="box">
-            <button onclick="fullWebVideo()">Full Web Video</button><br />
+            <button onclick="fullWebVideo()" id="fullScreen">Full Web Video</button><br />
             <div>
                 <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Icon & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br />
                 <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
             </div>
             <input type="checkbox" id="predictive">Predictive<br />
         </div>
-        <div class="box" style="width: 30%;">
+        <div class="box">
             <div id="playersList"></div>
             <span id="nowTurn">Now Turn: 1 </span>
             <span id="sumOfRoom">Members: 1</span><br />
@@ -70,16 +77,20 @@
     
     <!-- Live interaction-->
     <div class="videoBox">
-        <div id="canvasMap" style="position: absolute;">
+        <div id="canvasMap">
             <br /><br /><br /><br />
-            MapSize: Height:<input type="number" id="maxHeight" class="tidy" value="10"> Width:<input type="number" id="maxWidth" class="tidy" value="10"><br />
-            MaxPlayers: <input type="number" id="maxPlayers" class="tidy" value="5"><br />
-            GameMode: <select id="gameMode">
+            MapSize: Height:<input type="number" id="maxHeight" class="setting" value="10" min="1"> Width:<input type="number" id="maxWidth" class="setting" value="10" min="1"><br />
+            MaxPlayers: <input type="number" id="maxPlayers" class="setting" value="5" min="1"><br />
+            GameMode: <select id="gameMode" onchange="modeModify(this.selectedIndex)">
                 <option value="0" selected="selected">SLG Mode</option>
-                <option value="1">Energy Mode</option>
+                <option value="1">Energy
+                     Mode</option>
                 <option value="2">Card Mode</option>
             </select><br />
-            HostJoinGame: <input type="checkbox" class="tidy" checked="true" id="hostJoinGame"><br />
+            HostJoinGame: <input type="checkbox" class="setting" checked="true" id="hostJoinGame"><br />
+            <div id="modeMenu">
+                WaitingTime: <input type="number" id="waitingTime" class="setting" value="30" min="1"><br />
+            </div>
             <button id="start" onclick="start()">Start Game</button>
         </div>
         <!-- Message box -->
@@ -97,6 +108,9 @@
 
     <script src="js/peerjs.min.js"></script>
     <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
+    <script>
+        const peer = new Peer({ debug: 2})      //use PeerJS official server
+    </script>
     <script src="js/fn.js"></script>
     <script>
         let conn = null;
@@ -149,6 +163,7 @@
         let offlinePlayer = [];
         let lastGameMap = null;
         let gameInfo = [6, players, gameMap, gameMode, startTime, unavailablePosition, positionOwners];
+        let charactersURLs = ['',''];
         
         // Listen for the event when a Peer connection is successfully opened
         // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
@@ -223,23 +238,6 @@
                             console.log("Msg Connected to: " + data[4]);
                         }
                         recorder(data);
-                        break;
-                    case 2:
-                        if(data[1] && confirm(data[2]+"("+ data[1] +") ask for your media stream")){
-                            if(localStream){
-                                peer.call(data[1], localStream);
-                            } else if(remoteStream){
-                                peer.call(data[1], remoteStream);
-                            } else {
-                                document.getElementById('streamSourceMenuClose').innerHTML="Submit";
-                                streamSourceMenu();
-                                document.getElementById('streamSourceMenuClose').addEventListener('click', () => {
-                                    peer.call(data[1], localStream);
-                                    document.getElementById('streamSourceMenuClose').innerHTML="Close";
-                                
-                                });
-                            }
-                        }
                         break;
                     case 7:
                         data[1] = 1;
@@ -323,6 +321,15 @@
                                         nodesMap[2] = getRoomIds();
                                         childNodes[2] = audienceIds.length;
                                     }
+
+                                    if(startTime){
+                                        players.forEach(player => {
+                                            if(player[1] == conns[i].peer){
+                                                liveSend([8, player[0]]);   // TODO
+
+                                            }
+                                        });
+                                    }
                                     // child nodes of host closed the connection
                                     console.log("nodesMap update after somebody closed")    // DEBUG
                                     liveSend(nodesMap);
@@ -342,7 +349,7 @@
             });
         });
 
-        const inputs = Array.from(document.getElementsByClassName('tidy'));
+        const inputs = Array.from(document.getElementsByClassName('setting'));
         inputs.forEach(input => {
             input.addEventListener('focusout',() => {
                     maxWidth = Number(document.getElementById("maxWidth").value);
@@ -364,6 +371,44 @@
             },
             true,
         );
+        
+        function modeModify(mode) {
+            switch (mode) {
+                case 0:
+                    document.getElementById("modeMenu").innerHTML = 'WaitingTime: <input type="number" id="waitingTime" class="setting" value="30" min="1"><br />';
+                    break;
+                case 1:
+                    document.getElementById("modeMenu").innerHTML = '';
+                    charactersURLs.forEach(charactersURLs => {
+                        let character = document.createElement("img");
+                        character.setAttribute('src', charactersURLs);
+                        character.classList.add('cells');
+                        document.getElementById("modeMenu").appendChild(character);
+                    });
+                    document.getElementById("modeMenu").appendChild(document.createElement("br"));
+                    let input = document.createElement("input");
+                    input.setAttribute('type', "number");
+                    input.classList.add('setting');
+                    input.setAttribute('min', "0");
+
+                    let input1 = input.cloneNode();
+                    input1.id = "commonChessmanCost";
+                    input1.setAttribute('value', "3");
+                    document.getElementById("modeMenu").appendChild(document.createTextNode("commonChessmanCost: "));
+                    document.getElementById("modeMenu").appendChild(input1);
+                    document.getElementById("modeMenu").appendChild(document.createElement("br"));
+
+                    let input2 = input.cloneNode();
+                    input2.id = "MaxEnergy";
+                    input2.setAttribute('value', "5");
+                    document.getElementById("modeMenu").appendChild(document.createTextNode("MaxEnergy: "));
+                    document.getElementById("modeMenu").appendChild(input2);
+                    document.getElementById("modeMenu").appendChild(document.createElement("br"));
+                    break;
+                default:
+                    break;
+            }
+        }
 
         function displayNewPlayer(player){
             let newPlayer = document.createElement("div");
@@ -460,6 +505,10 @@
             gameInfo = [6, players, gameMap, gameMode, startTime, unavailablePosition, positionOwners];
             drawMap();
             liveSend([6, [players[0]], gameMap, gameMode, startTime, unavailablePosition, positionOwners]);
+            
+            if (myNumber == 1) {
+                document.getElementById("canvasMap").style.backgroundColor = 'rgb(80,83,80)';
+            }
         }
 
         function drawMap(){
@@ -477,7 +526,7 @@
                     }
                 }
             } else {
-                document.getElementById("canvasMap").innerHTML = '\n        <br><br><br><br>\n        MapSize: Height:<input type="number" id="maxHeight" class="tidy" value="10"> Width:<input type="number" id="maxWidth" class="tidy" value="10"><br>\n        MaxPlayers: <input type="number" id="maxPlayers" class="tidy" value="2"><br>\n        GameMode: <select id="gameMode">\n            <option value="1" selected="selected">SLG Mode</option>\n            <option value="2">Energy Mode</option>\n            <option value="3">Card Mode</option>\n        </select><br>\n        HostJoinGame: <input type="checkbox" checked="true" id="hostJoinGame"><br>\n        <button id="start" onclick="start()">Start Game</button>\n    ';
+                document.getElementById("canvasMap").innerHTML = '\n        <br><br><br><br>\n        MapSize: Height:<input type="number" id="maxHeight" class="setting" value="10"> Width:<input type="number" id="maxWidth" class="setting" value="10"><br>\n        MaxPlayers: <input type="number" id="maxPlayers" class="setting" value="2"><br>\n        GameMode: <select id="gameMode">\n            <option value="1" selected="selected">SLG Mode</option>\n            <option value="2">Energy Mode</option>\n            <option value="3">Card Mode</option>\n        </select><br>\n        HostJoinGame: <input type="checkbox" checked="true" id="hostJoinGame"><br>\n        <button id="start" onclick="start()">Start Game</button>\n    ';
             }
         }
 
@@ -488,18 +537,19 @@
         function applyForPut(position){
             let positionId = Number(position.id);
             if(positionId && !(unavailablePosition.includes(positionId))){
-                if(lastAimPosition !== position){
-                    if(lastAimPosition){
-                        lastAimPosition.classList.remove('inverted');
-                    }
-                    position.classList.add('inverted');
-                    lastAimPosition = position;
-                } else if(myNumber){
+                // if(lastAimPosition !== position){
+                //     if(lastAimPosition){
+                //         lastAimPosition.classList.remove('focus');
+                //     }
+                //     position.classList.add('focus');
+                //     lastAimPosition = position;
+                // } else 
+                if(myNumber){
                     let now = new Date();
                     switch (gameInfo[3][0]) {
                         case 0:
                             if(turn === myNumber){
-                                document.getElementById("myIcon").classList.remove("inverted");
+                                document.getElementById("canvasMap").style.backgroundColor = 'rgb(28, 33, 40)';
                                 if(parent){     // noticed: No circuit protection
                                     parent.send([7, 0, [1, positionId, myNumber, now.getTime()]]);
                                 } else {
@@ -538,13 +588,13 @@
 
         function drawChessman(chessman, effect){
             turn++;
-            if (turn == myNumber) {
-                document.getElementById("myIcon").classList.add("inverted");
-            }
             switch (chessman[0]) {
                 case 1:
                     if(turn >= players.length){
                         turn = 1;
+                    }
+                    if (turn == myNumber) {
+                        document.getElementById("canvasMap").style.backgroundColor = 'rgb(80,83,80)';
                     }
                     document.getElementById("nowTurn").innerHTML = "Now Turn: "+turn+" ";
                     unavailablePosition.push(chessman[1]);
@@ -570,8 +620,11 @@
                     [(-maxWidth)+1, 1, maxWidth+1, maxWidth].forEach(direction => {
                         let i = -4;
                         let t = 1;
-                        while (i<5) {
-                            if(i==0){i++;}
+                        let limit = chessman[1] % maxWidth;    // limit for out of canvas
+                        if(limit == 0){limit = maxWidth;}
+                        while (i<=4 && i<= maxWidth - limit) {
+                            if(i==0 || i < 1-limit ){i++; continue;}
+                            // console.log(""+ (1-limit) +";"+ (maxWidth-limit) +"");
                             let aimPosition = chessman[1]+(i*direction);
                             // console.log(aimPosition);
                             if(unavailablePosition.includes(aimPosition) && positionOwners[unavailablePosition.indexOf(aimPosition)] == chessman[2]){
@@ -601,10 +654,11 @@
         }
 
 
-        function reDraw(playerNumber) {     // TODO
+        function reDraw(playerNumber) {
             let t = 0;
-            while (t < positionOwners.length) {
-                
+            let aims = document.getElementsByClassName("owner"+ playerNumber);
+            while (t < aims.length) {
+                aims[t].setAttribute('src', players[playerNumber][2]);
             }
         }
 

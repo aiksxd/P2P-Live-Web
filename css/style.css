@@ -6,6 +6,28 @@ html, body {
 	border: 0;
     color: rgb(197,209,216);
 }
+video::-webkit-media-controls-timeline {
+display: none;
+}
+video::-webkit-media-controls-current-time-display {
+display: none;
+}
+video::-webkit-media-controls-time-remaining-display {
+display: none;
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+::-webkit-scrollbar {  /*TODO*/
+    width: 7px;
+    height: 7px;
+}
+::-webkit-scrollbar-thumb {
+    background: #afafaf;
+    -webkit-border-radius: 100px;
+}
 .time {
     vertical-align: middle;
     position: relative;
@@ -31,19 +53,22 @@ html, body {
     height: 85%;
 }
 .container {
-    display: flex;
-    align-items: flex-start;
+    width: 100%;
+    white-space: nowrap;
     height: 14%;
     background: rgb(28,33,40);
-}    
+    overflow-x: auto;
+    overflow-y: hidden;
+}
 .box {
-    border: 1px solid rgb(46, 46, 46);
+    display: inline-block;
+    border-right: 1px solid rgb(46, 46, 46);
     box-sizing: border-box;
     padding: 10px;
-    height: 100%;
-    width: 35%;
+    height: 98%;
+    width: 350px;
     padding-bottom: 0px;
-    overflow-y: scroll;
+    overflow-x: hidden;
 }
 .videoBox {
     width: 100%;
@@ -83,11 +108,6 @@ html, body {
     height: 20px;
     width: 130px;
 }
-.indexContainer {
-    border: 1px solid rgb(46, 46, 46);
-    display: flex;
-    align-items: flex-start;
-}
 .indexBox {
     padding: 10px;
     width: 50%;
@@ -95,13 +115,14 @@ html, body {
 .rooms {
     position: relative;
     border: 1px solid rgb(46, 46, 46);
+    background-color: rgb(46, 46, 46, 0.5);
     display: block;
     float: left;
-    height: 200px;
-    width: 200px;
+    height: 150px;
+    width: 150px;
     font-size: 20px;
     color: rgba(255, 255, 255, 0.8);
-    overflow: hidden;
+    overflow: auto;
 }
 #openRoomInfo {
     border: 1px solid rgb(28,33,40);
@@ -111,7 +132,6 @@ html, body {
     position: absolute;
     z-index: 999;
     width: 99%;
-    top: 0;
     overflow-y: hidden;
     transition: 0.5s;
     height: 0px;
@@ -128,13 +148,16 @@ html, body {
     margin-top: 1%;
 }
 .actionButton {
-    width: 8%;
-    height: 90%;
+    position: relative;
+    float: right;
+    width: 100%;
+    max-width: 100px;
+    min-height: 100px;
+    height: 45%;
     margin-top: 1%;
 }
 #roomTitle {
     background-color: #373E47;
-    width: 90%;
     height: 20%;
     margin: 1%;
     border: 1px solid rgb(0, 0, 0);
@@ -142,7 +165,6 @@ html, body {
 #roomSummary {
     background-color: #373E47;
     float: left;
-    width: 40%;
     height: 60%;
     margin: 1%;
     border: 1px solid rgb(0, 0, 0);
@@ -192,31 +214,31 @@ html, body {
     border: 1px solid rgb(46, 46, 46);
     display: flex;
     align-items: flex-start;
-    overflow-y: hidden;
+    overflow: auto;
     position: absolute;
     z-index: 999;
     width: 99%;
-    top: 0;
     transition: 0.5s;
     height: 0px;
 }
 #liveCover {
     background-color: #373E47;
-    width: 20%;
-    height: 90%;
+    width: 150px;
+    height: 150px;
     margin: 1%;
     border: 1px solid rgb(28,33,40);
 }
 .liveInput {
     background-color: #373E47;
-    width: 95%;
+    min-width: 150px;
+    width: 70%;
     height: 10%;
+    margin-bottom: 5px;
 }
 #LiveSummary {
+    width: 70%;
     background-color: #373E47;
-    margin-top: 3%;
-    width: 95%;
-    height: 60%;
+    height: 30%;
     word-wrap: break-word;
     overflow: scroll;
 }
@@ -228,38 +250,11 @@ html, body {
     position: absolute;
     z-index: 999;
     width: 99%;
-    top: 0;
     transition: 0.5s;
     height: 0px;
 }
-.tidy{
+.setting{
     width: 40px;
-}
-
-video::-webkit-media-controls-fullscreen-button {
-  display: none;
-}
-video::-webkit-media-controls-timeline {
-  display: none;
-}
-video::-webkit-media-controls-current-time-display {
-  display: none;
-}
-video::-webkit-media-controls-time-remaining-display {
-  display: none;
-}
-
-body::-webkit-scrollbar {
-    display: none;
-}
-
-::-webkit-scrollbar {  /*TODO*/
-    width: 10px;
-    height: 10px;
-}
-::-webkit-scrollbar-thumb {
-    background: #afafaf;
-    -webkit-border-radius: 100px;
 }
 input {
     background-color: #373E47;
@@ -304,7 +299,7 @@ textarea::-webkit-scrollbar-thumb {
     overflow: auto;
 }
 #canvasMap {
-    height: 85%;
+    height: 100%;
     width: 70%;
     float: left;
     background-color: rgb(28,33,40);
@@ -316,8 +311,10 @@ textarea::-webkit-scrollbar-thumb {
     width: 33px;
     height: 33px;
     /* display:inline-block; */
-    border: 1px solid #afafaf;
     box-sizing: border-box;
+}
+.cells:hover {
+    border: 1px solid #afafaf;
 }
 .icon {
     vertical-align: middle;
@@ -333,6 +330,94 @@ textarea::-webkit-scrollbar-thumb {
     white-space:nowrap;
     max-height: 50px;
 }
-.inverted {
-    filter: invert(1) hue-rotate(180deg);
+#fullScreen {
+    z-index: 99999;
+}
+@media only screen and (orientation: portrait) {
+    /* Styles for devices in portrait mode go here */
+    .container {
+        height: 35%;
+        position: absolute;
+        bottom: 0px;
+        overflow: auto;
+    }
+    #webVideo {
+        position: static;
+        width: 100%;
+        height: 35%;
+    }
+    #chatContainer {
+        width: 100%;
+        height: 40%;
+    }
+    #streamSource {
+        position: absolute;
+        bottom: 0px;
+    }
+    #chatBox {
+        height: 86%;
+    }
+    #liveSetting {
+        position: absolute;
+        bottom: 0px;
+    }
+    #openRoomInfo {
+        position: absolute;
+        bottom: 0px;
+    }
+    .indexContainer {
+        position: absolute;
+        bottom: 0px;
+    }
+    #roomTitle {
+        width: 100%;
+    }
+    #roomSummary {
+        height: 30%;
+    }
+    #nodeInfo {
+        width: 100%;
+    }
+    #stable {
+        width: 28%;
+        height: 80%;
+    }
+    #block0 {
+        width: 35%;
+    }
+    #block1 {
+        width: 35%;
+    }
+    #roomCover {
+        width: 60px;
+        height: 60px;
+    }
+    .sendInput {
+        width: 100%;
+    }
+    #sendMessageBox {
+        width: 250px;
+    }
+    #streamSourceMenuClose {
+        width: 50px;
+        height: 50px;
+    }
+    #canvasMap {
+        height: 35%;
+        width: 100%;
+    }
+}
+@media only screen and (orientation: landscape) {
+    #liveSetting {
+        top: 0px;
+    }
+    #openRoomInfo {
+        top: 0px;
+    }
+    #roomTitle {
+        width: 86%;
+    }
+    #streamSource {
+        top: 0;
+    }
 }

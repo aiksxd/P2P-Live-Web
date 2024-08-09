@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
@@ -20,42 +21,11 @@
                 <div id="block1"></div>
             </div>
         </div>
-        <button id="autoJoin" class="actionButton" onclick="autoJoin(3)">auto<br />Join</button>
-        <button id="closeInfo" class="actionButton" onclick="openRoomInfo()">Close</button>
+        <div>
+            <button id="autoJoin" class="actionButton" onclick="autoJoin(3)">auto<br />Join</button>
+            <button id="closeInfo" class="actionButton" onclick="openRoomInfo()">Close</button>
+        </div>
     </div>
-    
-    <!-- Stream Source -->
-    <div id="streamSource">
-        <div class="box" style="margin-top: 10px;">
-            <div style="font-weight: bold;">
-                Share PC Desktop:<br />
-                <button type="button" id="browserDisplayMedia" onclick="useDisplayMedia()">Use Display Stream</button>
-            </div>
-        </div>
-        <div class="box" style="margin-top: 10px;">
-            <div style="font-weight: bold;">
-                Share Local Devices(PE, PC...):
-                <button type="button" id="browserNavigatorMediaDevices" onclick="askNavigatorMediaDevices()">Upload Local Device</button><br />
-                <input type="checkbox" id="ifUseCamera">Camera
-                <input type="checkbox" id="ifUseMicrophone">Microphone
-            </div>
-        </div>
-        <div class="box" style="margin-top: 10px;">
-            <div style="font-weight: bold;">
-                Lend Media Stream From Others
-                <input id="lendAimId" type="text" placeholder="input ID OF AIM here...">
-                <button type="button" id="lendStream" onclick="tryConnect(1, document.getElementById('lendAimId').value, false, true)">lend aim stream( need be accepted )</button>    
-            </div>
-        </div>
-        <div class="box" style="margin-top: 10px;">
-            <div style="font-weight: bold;">
-                <input type="checkbox" id="ifNotDisplayLocalStream">If Display the localStream <br />
-                —— enable for saving performance of devices
-            </div>
-        </div>
-        <button class="actionButton" id="submitMediaStream" onclick="streamSourceMenu()">submit</button>
-    </div>
-
     <!-- Id interaction -->
     <div class="container">
         <div class="box">
@@ -69,14 +39,14 @@
             <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br />
         </div>
         <div class="box">
-            <button onclick="fullWebVideo()">Full Web Video</button><br />
+            <button onclick="fullWebVideo()" id="fullScreen">Full Web Video</button><br />
             <div>
                 <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Icon & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br />
                 <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
             </div>
             <input type="checkbox" id="predictive">Predictive<br />
         </div>
-        <div class="box" style="width: 30%;">
+        <div class="box">
             <div id="playersList"></div>
             <span id="nowTurn">Now Turn: 1 </span>
             <span id="sumOfRoom">Members: 1</span><br />
@@ -86,16 +56,19 @@
     
     <!-- Live interaction-->
     <div class="videoBox">
-        <div id="canvasMap" style="position: absolute;">
+        <div id="canvasMap">
             <br /><br /><br /><br />
-            MapSize: Height:<input type="number" id="maxHeight" class="tidy" value="10" readonly> Width:<input type="number" id="maxWidth" class="tidy" value="10" disabled="true"><br />
-            MaxPlayers: <input type="number" id="maxPlayers" class="tidy" value="5" readonly><br />
+            MapSize: Height:<input type="number" id="maxHeight" class="setting" value="10" readonly> Width:<input type="number" id="maxWidth" class="setting" value="10" disabled="true"><br />
+            MaxPlayers: <input type="number" id="maxPlayers" class="setting" value="5" readonly><br />
             GameMode: <select id="gameMode" disabled>
                 <option value="0" selected="selected">SLG Mode</option>
                 <option value="1">Energy Mode</option>
                 <option value="2">Card Mode</option>
             </select><br />
-            HostJoinGame: <input type="checkbox" checked="true" class="tidy" id="hostJoinGame" disabled><br />
+            HostJoinGame: <input type="checkbox" checked="true" class="setting" id="hostJoinGame" disabled><br />
+            <div id="modeMenu">
+                WaitingTime: <input type="number" id="waitingTime" class="setting" value="30" min="1" readonly><br />
+            </div>
             <button id="join" onclick="parent.send([8, 0, peer.id, myIcon, getMyName()])">Join Game</button>
         </div>
         <!-- Message box -->
@@ -112,6 +85,9 @@
     </div>
     <script src="js/peerjs.min.js"></script>
     <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
+    <script>
+        const peer = new Peer({ debug: 2})      //use PeerJS official server
+    </script>
     <script src="js/fn.js"></script>
     <script>
         let openInfoTimes = 0;
@@ -219,51 +195,8 @@
                             conns[aimPosition].send(gameInfo);
 
                             console.log("Msg Connected to: " + data[4]);
-
-                            // if(remoteStream){      // speed debug todo
-                            //     peer.call(data[4], remoteStream/*document.getElementById('RemoteVideo').srcObject*/);
-                            //     console.log("Media delivered successfully: "+ data[4]);
-                            // }else if(localStream){
-                            //     peer.call(data[4], localStream);
-                            //     console.log("Media sent successfully: "+ data[4]);
-                            //     // If you want to receive the reply of the stream
-                            //     // usage: let temp peer.call(conn.peer, localStream);
-                            //     // temp.on('stream', (stream) = displayStream);
-                            //     // PS:
-                            //     // It can only receive the previous one, so you need to deliver a new stream. 
-                            // }
                         }
                         recorder(data);
-                        break;
-                    case 2:
-                        if(data[1] && confirm(data[2]+"("+ data[1] +") ask for your media stream")){
-                            if(localStream){
-                                peer.call(data[1], localStream);
-                            } else if(remoteStream){
-                                peer.call(data[1], remoteStream);
-                            } else {
-                                streamSourceMenu();
-                                document.getElementById('submitMediaStream').addEventListener('click', () => {
-                                    peer.call(data[1], localStream);
-                                });
-                            }
-                        }
-                        break;
-                    case 4:
-                        if(remoteStream){
-                            peer.call(awaitedNodeId, remoteStream/*document.getElementById('RemoteVideo').srcObject*/);
-                            console.log("Media delivered successfully: "+ awaitedNodeId);
-                            awaitedNodeId = null;
-                        }else if(localStream){
-                            peer.call(awaitedNodeId, localStream);
-                            console.log("Media sent successfully: "+ awaitedNodeId);
-                            awaitedNodeId = null;
-                        }else if(parent){
-                            awaitedNodeId = data[1];
-                            if(parent.open){
-                                parent.send([4, peer.id]);
-                            }
-                        }
                         break;
                     default:
                         console.log("unknown data: " + data);
@@ -413,7 +346,7 @@
                                     liveSend(data);
                                 }
                                 break;
-                            case 6:
+                            case 6: // [6, [players[0]], gameMap, gameMode, startTime, unavailablePosition, positionOwners]
                                 let i = 1;
                                 if(data[4]){   // already started
                                     startTime = data[4];
@@ -423,6 +356,7 @@
                                     maxHeight = mapSize[0];
                                     maxWidth = mapSize[1];
                                     gameMode = data[3];
+                                    modeModify(gameMode[0]);
                                     if (data[1][1]) {  // firstly receive gameInfo
                                         let i = 1;
                                         gameInfo = data;
@@ -433,6 +367,10 @@
                                         }
                                     }   // because of no sense of void player game, it is without dealing with new gameInfo which is hasn't any player
                                     drawMap();
+                                    
+                                    if (myNumber == 1) {
+                                        document.getElementById("canvasMap").style.backgroundColor = 'rgb(80,83,80)';
+                                    }
                                 } else {
                                     document.getElementById("maxHeight").value = String(data[2][0][0]);
                                     document.getElementById("maxWidth").value = String(data[2][0][1]);
@@ -538,6 +476,8 @@
                                         // }
                                         // appearMsg("...");   // kick Msg todo
                                         break;
+                                    case 3: // SB quit in gameing
+                                        // TODO
                                     default:
                                         console.log("unknown data: " + data);
                                         break;
@@ -746,6 +686,33 @@
                 document.getElementById('streamSource').style.height = "0px";
             } 
         }
+
+        function modeModify(mode) {
+            switch (mode) {
+                case 0:
+                    document.getElementById("modeMenu").innerHTML = 'WaitingTime: <input type="number" id="waitingTime" class="setting" value="30" min="1" readonly><br />';
+                    break;
+                case 1:
+                    document.getElementById("modeMenu").innerHTML = '';
+                    charactersURLs.forEach(charactersURLs => {
+                        let character = document.createElement("img");
+                        character.setAttribute('src', charactersURLs);
+                        character.classList.add('cells');
+                        document.getElementById("modeMenu").appendChild(character);
+                    });
+                    let input = document.createElement("input");
+                    input.setAttribute('type', "number");
+                    input.setAttribute('readonly');
+                    input.classList.add('setting');
+                    input.setAttribute('min', "0");
+                    let input1 = input.id = "commonChessmanCost";
+                    document.getElementById("modeMenu").appendChild(document.createTextNode("commonChessmanCost"));
+                    document.getElementById("modeMenu").appendChild(input1);
+                    break;
+                default:
+                    break;
+            }
+        }
         
         function displayNewPlayer(player){
             let newPlayer = document.createElement("div");
@@ -808,7 +775,7 @@
                     }
                 }
             } else {
-                // document.getElementById("canvasMap").innerHTML = '\n        <br><br><br><br>\n        MapSize: Height:<input type="number" id="maxHeight" class="tidy" value="10"> Width:<input type="number" id="maxWidth" class="tidy" value="10"><br>\n        MaxPlayers: <input type="number" id="maxPlayers" class="tidy" value="2"><br>\n        GameMode: <select id="gameMode">\n            <option value="1" selected="selected">SLG Mode</option>\n            <option value="2">Energy Mode</option>\n            <option value="3">Card Mode</option>\n        </select><br>\n        HostJoinGame: <input type="checkbox" checked="true" id="hostJoinGame"><br>\n        <button id="start" onclick="start()">Start Game</button>\n    ';
+                // document.getElementById("canvasMap").innerHTML = '\n        <br><br><br><br>\n        MapSize: Height:<input type="number" id="maxHeight" class="setting" value="10"> Width:<input type="number" id="maxWidth" class="setting" value="10"><br>\n        MaxPlayers: <input type="number" id="maxPlayers" class="setting" value="2"><br>\n        GameMode: <select id="gameMode">\n            <option value="1" selected="selected">SLG Mode</option>\n            <option value="2">Energy Mode</option>\n            <option value="3">Card Mode</option>\n        </select><br>\n        HostJoinGame: <input type="checkbox" checked="true" id="hostJoinGame"><br>\n        <button id="start" onclick="start()">Start Game</button>\n    ';
             }
         }
         function effectFeedBack(position, type){
@@ -818,18 +785,20 @@
         function applyForPut(position){
             let positionId = Number(position.id);
             if(positionId && !(unavailablePosition.includes(positionId))){
-                if(lastAimPosition !== position){
-                    if(lastAimPosition){
-                        lastAimPosition.classList.remove('inverted');
-                    }
-                    position.classList.add('inverted');
-                    lastAimPosition = position;
-                } else if(myNumber){
+                lastAimPosition = position;
+                // if(lastAimPosition !== position){
+                //     if(lastAimPosition){
+                //         lastAimPosition.classList.remove('focus');
+                //     }
+                //     position.classList.add('focus');
+                //     lastAimPosition = position;
+                // } else 
+                if(myNumber){
                     let now = new Date();
                     switch (gameInfo[3][0]) {
                         case 0:
                             if(turn === myNumber){
-                                document.getElementById("myIcon").classList.remove("inverted");
+                                document.getElementById("canvasMap").style.backgroundColor = 'rgb(28, 33, 40)';
                                 if(parent){     // noticed: No circuit protection
                                     parent.send([7, 0, [1, positionId, myNumber, now.getTime()]]);
                                 } else {
@@ -868,13 +837,13 @@
 
         function drawChessman(chessman, effect){
             turn++;
-            if (turn == myNumber) {
-                document.getElementById("myIcon").classList.add("inverted");
-            }
             switch (chessman[0]) {
                 case 1:
                     if(turn >= players.length){
                         turn = 1;
+                    }
+                    if (turn == myNumber) {
+                        document.getElementById("canvasMap").style.backgroundColor = 'rgb(80,83,80)';
                     }
                     document.getElementById("nowTurn").innerHTML = "Now Turn: "+turn+" ";
                     unavailablePosition.push(chessman[1]);
@@ -900,8 +869,11 @@
                     [(-maxWidth)+1, 1, maxWidth+1, maxWidth].forEach(direction => {
                         let i = -4;
                         let t = 1;
-                        while (i<5) {
-                            if(i==0){i++;}
+                        let limit = chessman[1] % maxWidth;    // limit for out of canvas
+                        if(limit == 0){limit = maxWidth;}
+                        while (i<=4 && i<= maxWidth - limit) {
+                            if(i==0 || i < 1-limit ){i++; continue;}
+                            // console.log(""+ (1-limit) +";"+ (maxWidth-limit) +"");
                             let aimPosition = chessman[1]+(i*direction);
                             // console.log(aimPosition);
                             if(unavailablePosition.includes(aimPosition) && positionOwners[unavailablePosition.indexOf(aimPosition)] == chessman[2]){
@@ -932,8 +904,9 @@
 
         function reDraw(playerNumber) {
             let t = 0;
-            while (t < positionOwners.length) {
-                
+            let aims = document.getElementsByClassName("owner"+ playerNumber);
+            while (t < aims.length) {
+                aims[t].setAttribute('src', players[playerNumber][2]);
             }
         }
 

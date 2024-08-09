@@ -7,7 +7,6 @@
 */
 // choose one of both
 // const peer = new Peer({ host: 'localhost', port: 9000, path: '/myapp', debug: 2})     //if you use local peer server
-const peer = new Peer({ debug: 2})      //use PeerJS official server
 let roomIds = new Array();
 let bridge = null;
 let guest = null;
@@ -25,7 +24,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
     // 0: parent
     // 1: guest
     // 2: bridge
-    // 3: root
+    // 3: hostRoot
     // 4: indexRoot
     switch (object) {
         case 0:
@@ -226,15 +225,16 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             });
             
             root.on('close', () => {
-                document.getElementById("status").innerHTML="Status: Root Connection Closed!"; 
-                if(document.getElementById("ifAutoReconnect").checked){
-                    document.getElementById("status").innerHTML="Status: Reconnecting to last Root Node...";
+                document.getElementById("status").innerHTML="Status: Root Connection Closed!";
+                document.getElementById("connectRoot").style.visibility = 'visible';
+                // if(document.getElementById("ifAutoReconnect").checked){
+                //     document.getElementById("status").innerHTML="Status: Reconnecting to last Root Node...";
                     
-                    tryConnect(0, urlInfo[0], false);
-                }
+                //     tryConnect(0, urlInfo[0], false);
+                // }
             });
             break;
-        case 4:
+        case 4:     // for Index
             // Close old connection
             if (root) {
                 root.close();
@@ -243,45 +243,28 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             root = peer.connect(id);
             
             root.on('open', () => {
-                document.getElementById('connectButton').innerHTML="Refresh";
                 document.getElementById('peerId').value=id;
                 document.getElementById("status").innerHTML="Status: Connected to Root Node Successfully!"
             });
 
-            document.getElementById("peerId").addEventListener(
-                "focusout",
-                () => {
-                    if (document.getElementById('peerId').value != id){
-                        document.getElementById('connectButton').innerHTML="Connect";
-                    }
-                },
-                true,
-            );
-
             // Receive the reply of text: Host --> Guset
             root.on('data', (data) => {
-                // data[0]:
-                //  0: msg
-                //  1: nodeInfo or indexRoomInfo 
-                //  2: roomInfoModfied
-                //
                 // Info of rooms from root received
-                appearRooms(data);
                 rooms = data;
+                appearRooms();
                 console.log("Room list received");
             });
 
             root.on('close', () => {
                 // root = null;
                 document.getElementById("status").innerHTML="Status: Root Connection Closed!";
-                document.getElementById('connectButton').innerHTML="Connect";
                 
-                if(document.getElementById("ifAutoReconnect").checked){
-                    document.getElementById("status").innerHTML="Status: Reconnecting to last Root Node...";
+                // if(document.getElementById("ifAutoReconnect").checked){
+                //     document.getElementById("status").innerHTML="Status: Reconnecting to last Root Node...";
                     
-                    tryConnect(0, connectHistroy.slice(-1)[0], false);
-                    // document.getElementById("status").innerHTML="Status: Root Reconnection Failed!";
-                }
+                //     tryConnect(4, connectHistroy.slice(-1)[0], false);
+                //     // document.getElementById("status").innerHTML="Status: Root Reconnection Failed!";
+                // }
             });
             break;
         default:
@@ -672,15 +655,31 @@ function iconInput(){
 }
 
 
-
+let middleX = 0;
 function fullWebVideo(){
     if(fullWebVideoTimes === 0){
-        WebVideo.style.height = window.innerHeight + "px";
-        WebVideo.style.width = window.innerWidth + "px";
-        window.scrollBy({
-            top: document.documentElement.scrollHeight,
-            behavior: "smooth",
-        });
+        if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+            WebVideo.style.height = window.innerWidth + "px";
+            WebVideo.style.width = window.innerHeight + "px";
+            WebVideo.style.transform = "rotate(90deg)";
+            WebVideo.style.position = "absolute";
+            if(middleX === 0){middleX = WebVideo.offsetWidth - window.innerWidth;}
+            WebVideo.style.right = -middleX + "px";
+            WebVideo.style.top = (WebVideo.offsetWidth*0.25 + 10) + "px";
+            document.getElementsByClassName("container")[0].style.bottom = -20 + "px";
+            let fullScreen = document.getElementById("fullScreen");
+            fullScreen.style.position = "absolute";
+            fullScreen.style.left = 0 + "px";
+            fullScreen.style.bottom = 0 + "px";
+        } else {
+            WebVideo.style.height = window.innerHeight + "px";
+            WebVideo.style.width = window.innerWidth + "px";
+            WebVideo.style.position = "absolute";
+            window.scrollBy({
+                top: document.documentElement.scrollHeight,
+                behavior: "smooth",
+            });
+        }
         fullWebVideoTimes++;
         setTimeout(
             function(){
@@ -689,12 +688,21 @@ function fullWebVideo(){
             }
         }, 3000);
     } else {
-        WebVideo.style.height = "85%";
-        WebVideo.style.width = "70%";
+        if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+            WebVideo.style.transform = "none";
+            WebVideo.style.width = "100%";
+            WebVideo.style.height = "35%";
+            WebVideo.style.position = "static";
+            document.getElementById("fullScreen").style.position = "static";
+            document.getElementsByClassName("container")[0].style.bottom = 0 + "px";
+            WebVideo.style.position = "static";
+        } else {
+            WebVideo.style.height = "85%";
+            WebVideo.style.width = "70%";
+        }
         fullWebVideoTimes = 0;
         document.getElementById("chatBox").style.visibility="visible";
     }
-    
 }
 
 // window.onload=function(){

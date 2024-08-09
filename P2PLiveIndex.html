@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
@@ -10,7 +11,7 @@
         <img id="roomCover" src="">
         <div id="roomText">
             <div id="roomTitle"></div>
-            <div id="roomSummary"></div>
+            <textarea id="roomSummary" rows="3" cols="32" readonly="readonly"></textarea>
             <div id="nodeInfo">
                 <div id="stable">
                     <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">Host Node</button>
@@ -20,67 +21,88 @@
                 <div id="block1"></div>
             </div>
         </div>
-        <button id="autoJoin" class="actionButton" onclick="autoJoin(2)">auto<br />Join</button>
-        <button id="closeInfo" class="actionButton" onclick="openRoomInfo()">Close</button>
+        <div>
+            <button id="autoJoin" class="actionButton" onclick="autoJoin(2)">auto<br />Join</button>
+            <button id="closeInfo" class="actionButton" onclick="openRoomInfo()">Close</button>
+        </div>
     </div>
     <!-- Host Setting -->
     <div id="liveSetting">
-        <img id="liveCover">
-        <div style="height: 100%; width: 30%; margin-top: 2%;">
-            <input type="text" id="liveTitle" class="liveInput" placeholder="Room Title"><br />
-            <textarea id="liveSummary" name="roomSummary" rows="5" cols="33" placeholder="Input your Summary there..."></textarea><br />
-        </div>
-        <div style="height: 100%; width: 30%; margin-top: 2%;">
-            <input type="text" id="liveCoverURL" class="liveInput" placeholder="URL of img served as Cover"><br />
-            Notice: Upload Room Cover only become available after created room<br />
-            <input type="checkbox" id="ifPravite">pravite(whitout Root node)<br />
-            Room Type:<select id="roomType">
+        <div id="liveInputBox" style="height: 100%; width: 100%; margin-top: 2%;">
+            Room Title : <input type="text" id="liveTitle" class="liveInput" placeholder="Room Title"><br />
+            Cover URL: <input type="text" id="liveCoverURL" class="liveInput" placeholder="URL of img served as Cover"><br />
+            Summary  : <textarea id="LiveSummary" name="roomSummary" rows="5" cols="20" placeholder="Input your Summary there..."></textarea><br />
+            <!-- Notice: Upload Room Cover only become available after created room<br /> -->
+            <!-- Cover:<select id="roomCover" onchange="inputCoverURL(this.selectedIndex)">
+                <option value="null" selected="selected">Custome</option>
+                <option value="0">Live</option>
+                <option value="1">FiveOnline</option>
+                <option value="2">Multiplay</option>
+            </select><br /> -->
+        </div><div>
+            Options:<br />
+            1.pravite<input type="checkbox" id="ifPravite"><br />
+            2.Room Type:<select id="roomType">
                 <option value="0" selected="selected">Live</option>
                 <option value="1">FiveOnline</option>
                 <option value="2">Multiplay</option>
             </select>
         </div>
-        <button id="goToLive" class="actionButton">GoToLive</button>
-        <button id="closeLiveMenu" class="actionButton" onclick="showLive()">Close</button>
+        <div>
+            <button id="createRoom" class="actionButton">Create Room</button>
+            <button id="closeLiveMenu" class="actionButton" onclick="showLive()">Close</button>
+        </div>
     </div>
     <!-- Control Panel -->
-    <div class="indexContainer" id="control">
+    <div class="container" id="control" style="height: 25%;">
         <!-- Join a live web -->
-        <div class="indexBox">
-            <!-- Sender -->
-            <div style="font-weight: bold; font-size: 32px;">Join a root node</div>
-            <!-- Connect box -->
-            <input type="text" id="peerId" placeholder="Input counterpart's Id" autofocus="true">
-            <button id="connectButton">Connect</button>
-            <button id="live" onclick="showLive()">Go To Live</button><br />
-            <div id="status" style="font-weight: bold;">Status: Connecting to PeerServer...</div>
+        <div class="box">
+            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div><br />
+
+            <div style="font-weight: bold; font-size: 20px;">Direct Connect:</div>
             <input type="text" id="directConnectId" placeholder="Input room Id">
-            <button id="directConnectButton">GoTo</button>
-            <div style="font-weight: bold; font-size: 32px;">Rooms List:</div>
+            <button id="directConnectButton">GoTo</button><br />
+            
+            <div style="font-weight: bold; font-size: 32px;">Rooms List:
+                <button id="live" onclick="showLive()">Go To Live</button>
+            </div>
+            Display Room Type:<select id="roomSort" onchange="appearRooms()">
+                <option value="" selected="selected">All</option>
+                <option value="0">Live</option>
+                <option value="1">FiveOnline</option>
+                <option value="2">Multiplay</option>
+            </select>
         </div>
-        <div class="indexBox">
+        <div class="box">
             <!-- <button onclick="changeTheme()">Dark - Light Mode</button><br /> -->
-            <button onclick="echoHistoricalConnectedId()">console.log( HistoricalConnectedId )</button><br />
+            <button onclick="echoHistoricalConnectedId()">console.log( Historical Connected Ids )</button><br />
             <button onclick="defaultConnect()">Click me to connect the deafult Root Id</button><br />
-            <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnect when connection closed
+            <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnect when connection closed<br /> -->
+            <!-- Connect box -->
+            <div id="connectRoot" style="visibility: hidden;">
+                Join a root node:<input type="text" id="peerId" placeholder="Input counterpart's Id" autofocus="true">
+                <button id="connectButton">Connect</button><br />
+            </div>
+            <div id="status" style="font-weight: bold;">Status: Connecting to PeerServer...</div>
         </div>
     </div>
     <div id="rooms">
     </div>
-
     <script src="js/peerjs.min.js"></script>
     <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <script src="js/fn.js"></script>
     <script>
         let openInfoTimes = 0;
         let openLiveTimes = 0;
-        let defaultId = 'P2P-Live-Web-default-Id';
         let myid = null;
         let ifIndex = true;
         let ifConnectedAim = false;
         let lastAimId = null;
         let nodesMap = new Array();
         let rooms = new Array();
+        let liveHostIds = new Array();
+        let conns = new Array();
+        let connIds = new Array();
         let layers = [0];
         let roomPosition = null;
         let lastLayerNumber = null;
@@ -88,16 +110,122 @@
 
         let switchDeg = 180;
         let connectHistroy = [];
-
+        let defaultId = 'P2P-Live-Web-default-Id';
+        let peer = null;
+        
+        peer = new Peer(defaultId, { debug: 2});
         // Listen for the event when a Peer connection is successfully opened
         // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
         peer.on('open', (id) => {
             console.log(id);
-            document.getElementById("status").innerHTML="Status: Need to connect to the Root Node";
-            defaultConnect();
+            document.getElementById("myid").innerHTML = "Your ID:<br/>" + id;
+            document.getElementById("status").innerHTML="Status: Root Node Created";
         });
+        peer.on('error', function(err) {
+            if (err.type === 'unavailable-id') {
+                document.getElementById("connectRoot").style.visibility = 'visible';
+                peer = new Peer({ debug: 2});
+                // Listen for the event when a Peer connection is successfully opened
+                // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
+                peer.on('open', (id) => {
+                    console.log(id);
+                    document.getElementById("myid").innerHTML = "Your ID:<br/>" + id;
+                    document.getElementById("status").innerHTML="Status: Need to connect to the Root Node";
+                    defaultConnect();
+                });
+            } else {
+                alert("initial work ERROR(check in console)");
+            }
+        });
+        if(peer.id === defaultId){
+            // When a new connection request is received, this code creates a data channel and sends the local or remote stream (if available) and text messages.
+            peer.on('connection', (connPort) => {
+                conn = connPort;
+
+                conn.on('open', () => {
+                    connIds.push(conn.peer);
+                    conns.push(conn);
+                    console.log("Be connected to: " + conn.peer);
+                    conn.send(rooms);
+                });
+
+                conn.on('close', () => {
+                    for (let i = 0; i < conns.length; i++){
+                        if(conns[i]){
+                            if (conns[i].open){
+                                continue;
+                            }else{
+                                let disconnectedHost = connIds.indexOf(conns[i].peer);
+                                let disconnectedLiveHost = liveHostIds.indexOf(conns[i].peer);
+                                if (disconnectedHost !== -1){
+                                    console.log("Disconnected and deleted: " + conns[i].peer);     //DEBUG
+                                    conns.splice(disconnectedHost, 1);
+                                    connIds.splice(disconnectedHost, 1);
+                                }
+                                if (disconnectedLiveHost !== -1){
+                                    liveHostIds.splice(disconnectedLiveHost, 1);
+                                    rooms.splice(disconnectedLiveHost, 1);
+                                }
+                            }
+                        }else{break;}
+                    }
+                });
+
+                // Receive the text: Host <-- Guest
+                conn.on('data', (data) => {
+                    // data[0]:
+                    //  0: msg
+                    //  1: nodeInfo or indexRoomInfo 
+                    //  2: roomInfoModfied
+                    //  3: for reconnect: Remind the child node to replace the parent node
+                    //  4: for refresh: apply to the new media Stream for daliver to child
+                    switch (data[0]) {
+                        case 0:
+                            // console.log('Received data:', data);
+                            break;
+                        case 1:
+                            if( liveHostIds.includes(data[7]) ){
+                                rooms[ liveHostIds.indexOf(data[7]) ] = data;
+                            } else {
+                                liveHostIds.push(data[7]);
+                                rooms.push(data); // record child nodesMap
+                                appearRooms();
+                            }
+                            console.log("Live rooms update");  // DEBUG
+                            rootSend(rooms);
+                            break;
+                        default:
+                            console.log("unknown data: " + data);
+                    }
+                });
+            });
+
+            
+            // Root Send Massage
+            function rootSend (rooms){
+                console.log("deliver rooms update");  // DEBUG
+                // let disconnectedHost = null;         // todo
+                // let audiences = connIds.filter(function(t){ return liveHostIds.indexOf(t) == -1 })
+                // let aims = 0;     // count successful times
+                // let temp = null;    // to avoid encountering errors, ensure that null.peer is not existed.
+                for(let i=0; i<conns.length; i++){
+                    if(liveHostIds.includes(connIds[i])){continue;}
+                    if(conns[i].open){
+                        // console.log("send " + conns[i].peer + " to " + rooms);    //DEBUG
+                        conns[i].send(rooms);
+                        // aims++;
+                    }
+                }
+                // avoid losing text when sending
+                // predecessorHost = null;
+            }
+        }
 
         function defaultConnect(){
+            if (peer.id == defaultId){
+                alert("Root node can't connect others");
+                return;
+            }
             if (root) {
                 root.close();
             }
@@ -108,10 +236,16 @@
         // *Explanation: In the given code snippet, there is an event listener attached to the "connectButton" element, which triggers a function when the button is clicked.
         // *Inside the function, the "root" variable is assigned the value of the connection made with the peer using the peer Id obtained from the input field with the Id "peerId".
         document.getElementById('connectButton').addEventListener('click', () => {
+            if (peer.id == defaultId){
+                alert("Root node can't connect others");
+                return;
+            }
             document.getElementById("status").innerHTML="Status: Connecting to Root Node...";
             
-            if (document.getElementById("peerId").value){
-                connectHistroy.push(document.getElementById("peerId").value);
+            if (document.getElementById("peerId").value ){
+                if(connectHistroy.slice(-1)[0] != document.getElementById("peerId").value){
+                    connectHistroy.push(document.getElementById("peerId").value);
+                }
                 tryConnect(4, connectHistroy.slice(-1)[0], false);
             } else {
                 defaultConnect();
@@ -128,13 +262,31 @@
         });
 
         // add rooms to box
-        function appearRooms(data) {
+        function appearRooms() {
             console.log("Rooms list upated");
             document.getElementById("rooms").innerHTML = "";
-            for (let i = 0; i < data.length; i++){
-                document.getElementById("rooms").innerHTML = document.getElementById("rooms").innerHTML + 
-                "<div class=\"rooms\" onclick=displayRoomInfo("+ i +") alt=\"img Error\" style=\"background-image: url(\'"+ data[i][6] +"\'); background-size: contain;\"><span style=\"background-color: rgb(46, 46, 46, 0.5);\">"+ data[i][4] +
-                "</span><br /><span style=\"background-color: rgb(46, 46, 46, 0.5); position: absolute; bottom: 0;\">Members:"+ data[i][2].length +" </span></div>";
+            for (let i = 0; i < rooms.length; i++){
+                if (document.getElementById("roomSort").value){
+                    if (rooms[i][3] != document.getElementById("roomSort").selectedIndex -1) {
+                        continue;
+                    }
+                }
+                // document.getElementById("rooms").innerHTML = document.getElementById("rooms").innerHTML + 
+                // "<div class=\"rooms\" onclick=displayRoomInfo("+ i +") alt=\"img Error\" style=\"background-image: url(\'"+ rooms[i][6] +"\'); background-size: contain;\"><span style=\"background-color: rgb(46, 46, 46, 0.5);\">"+ rooms[i][4] +
+                // "</span><br /><span style=\"background-color: rgb(46, 46, 46, 0.5); position: absolute; bottom: 0;\">Members:"+ rooms[i][2].length +" </span></div>";
+
+                let room = document.createElement("div");
+                room.classList.add('rooms');
+                room.setAttribute('onclick', "displayRoomInfo("+ i +")");
+                room.appendChild(document.createTextNode(rooms[i][4]));
+                room.setAttribute('style', "background-image: url(\'"+ rooms[i][6] +"\'); background-size: contain;");
+                
+                let roomNumbers = document.createElement("span");
+                roomNumbers.appendChild(document.createTextNode("Members:"+ rooms[i][2].length));
+                roomNumbers.setAttribute('style', 'position: absolute; bottom: 0;');
+                room.appendChild(roomNumbers);
+
+                document.getElementById("rooms").appendChild(room);
             }
         }
 
@@ -172,10 +324,12 @@
             }
         }
 
-        document.getElementById('goToLive').addEventListener('click', () => {
+        document.getElementById('createRoom').addEventListener('click', () => {
             let rootId = "";
             if(! document.getElementById("ifPravite").checked){
-                if(root){
+                if (peer.id === defaultId) {
+                    rootId = defaultId;
+                } else if(root){
                     if(root.open){
                         rootId = root.peer;
                     } else { alert("Please join a Root Node at first!"); return; }
@@ -183,10 +337,10 @@
             }
             switch (document.getElementById("roomType").selectedIndex) {
                 case 0:
-                    document.location.href = "./P2PLiveHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("liveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value;
+                    window.open("./P2PLiveHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("LiveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value, '_blank');
                     break;
                 case 1:
-                    document.location.href = "./P2PGameFiveOnLineHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("liveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value;
+                    window.open("./P2PGameFiveOnLineHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("LiveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value, '_blank');
                     break;
                 case 2:
                     // TODO
@@ -196,7 +350,6 @@
                     break;
             }
         });
-
     </script>
 </body>
 </html>
