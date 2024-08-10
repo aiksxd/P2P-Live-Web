@@ -70,8 +70,9 @@
             <div id="playersList"></div>
             <span id="nowTurn">Now Turn: 1 </span>
             <span id="sumOfRoom">Members: 1</span><br />
-            <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max to 100]<br />
+            <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max->100]<br />
             <button onclick="cleanMsg()">CleanMsgs</button><br />
+            Click number to kick player in game.
         </div>
     </div>
     
@@ -140,7 +141,7 @@
         const WebVideo = document.getElementById('canvasMap');
 
         // For game
-        let players = [5];
+        let players = [5];  // [ maxPlayerNumber, [number, peerId, icon, name] ]
         let deliver = null;
         let unavailablePosition = [];
         let positionOwners = [];
@@ -160,6 +161,7 @@
         let gameMap = [mapSize]
         let startTime = null;
         let myNumber = null;
+        let kickNumbers = new Array();
         let offlinePlayer = [];
         let lastGameMap = null;
         let gameInfo = [6, players, gameMap, gameMode, startTime, unavailablePosition, positionOwners];
@@ -284,7 +286,7 @@
                                 }
                             }
                             if(! position){
-                                let newPlayer = [players.length, data[2], data[3], data[4]]
+                                let newPlayer = [players.length, data[2], data[3], data[4]];    // [number, peerId, icon, name]
                                 players.push(newPlayer);
                                 displayNewPlayer(newPlayer);
                                 liveSend([8, 1, newPlayer]);
@@ -593,6 +595,17 @@
                     if(turn >= players.length){
                         turn = 1;
                     }
+                    let controller = false;
+                    while (kickNumbers.includes(turn)) {
+                        turn++;
+                        if(turn >= players.length){
+                            if (controller) {
+                                break;
+                            }
+                            turn = 1;
+                            controller = true;
+                        }
+                    }
                     if (turn == myNumber) {
                         document.getElementById("canvasMap").style.backgroundColor = 'rgb(80,83,80)';
                     }
@@ -654,12 +667,23 @@
         }
 
 
-        function reDraw(playerNumber) {
+        function reDraw(playerNumber, reDrawType) {
             let t = 0;
-            let aims = document.getElementsByClassName("owner"+ playerNumber);
-            while (t < aims.length) {
-                aims[t].setAttribute('src', players[playerNumber][2]);
-            }
+                let aims = document.getElementsByClassName("owner"+ playerNumber);
+                while (t < aims.length) {
+                    aims[t].removeAttribute("style");
+                    switch (reDrawType) {
+                        case 1:     // update chessmans icon
+                            aims[t].setAttribute('src', players[playerNumber][2]);
+                            break;
+                        case 2:     // kick someone
+                            aims[t].removeAttribute("src");
+                            aims[t].classList.remove("owner"+ playerNumber);
+                            break;
+                        default:
+                            break;
+                    }
+                }
         }
 
         function energy() {
@@ -680,29 +704,57 @@
         function kick(number) {
             if(confirm("Do you want to kick the "+number+"th player?")){
                 liveSend([8, 2, Number(number)]);
-                let i = number;
-                players.splice(i, 1);
-                document.getElementsByClassName("playersInfo")[i-1].remove();
-                while(i<players.length){
-                    if(players[i] instanceof Array){
-                        players[i][0]--;
-                        let player = players[i];
-                        if(!player[2]){
-                            let colour = 255*((player[0] + 2)/(player[0] + 4));
-                            document.getElementsByClassName("playersInfo")[i-1].children[1].setAttribute("style", "background-color: rgb("+parseInt(((((player[0]+1) % 5) + 1)/5)*colour)+", "+parseInt(((((player[0]+1) % 4) + 1)/4)*colour)+", "+parseInt(((((player[0]+1) % 3) + 1)/3)*colour)+")");
-                        }
-                        document.getElementsByClassName("playersInfo")[i-1].children[0].setAttribute("onclick", "kick("+ player[0] +")");
-                        document.getElementsByClassName("playersInfo")[i-1].children[0].innerHTML = i+": ";
+                // let i = number;
+                kickNumbers.push(number);
+                // players.splice(i, 1);
+                document.getElementsByClassName("playersInfo")[number-1].childNodes[2].innerHTML = document.getElementsByClassName("playersInfo")[number-1].childNodes[2].innerHTML + "(kicked)";
+                if (number == myNumber) {
+                    document.getElementById("canvasMap").style.backgroundColor = 'rgb(34,39,46)';
+                    myNumber = null;
+                }
+                if (turn == number) {
+                    turn++;
+                    if(turn >= players.length){
+                        turn = 1;
                     }
-                    i++;
-                }
-                if(number < myNumber){
-                    myNumber--;
-                }
-                if(turn >= players.length){
-                    turn = 1;
+                    let controller = false;
+                    while (kickNumbers.includes(turn)) {
+                        turn++;
+                        if(turn >= players.length){
+                            if (controller) {
+                                alert("Error: no player in game");
+                                break;
+                            }
+                            turn = 1;
+                            controller = true;
+                        }
+                    }
+                    if (turn == myNumber) {
+                        document.getElementById("canvasMap").style.backgroundColor = 'rgb(80,83,80)';
+                    }
                     document.getElementById("nowTurn").innerHTML = "Now Turn: "+turn+" ";
                 }
+                appearMsg([ 0, null, "System", "player: "+ players[number][3]+" was kicked"]);
+                // while(i<players.length){
+                //     if(players[i] instanceof Array){
+                //         players[i][0]--;
+                //         let player = players[i];
+                //         if(!player[2]){      // kick and change default color
+                //             let colour = 255*((player[0] + 2)/(player[0] + 4));
+                //             document.getElementsByClassName("playersInfo")[i-1].children[1].setAttribute("style", "background-color: rgb("+parseInt(((((player[0]+1) % 5) + 1)/5)*colour)+", "+parseInt(((((player[0]+1) % 4) + 1)/4)*colour)+", "+parseInt(((((player[0]+1) % 3) + 1)/3)*colour)+")");
+                //         }
+                //         document.getElementsByClassName("playersInfo")[i-1].children[0].setAttribute("onclick", "kick("+ player[0] +")");
+                //         document.getElementsByClassName("playersInfo")[i-1].children[0].innerHTML = i+": ";
+                //     }
+                //     i++;
+                // }
+                // if(number < myNumber){
+                //     myNumber--;
+                // }
+                // if(turn >= players.length){
+                //     turn = 1;
+                //     document.getElementById("nowTurn").innerHTML = "Now Turn: "+turn+" ";
+                // }
             }
         }
 
@@ -811,7 +863,9 @@
             root.close();
             // event.preventDefault();
         });
-
+    if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+        document.getElementById("playersList").style.maxHeight = '200px';
+    }
     </script>
 </body>
 </html>

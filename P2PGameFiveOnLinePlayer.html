@@ -50,7 +50,8 @@
             <div id="playersList"></div>
             <span id="nowTurn">Now Turn: 1 </span>
             <span id="sumOfRoom">Members: 1</span><br />
-            <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max to 100]<br />
+            <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max->100]<br />
+            <button onclick="cleanMsg()">CleanMsgs</button><br />
         </div>
     </div>
     
@@ -137,6 +138,7 @@
         let gameMap = [mapSize]
         let startTime = null;
         let myNumber = null;
+        let kickNumbers = new Array();
         let offlinePlayer = [];
         let lastGameMap = null;
         let gameInfo = [6, players, gameMap, gameMode, startTime, unavailablePosition, positionOwners];
@@ -429,6 +431,7 @@
                                             }
                                         }
                                         displayNewPlayer(data[2]);
+                                        break;
                                     case 2:     // kick SB
                                         deliverId = parent.peer;
                                         liveSend(data);
@@ -437,44 +440,69 @@
                                             if(document.getElementById("join")){
                                                 document.getElementById("join").innerHTML = "Join Game";
                                             }
+                                            document.getElementById("canvasMap").style.backgroundColor = 'rgb(28, 33, 40)';
                                         }
-                                        let i = 1;
-                                        let position = false;
-                                        while(i<players.length){
-                                            if(players[i] instanceof Array){
-                                                if(position){
-                                                    players[i][0]--;
-                                                    document.getElementsByClassName("playersInfo")[i-1].children[0].innerHTML = i+": ";
-                                                    if(!players[i][2]){
-                                                        player = players[i];
-                                                        let colour = 255*((player[0] + 2)/(player[0] + 4));
-                                                        document.getElementsByClassName("playersInfo")[i-1].children[1].setAttribute("style", "background-color: rgb("+parseInt(((((player[0]+1) % 5) + 1)/5)*colour)+", "+parseInt(((((player[0]+1) % 4) + 1)/4)*colour)+", "+parseInt(((((player[0]+1) % 3) + 1)/3)*colour)+")");
-                                                    }
-                                                }
-                                                if(players[i][0] == data[2] && (!position)){   // refer to number
-                                                    players.splice(i, 1);
-                                                    document.getElementsByClassName("playersInfo")[i-1].remove();
-                                                    position = i;   // changed
-                                                } else {
-                                                    i++;
-                                                }
-                                            } else {i++;}
-                                        }
-                                        if(position){
-                                            if(position < myNumber){
-                                                myNumber--;
+                                        kickNumbers.push(data[2]);
+                                        document.getElementsByClassName("playersInfo")[data[2]-1].childNodes[2].innerHTML = document.getElementsByClassName("playersInfo")[data[2]-1].childNodes[2].innerHTML + "(kicked)";
+                                        if (turn == data[2]) {
+                                            turn++;
+                                            if(turn >= players.length){
+                                                turn = 1;
                                             }
-                                        }
-                                        if(turn >= players.length){
-                                            trun = 1;
+                                            let controller = false;
+                                            while (kickNumbers.includes(turn)) {
+                                                turn++;
+                                                if(turn >= players.length){
+                                                    if (controller) {
+                                                        alert("Error: no player in game");
+                                                        break;
+                                                    }
+                                                    turn = 1;
+                                                    controller = true;
+                                                }
+                                            }
+                                            if (turn == myNumber) {
+                                                document.getElementById("canvasMap").style.backgroundColor = 'rgb(80, 83, 80)';
+                                            }
                                             document.getElementById("nowTurn").innerHTML = "Now Turn: "+turn+" ";
                                         }
-                                        // if(data[3] == peer.id){
-                                        //     peer.distory();
-                                        // } else if (audienceIds.includes(data[3])){
-                                        //     audiences[audienceIds.indexOf(data[3])].close();
+                                        // let i = 1;
+                                        // // let position = false;
+                                        // while(i<players.length){
+                                        //     if(players[i] instanceof Array){
+                                        //         // if(position){
+                                        //         //     players[i][0]--;
+                                        //         //     document.getElementsByClassName("playersInfo")[i-1].children[0].innerHTML = i+": ";
+                                        //         //     if(!players[i][2]){      // kick and change default color
+                                        //         //         player = players[i];
+                                        //         //         let colour = 255*((player[0] + 2)/(player[0] + 4));
+                                        //         //         document.getElementsByClassName("playersInfo")[i-1].children[1].setAttribute("style", "background-color: rgb("+parseInt(((((player[0]+1) % 5) + 1)/5)*colour)+", "+parseInt(((((player[0]+1) % 4) + 1)/4)*colour)+", "+parseInt(((((player[0]+1) % 3) + 1)/3)*colour)+")");
+                                        //         //     }
+                                        //         // }
+                                        //         if(players[i][0] == data[2] && (!position)){   // refer to number
+                                        //             // players.splice(i, 1);
+                                        //             document.getElementsByClassName("playersInfo")[i-1].remove();
+                                        //             position = i;   // changed
+                                        //         } else {
+                                        //             i++;
+                                        //         }
+                                        //     } else {i++;}
                                         // }
-                                        // appearMsg("...");   // kick Msg todo
+                                        // // if(position){
+                                        // //     if(position < myNumber){
+                                        // //         myNumber--;
+                                        // //     }
+                                        // // }
+                                        // // if(turn >= players.length){
+                                        // //     trun = 1;
+                                        // //     document.getElementById("nowTurn").innerHTML = "Now Turn: "+turn+" ";
+                                        // // }
+                                        // // if(data[3] == peer.id){
+                                        // //     peer.distory();
+                                        // // } else if (audienceIds.includes(data[3])){
+                                        // //     audiences[audienceIds.indexOf(data[3])].close();
+                                        // // }
+                                        appearMsg([ 0, null, "System", "player: "+ players[data[2]][3]+" was kicked"]);
                                         break;
                                     case 3: // SB quit in gameing
                                         // TODO
@@ -842,6 +870,9 @@
                     if(turn >= players.length){
                         turn = 1;
                     }
+                    while (kickNumbers.includes(turn)) {
+                        turn++;
+                    }
                     if (turn == myNumber) {
                         document.getElementById("canvasMap").style.backgroundColor = 'rgb(80,83,80)';
                     }
@@ -902,12 +933,23 @@
             }
         }
 
-        function reDraw(playerNumber) {
+        function reDraw(playerNumber, reDrawType) {
             let t = 0;
-            let aims = document.getElementsByClassName("owner"+ playerNumber);
-            while (t < aims.length) {
-                aims[t].setAttribute('src', players[playerNumber][2]);
-            }
+                let aims = document.getElementsByClassName("owner"+ playerNumber);
+                while (t < aims.length) {
+                    aims[t].removeAttribute("style");
+                    switch (reDrawType) {
+                        case 1:     // update chessmans icon
+                            aims[t].setAttribute('src', players[playerNumber][2]);
+                            break;
+                        case 2:     // kick someone
+                            aims[t].removeAttribute("src");
+                            aims[t].classList.remove("owner"+ playerNumber);
+                            break;
+                        default:
+                            break;
+                    }
+                }
         }
 
         function energy() {
@@ -1010,7 +1052,9 @@
             }
             // event.preventDefault();
         });
-
+    if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+        document.getElementById("playersList").style.maxHeight = '200px';
+    }
     </script>
 </body>
 </html>

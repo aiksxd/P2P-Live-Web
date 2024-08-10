@@ -147,8 +147,8 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                     for(let i=0; i<guests.length; i++){
                         guest = guests[i];
                         guests = new Array();   // break all of conn
-                        ifConnectedAim = true;
-                        switch (nodesMap[3]) {
+                        ifConnectedAim = true;  // break search node
+                        switch (nodesMap[3]) {  // room type
                             case 0:
                                 document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName();       
                                 break;
