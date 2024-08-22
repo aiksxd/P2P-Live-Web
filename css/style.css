@@ -137,8 +137,8 @@ body::-webkit-scrollbar {
     height: 0px;
 }
 #roomCover {
-    width: 20%;
-    height: 90%;
+    width: 150px;
+    height: 150px;
     margin: 1%;
     border: 1px solid rgb(0, 0, 0);
 }
@@ -360,6 +360,10 @@ textarea::-webkit-scrollbar-thumb {
     #liveSetting {
         position: absolute;
         bottom: 0px;
+    }
+    #LiveCover {
+        width: 80px;
+        height: 80px;
     }
     #openRoomInfo {
         position: absolute;
