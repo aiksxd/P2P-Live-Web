@@ -221,7 +221,7 @@ body::-webkit-scrollbar {
     transition: 0.5s;
     height: 0px;
 }
-#liveCover {
+#LiveCover {
     background-color: #373E47;
     width: 150px;
     height: 150px;

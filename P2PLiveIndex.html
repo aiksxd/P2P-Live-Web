@@ -22,30 +22,30 @@
             </div>
         </div>
         <div>
-            <button id="autoJoin" class="actionButton" onclick="autoJoin(2)">auto<br />Join</button>
+            <button id="autoJoin" class="actionButton" onclick="autoJoin(2)">auto<br>Join</button>
             <button id="closeInfo" class="actionButton" onclick="openRoomInfo()">Close</button>
         </div>
     </div>
     <!-- Host Setting -->
     <div id="liveSetting">
         <div id="liveInputBox" style="height: 100%; width: 100%; margin-top: 2%;">
-            Room Title : <input type="text" id="liveTitle" class="liveInput" placeholder="Room Title"><br />
-            Cover URL: <input type="text" id="liveCoverURL" class="liveInput" placeholder="URL of img served as Cover"><br />
-            Summary  : <textarea id="LiveSummary" name="roomSummary" rows="5" cols="20" placeholder="Input your Summary there..."></textarea><br />
-            <!-- Notice: Upload Room Cover only become available after created room<br /> -->
+            Room Title : <input type="text" id="liveTitle" class="liveInput" placeholder="Room Title"><br>
+            Cover URL: <input type="text" id="liveCoverURL" class="liveInput" placeholder="URL of img served as Cover"><br>
+            Summary  : <textarea id="LiveSummary" name="roomSummary" rows="5" cols="20" placeholder="Input your Summary there..."></textarea><br>
+            <!-- Notice: Upload Room Cover only become available after created room<br> -->
             <!-- Cover:<select id="roomCover" onchange="inputCoverURL(this.selectedIndex)">
                 <option value="null" selected="selected">Custome</option>
                 <option value="0">Live</option>
                 <option value="1">FiveOnline</option>
                 <option value="2">Multiplay</option>
-            </select><br /> -->
+            </select><br> -->
         </div><div>
-            Options:<br />
-            1.pravite<input type="checkbox" id="ifPravite"><br />
+            Options:<br>
+            1.pravite<input type="checkbox" id="ifPravite"><br>
             2.Room Type:<select id="roomType">
                 <option value="0" selected="selected">Live</option>
                 <option value="1">FiveOnline</option>
-                <option value="2">Multiplay</option>
+                <!-- <option value="2">Multiplay</option> -->
             </select>
         </div>
         <div>
@@ -57,11 +57,11 @@
     <div class="container" id="control" style="height: 25%;">
         <!-- Join a live web -->
         <div class="box">
-            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div><br />
+            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div><br>
 
             <div style="font-weight: bold; font-size: 20px;">Direct Connect:</div>
-            <input type="text" id="directConnectId" placeholder="Input room Id">
-            <button id="directConnectButton">GoTo</button><br />
+            <input type="text" id="directConnectId" placeholder="Input room Id...">
+            <button id="directConnectButton">GoTo</button><br>
             
             <div style="font-weight: bold; font-size: 32px;">Rooms List:
                 <button id="live" onclick="showLive()">Go To Live</button>
@@ -74,14 +74,14 @@
             </select>
         </div>
         <div class="box">
-            <!-- <button onclick="changeTheme()">Dark - Light Mode</button><br /> -->
-            <button onclick="echoHistoricalConnectedId()">console.log( Historical Connected Ids )</button><br />
-            <button onclick="defaultConnect()">Click me to connect the deafult Root Id</button><br />
-            <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnect when connection closed<br /> -->
+            <!-- <button onclick="changeTheme()">Dark - Light Mode</button><br> -->
+            <button onclick="echoHistoricalConnectedId()">console.log( Historical Connected Ids )</button><br>
+            <button onclick="defaultConnect()">Click me to connect the deafult Root Id</button><br>
+            <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnect when connection closed<br> -->
             <!-- Connect box -->
             <div id="connectRoot" style="visibility: hidden;">
                 Join a root node:<input type="text" id="peerId" placeholder="Input counterpart's Id" autofocus="true">
-                <button id="connectButton">Connect</button><br />
+                <button id="connectButton">Connect</button><br>
             </div>
             <div id="status" style="font-weight: bold;">Status: Connecting to PeerServer...</div>
         </div>
@@ -165,6 +165,7 @@
                                 if (disconnectedLiveHost !== -1){
                                     liveHostIds.splice(disconnectedLiveHost, 1);
                                     rooms.splice(disconnectedLiveHost, 1);
+                                    rootSend(rooms);
                                 }
                             }
                         }else{break;}
@@ -189,7 +190,6 @@
                             } else {
                                 liveHostIds.push(data[7]);
                                 rooms.push(data); // record child nodesMap
-                                appearRooms();
                             }
                             console.log("Live rooms update");  // DEBUG
                             rootSend(rooms);
@@ -218,6 +218,7 @@
                 }
                 // avoid losing text when sending
                 // predecessorHost = null;
+                appearRooms();
             }
         }
 
@@ -273,7 +274,7 @@
                 }
                 // document.getElementById("rooms").innerHTML = document.getElementById("rooms").innerHTML + 
                 // "<div class=\"rooms\" onclick=displayRoomInfo("+ i +") alt=\"img Error\" style=\"background-image: url(\'"+ rooms[i][6] +"\'); background-size: contain;\"><span style=\"background-color: rgb(46, 46, 46, 0.5);\">"+ rooms[i][4] +
-                // "</span><br /><span style=\"background-color: rgb(46, 46, 46, 0.5); position: absolute; bottom: 0;\">Members:"+ rooms[i][2].length +" </span></div>";
+                // "</span><br><span style=\"background-color: rgb(46, 46, 46, 0.5); position: absolute; bottom: 0;\">Members:"+ rooms[i][2].length +" </span></div>";
 
                 let room = document.createElement("div");
                 room.classList.add('rooms');
@@ -340,10 +341,11 @@
                     window.open("./P2PLiveHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("LiveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value, '_blank');
                     break;
                 case 1:
-                    window.open("./P2PGameFiveOnLineHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("LiveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value, '_blank');
+                    alert("Find files of P2P Game FiveOnline in Github");
+                    // window.open("./P2PGameFiveOnLineHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("LiveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value, '_blank');
                     break;
                 case 2:
-                    // TODO
+                    alert("undone");        // TODO
                     break;
                 default:
                     console.log("Error type of room");

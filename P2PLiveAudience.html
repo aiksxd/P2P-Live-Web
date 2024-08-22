@@ -8,7 +8,7 @@
 <body>
     <!-- Detail of Room -->
     <div id="openRoomInfo">
-        <img id="roomCover" src="">
+        <img id="roomCover">
         <div id="roomText">
             <div id="roomTitle"></div>
             <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea>
@@ -22,7 +22,7 @@
             </div>
         </div>
         <div>
-            <button id="autoJoin" class="actionButton" onclick="autoJoin(3)">auto<br />Join</button>
+            <button id="autoJoin" class="actionButton" onclick="autoJoin(3)">auto<br>Join</button>
             <button id="closeInfo" class="actionButton" onclick="openRoomInfo()">Close</button>
         </div>
     </div>
@@ -31,14 +31,14 @@
     <div id="streamSource">
         <div class="box" id="onlyPC" style="margin-top: 10px;">
             <div style="font-weight: bold;">
-                Share PC Desktop:<br />
+                Share PC Desktop:<br>
                 <button type="button" id="browserDisplayMedia" onclick="useDisplayMedia()">Use Display Stream</button>
             </div>
         </div>
         <div class="box" style="margin-top: 10px;">
             <div style="font-weight: bold;">
-                Share Local Devices(PE, PC...):
-                <button type="button" id="browserNavigatorMediaDevices" onclick="askNavigatorMediaDevices()">Upload Local Device</button><br />
+                Share Local Devices:
+                <button type="button" id="browserNavigatorMediaDevices" onclick="askNavigatorMediaDevices()">Upload Local Device</button><br>
                 <input type="checkbox" id="ifUseCamera">Camera
                 <input type="checkbox" id="ifUseMicrophone">Microphone
             </div>
@@ -52,7 +52,7 @@
         </div>
         <div class="box" style="margin-top: 10px;">
             <div style="font-weight: bold;">
-                <input type="checkbox" id="ifNotDisplayLocalStream">If Display the localStream <br />
+                <input type="checkbox" id="ifNotDisplayLocalStream">If Display the localStream <br>
                 —— enable for saving performance of devices
             </div>
         </div>
@@ -69,19 +69,19 @@
                 <button id="openRoomInfoButton" onclick="openRoomInfo()">Room Info</button>
                 <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div>
                 <div id="status" style="font-weight: bold;">Status: Waiting to Connecting to PeerServer...</div>
-                <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br />
+                <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br>
         </div>
         <div class="box">
-            <button onclick="fullWebVideo()" id="fullScreen">Full Page Video</button><br />
+            <button onclick="fullWebVideo()" id="fullScreen">Full Page Video</button><br>
             <div>
-                <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Icon & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br />
+                <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Avatar & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br>
                 <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
             </div>
         </div>
         <div class="box">
-            <span id="sumOfRoom">Members: 1</span><br />
-            <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max->100]<br />
-            <button onclick="cleanMsg()">CleanMsgs</button><br />
+            <span id="sumOfRoom">Members: 1</span><br>
+            <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max->100]<br>
+            <button onclick="cleanMsg()">CleanMsgs</button><br>
         </div>
     </div>
     
@@ -96,7 +96,7 @@
                 <!-- Send box -->
                 <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
                 <button type="button" id="uploadImgButton">Img</button>
-                <button type="button" id="sendButton" onclick="sendMsg()">Send</button><br />
+                <button type="button" id="sendButton" onclick="sendMsg()">Send</button><br>
                 <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
             </div>
         </div>

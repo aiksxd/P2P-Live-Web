@@ -351,11 +351,6 @@ function liveSend (msg){
             source = msg[1];
         }
     }
-    if(root){
-        if(root.open){     // check the data channel
-            root.send(msg);
-        }
-    }
     if(parent){
         if( ! [source, deliverId].includes(parent.peer)){    // Promise a stable sending
             if(parent.open){     // check the data channel
@@ -626,6 +621,7 @@ function liveCoverInput(){
             reader.readAsDataURL(file);
             reader.onloadend = () => {
                 liveCoverBase64 = reader.result;
+                document.getElementById("LiveCover").src = liveCoverBase64;
             }
         } else {
             alert("it can't over 1MB");

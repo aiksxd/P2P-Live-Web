@@ -9,13 +9,15 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 
 ### Update:
-+ Mobile UI support
-+ give up design of root mode
++ separete FiveOnline project
++ fix the info of room lost
++ UI adjust
++ Room List update more frequently
 
 ### Next Version Plan:
-+ Redraw() & better kick with color
-+ Game Mode -> 2&3 update
-+ single Version update
++ media stream extend
++ new indenpent voice channel
++ single version update
 
 ## [Multi-Room Type (URL->ROOT)](https://aiksxd.github.io/P2PLiveIndex.html)
 + Instructions of files:
