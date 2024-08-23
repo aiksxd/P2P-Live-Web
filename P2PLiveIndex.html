@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/styleLiveWeb.css">
 </head>
 <body>
     <!-- Detail of Room -->
@@ -59,12 +59,12 @@
         <div class="box">
             <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div><br>
 
-            <div style="font-weight: bold; font-size: 20px;">Direct Connect:</div>
+            <div style="font-weight: bold; font-size: 20px;">Direct Connect to Room:</div>
             <input type="text" id="directConnectId" placeholder="Input room Id...">
             <button id="directConnectButton">GoTo</button><br>
             
             <div style="font-weight: bold; font-size: 32px;">Rooms List:
-                <button id="live" onclick="showLive()">Go To Live</button>
+                <button id="live" onclick="showLive()">Create Room</button>
             </div>
             Display Room Type:<select id="roomSort" onchange="appearRooms()">
                 <option value="" selected="selected">All</option>
@@ -77,6 +77,7 @@
             <!-- <button onclick="changeTheme()">Dark - Light Mode</button><br> -->
             <button onclick="echoHistoricalConnectedId()">console.log( Historical Connected Ids )</button><br>
             <button onclick="defaultConnect()">Click me to connect the deafult Root Id</button><br>
+            <button onclick="peer.reconnect()">Reconnect to Peer Server</button><br>
             <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnect when connection closed<br> -->
             <!-- Connect box -->
             <div id="connectRoot" style="visibility: hidden;">

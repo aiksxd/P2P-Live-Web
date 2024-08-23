@@ -3,20 +3,20 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/styleLiveWeb.css">
 </head>
 <body>
     <!-- Host Setting -->
     <div id="liveSetting">
         <img id="LiveCover">
         <div style="height: 100%; width: 30%; margin-top: 2%;">
-            <input type="text" id="LiveTitle" class="liveInput" placeholder="Room Title"><br>
+            <input type="text" id="LiveTitle" class="liveInput" placeholder="Input your Room Title there..."><br>
             <textarea id="LiveSummary" rows="5" cols="33" placeholder="Input your Summary there..."></textarea><br>
         </div>
         <div style="height: 100%; width: 30%; margin-top: 2%;">
             <input type="text" id="LiveCoverURL" class="liveInput" placeholder="URL of img served as Cover"><br>
             <input id="LiveCoverInput" type="file" onchange="liveCoverInput()">Upload Local Image<br/><br/>
-            <button onclick="peer.disconnect()">Lock the room(can not restore!)</button>
+            <button onclick="peer.disconnect()">Lock the room<br>(disconnect to PeerServer)</button>
             <button onclick="peer.reconnect()">reconnect with original Id</button>
         </div>
         <div>
@@ -67,7 +67,7 @@
         </div>
         <div class="box" style="margin-top: 10px;">
             <div style="font-weight: bold;">
-                <input type="checkbox" id="ifNotDisplayLocalStream">If Display the localStream <br>
+                <input type="checkbox" id="ifNotDisplayLocalStream">If not Display the localStream <br>
                 —— enable for saving performance of devices
             </div>
         </div>

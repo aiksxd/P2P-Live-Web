@@ -307,28 +307,10 @@ textarea::-webkit-scrollbar-thumb {
     box-sizing: border-box;
     z-index: 99;
 }
-.cells {
-    width: 33px;
-    height: 33px;
-    /* display:inline-block; */
-    box-sizing: border-box;
-}
-.cells:hover {
-    border: 1px solid #afafaf;
-}
 .icon {
     vertical-align: middle;
     width: 32px;
     height: 32px;
-}
-.playersInfo {
-    overflow-x: auto;
-}
-#playersList {
-    background-color: #373E47;
-    overflow-y: auto;
-    white-space:nowrap;
-    max-height: 50px;
 }
 #fullScreen {
     z-index: 99999;
@@ -405,10 +387,6 @@ textarea::-webkit-scrollbar-thumb {
     #streamSourceMenuClose {
         width: 50px;
         height: 50px;
-    }
-    #canvasMap {
-        height: 35%;
-        width: 100%;
     }
 }
 @media only screen and (orientation: landscape) {

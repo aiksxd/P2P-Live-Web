@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/styleLiveWeb.css">
 </head>
 <body>
     <!-- Detail of Room -->
@@ -52,7 +52,7 @@
         </div>
         <div class="box" style="margin-top: 10px;">
             <div style="font-weight: bold;">
-                <input type="checkbox" id="ifNotDisplayLocalStream">If Display the localStream <br>
+                <input type="checkbox" id="ifNotDisplayLocalStream">If not Display the localStream <br>
                 —— enable for saving performance of devices
             </div>
         </div>
@@ -67,6 +67,7 @@
                 <!-- Connect box -->
                 <button id="refreshButton" onclick="refreshMedia()">Refresh</button>
                 <button id="openRoomInfoButton" onclick="openRoomInfo()">Room Info</button>
+                <button onclick="peer.reconnect()">Reconnect to Peer Server</button>
                 <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div>
                 <div id="status" style="font-weight: bold;">Status: Waiting to Connecting to PeerServer...</div>
                 <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br>

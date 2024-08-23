@@ -17,7 +17,7 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 + 流媒体渠道拓宽
 + 新建独立的音频通道
 
-## [多房间型(URL->ROOT)](https://aiksxd.github.io/P2PLiveIndex.html)
+## [多房间型](https://aiksxd.github.io/P2PLiveIndex.html)
 + 文件说明：
 + P2PLiveIndex.html 为网站主页（用于传输并展示发起直播的房间信息）
 + P2PLiveHost.html & P2PLiveAudience.html 为附属页面，置于同目录下即可
@@ -27,7 +27,7 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 3. 观众在执行第一步后可以看到该根节点下的所有活跃直播间(列入标准不在于是否推流，而是直播页面的连接情况)
 + [ 对于主播 ]
 1. 联网并使用浏览器读取主页(P2PLiveIndex.html)，(若根节点连接不成功，则创建不公开房间 或 填个根节点的ID连接)
-2. 点击**去开播**之后点击**共享本地流**
+2. 点击**创建房间**之后点击**共享本地流**
 
 ### **注意事项**：
 1. 如果建立连接发生在主机开始共享流媒体之前，再次点击刷新按钮会**刷新接收的流媒体**（如不可用则刷新整个页面）
