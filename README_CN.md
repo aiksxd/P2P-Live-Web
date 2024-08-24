@@ -17,7 +17,7 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 + 流媒体渠道拓宽
 + 新建独立的音频通道
 
-## [多房间型](https://aiksxd.github.io/P2PLiveIndex.html)
+## [多房间型 -> https://aiksxd.github.io/P2PLiveIndex.html](https://aiksxd.github.io/P2PLiveIndex.html)
 + 文件说明：
 + P2PLiveIndex.html 为网站主页（用于传输并展示发起直播的房间信息）
 + P2PLiveHost.html & P2PLiveAudience.html 为附属页面，置于同目录下即可
@@ -36,7 +36,7 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 4. 通常，主页会默认尝试连接id"P2P-Live-Web-Default-Id"
 
 
-## [单文件版本](https://aiksxd.github.io/SingleP2PLiveVersion.html)
+## [单文件版本 -> https://aiksxd.github.io/SingleP2PLiveVersion.html](https://aiksxd.github.io/SingleP2PLiveVersion.html)
 ### 用法:
 1. 将文件在**本地读取**或**直接访问**现成网址等
 2. 直播方点击**共享本地流**按钮，并且分享自己的ID给观众
@@ -85,12 +85,5 @@ npm install peer -g
 然后用下面命令可以启用本地peer服务器(路径等值需要与网页内peerjs统一)
 ```
 peerjs --port 9000 --key peerjs --path /myapp Started PeerServer on ::, port: 9000, path: /myapp
-```
-### 修改JS引用路径
-在head标签中引用远程js路径改为本地的js路径，示例如下
-```
-<script src="js/peerjs.min.js"></script>
-
-<!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
 ```
 

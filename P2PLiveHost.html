@@ -155,6 +155,7 @@
         const LiveSummary = document.getElementById("LiveSummary");
         const LiveCoverURL = document.getElementById("LiveCoverURL");
         const MyName = document.getElementById("name");
+        let coverURL = "";
 
         // Listen for the event when a Peer connection is successfully opened
         // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
@@ -332,7 +333,7 @@
                 document.getElementById('liveSetting').style.height = "25%";
                 LiveTitle.value = nodesMap[4];
                 LiveSummary.value = nodesMap[5];
-                LiveCoverURL.value = nodesMap[6];
+                LiveCoverURL.value = coverURL;
             }else{
                 openLiveTimes=0;
                 document.getElementById('liveSetting').style.height = "0px";
@@ -345,6 +346,7 @@
             if(liveCoverBase64){
                 nodesMap[6] = liveCoverBase64;
             } else {
+                coverURL = LiveCoverURL.value;
                 nodesMap[6] = LiveCoverURL.value;
             }
             liveSend(nodesMap);

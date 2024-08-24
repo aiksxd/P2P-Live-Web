@@ -665,7 +665,6 @@ function fullWebVideo(){
             document.getElementsByClassName("container")[0].style.bottom = -20 + "px";
             let fullScreen = document.getElementById("fullScreen");
             fullScreen.style.position = "absolute";
-            fullScreen.style.left = 0 + "px";
             fullScreen.style.bottom = 0 + "px";
         } else {
             WebVideo.style.height = window.innerHeight + "px";

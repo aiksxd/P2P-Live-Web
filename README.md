@@ -19,7 +19,7 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 + new indenpent voice channel
 + single version update
 
-## [Multi-Room Type](https://aiksxd.github.io/P2PLiveIndex.html)
+## [Multi-Room Type -> https://aiksxd.github.io/P2PLiveIndex.html](https://aiksxd.github.io/P2PLiveIndex.html)
 + Instructions of files:
 + P2PLiveIndex.html serves as the website homepage (displaying rooms ready for live streaming and providing entry points)
 + P2PLiveHost.html & P2PLiveAudience.html are auxiliary pages placed in the same directory
@@ -38,7 +38,7 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 4. By default, index request the id of "P2P-Live-Web-Default-Id"
 
 
-## [Single Room Type Live Streaming](https://aiksxd.github.io/SingleP2PLiveVersion.html)
+## [Single Room Type Live Streaming -> https://aiksxd.github.io/SingleP2PLiveVersion.html](https://aiksxd.github.io/SingleP2PLiveVersion.html)
 ### Instructions:
 1. Load the file **locally** or **access directly** via the following links
 2. The broadcaster clicks the **Start Local Stream** button and shares their ID with the audience
@@ -87,11 +87,4 @@ npm install peer -g
 local peer server run command(value of path need to be united on web & terminal):
 ```
  peerjs --port 9000 --key peerjs --path /myapp Started PeerServer on ::, port: 9000, path: /myapp
-```
-### Modify JS path
-Modify path of remote peerjs.min.js to local path of js in headP (example)
-```
-<script src="js/peerjs.min.js"></script>
-
-<!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
 ```
