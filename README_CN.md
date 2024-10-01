@@ -27,6 +27,9 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 
 ### **SRS support**：
 1. 运行srs服务器并添加webRTC支持
+> + windows & docker:
+>
+> `docker run --rm -it -p 1935:1935 -p 1985:1985 -p 8080:8080 --env CANDIDATE=127.0.0.1 -p 8000:8000/udp registry.cn-hangzhou.aliyuncs.com/ossrs/srs:5 ./objs/srs -c conf/rtmp2rtc.conf`
 2. 向目标地址推rtmp协议流，拉取时在共享本地流填入"目标地址/密钥"并点分享按钮
 
 ### **注意事项**：

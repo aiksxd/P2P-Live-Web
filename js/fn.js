@@ -593,6 +593,7 @@ function askNavigatorMediaDevices(){
         });
 }
 function shareSRSMediaStream(url) {
+    url = "webrtc://" + url;
     const rtcPlayer = new SrsRtcPlayerAsync();
     rtcPlayer.play(url);
     localStream = rtcPlayer.stream;

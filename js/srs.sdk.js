@@ -15,12 +15,10 @@ function SrsError(name, message) {
 SrsError.prototype = Object.create(Error.prototype);
 SrsError.prototype.constructor = SrsError;
 
-// Depends on adapter-7.4.0.min.js from https://github.com/webrtc/adapter
 // Async-awat-prmise based SRS RTC Publisher.
 function SrsRtcPublisherAsync() {
     var self = {};
 
-    // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
     self.constraints = {
         audio: true,
         video: {
@@ -28,7 +26,6 @@ function SrsRtcPublisherAsync() {
         }
     };
 
-    // @see https://github.com/rtcdn/rtcdn-draft
     // @url The WebRTC url to play with, for example:
     //      webrtc://r.ossrs.net/live/livestream
     // or specifies the API port:
@@ -62,7 +59,6 @@ function SrsRtcPublisherAsync() {
         }
         var stream = await navigator.mediaDevices.getUserMedia(self.constraints);
 
-        // @see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream#Migrating_to_addTrack
         stream.getTracks().forEach(function (track) {
             self.pc.addTrack(track);
 
@@ -73,7 +69,6 @@ function SrsRtcPublisherAsync() {
         var offer = await self.pc.createOffer();
         await self.pc.setLocalDescription(offer);
         var session = await new Promise(function (resolve, reject) {
-            // @see https://github.com/rtcdn/rtcdn-draft
             var data = {
                 api: conf.apiUrl, tid: conf.tid, streamurl: conf.streamUrl,
                 clientip: null, sdp: offer.sdp
@@ -107,7 +102,6 @@ function SrsRtcPublisherAsync() {
     };
 
     // The callback when got local stream.
-    // @see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream#Migrating_to_addTrack
     self.ontrack = function (event) {
         // Add track to stream of SDK.
         self.stream.addTrack(event.track);
@@ -124,11 +118,10 @@ function SrsRtcPublisherAsync() {
             schema = schema ? schema + ':' : window.location.protocol;
 
             var port = urlObject.port || 1985;
-            if (schema === 'https:') {
-                port = urlObject.port || 443;
-            }
+            // if (schema === 'https:') {
+            //     port = urlObject.port || 443;
+            // }
 
-            // @see https://github.com/rtcdn/rtcdn-draft
             var api = urlObject.user_query.play || self.__internal.defaultPath;
             if (api.lastIndexOf('/') !== api.length - 1) {
                 api += '/';
@@ -200,8 +193,8 @@ function SrsRtcPublisherAsync() {
                 // Guess by schema.
                 if (schema === 'http') {
                     port = 80;
-                } else if (schema === 'https') {
-                    port = 443;
+                // } else if (schema === 'https') {
+                //     port = 443;
                 } else if (schema === 'rtmp') {
                     port = 1935;
                 }
@@ -218,14 +211,14 @@ function SrsRtcPublisherAsync() {
             // For webrtc API, we use 443 if page is https, or schema specified it.
             if (!ret.port) {
                 if (schema === 'webrtc' || schema === 'rtc') {
-                    if (ret.user_query.schema === 'https') {
-                        ret.port = 443;
-                    } else if (window.location.href.indexOf('https://') === 0) {
-                        ret.port = 443;
-                    } else {
+                    // if (ret.user_query.schema === 'https') {
+                    //     ret.port = 443;
+                    // } else if (window.location.href.indexOf('https://') === 0) {
+                    //     ret.port = 443;
+                    // } else {
                         // For WebRTC, SRS use 1985 as default API port.
                         ret.port = 1985;
-                    }
+                    // }
                 }
             }
 
@@ -263,19 +256,15 @@ function SrsRtcPublisherAsync() {
     self.pc = new RTCPeerConnection(null);
 
     // To keep api consistent between player and publisher.
-    // @see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream#Migrating_to_addTrack
-    // @see https://webrtc.org/getting-started/media-devices
     self.stream = new MediaStream();
 
     return self;
 }
 
-// Depends on adapter-7.4.0.min.js from https://github.com/webrtc/adapter
 // Async-await-promise based SRS RTC Player.
 function SrsRtcPlayerAsync() {
     var self = {};
 
-    // @see https://github.com/rtcdn/rtcdn-draft
     // @url The WebRTC url to play with, for example:
     //      webrtc://r.ossrs.net/live/livestream
     // or specifies the API port:
@@ -308,7 +297,6 @@ function SrsRtcPlayerAsync() {
         var offer = await self.pc.createOffer();
         await self.pc.setLocalDescription(offer);
         var session = await new Promise(function(resolve, reject) {
-            // @see https://github.com/rtcdn/rtcdn-draft
             var data = {
                 api: conf.apiUrl, tid: conf.tid, streamurl: conf.streamUrl,
                 clientip: null, sdp: offer.sdp
@@ -327,6 +315,9 @@ function SrsRtcPlayerAsync() {
             // sorry, please forgive my stupid knowledge:
             if (conf.apiUrl.slice(0,4) == "file") {
                 conf.apiUrl = "http"+conf.apiUrl.slice(4);
+            }
+            if (conf.apiUrl.slice(0,5) == "https") {
+                conf.apiUrl = "http"+conf.apiUrl.slice(5);
             }
             
             console.log(conf.apiUrl);
@@ -349,9 +340,7 @@ function SrsRtcPlayerAsync() {
     };
 
     // The callback when got remote track.
-    // Note that the onaddstream is deprecated, @see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onaddstream
     self.ontrack = function (event) {
-        // https://webrtc.org/getting-started/remote-streams
         self.stream.addTrack(event.track);
     };
 
@@ -366,11 +355,10 @@ function SrsRtcPlayerAsync() {
             schema = schema ? schema + ':' : window.location.protocol;
 
             var port = urlObject.port || 1985;
-            if (schema === 'https:') {
-                port = urlObject.port || 443;
-            }
+            // if (schema === 'https:') {
+            //     port = urlObject.port || 443;
+            // }
 
-            // @see https://github.com/rtcdn/rtcdn-draft
             var api = urlObject.user_query.play || self.__internal.defaultPath;
             if (api.lastIndexOf('/') !== api.length - 1) {
                 api += '/';
@@ -442,8 +430,8 @@ function SrsRtcPlayerAsync() {
                 // Guess by schema.
                 if (schema === 'http') {
                     port = 80;
-                } else if (schema === 'https') {
-                    port = 443;
+                // } else if (schema === 'https') {
+                //     port = 443;
                 } else if (schema === 'rtmp') {
                     port = 1935;
                 }
@@ -460,14 +448,14 @@ function SrsRtcPlayerAsync() {
             // For webrtc API, we use 443 if page is https, or schema specified it.
             if (!ret.port) {
                 if (schema === 'webrtc' || schema === 'rtc') {
-                    if (ret.user_query.schema === 'https') {
-                        ret.port = 443;
-                    } else if (window.location.href.indexOf('https://') === 0) {
-                        ret.port = 443;
-                    } else {
+                    // if (ret.user_query.schema === 'https') {
+                    //     ret.port = 443;
+                    // } else if (window.location.href.indexOf('https://') === 0) {
+                    //     ret.port = 443;
+                    // } else {
                         // For WebRTC, SRS use 1985 as default API port.
                         ret.port = 1985;
-                    }
+                    // }
                 }
             }
 
@@ -504,10 +492,8 @@ function SrsRtcPlayerAsync() {
 
     self.pc = new RTCPeerConnection(null);
 
-    // Create a stream to add track to the stream, @see https://webrtc.org/getting-started/remote-streams
     self.stream = new MediaStream();
 
-    // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/ontrack
     self.pc.ontrack = function(event) {
         if (self.ontrack) {
             self.ontrack(event);
@@ -517,12 +503,10 @@ function SrsRtcPlayerAsync() {
     return self;
 }
 
-// Depends on adapter-7.4.0.min.js from https://github.com/webrtc/adapter
 // Async-awat-prmise based SRS RTC Publisher by WHIP.
 function SrsRtcWhipWhepAsync() {
     var self = {};
 
-    // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
     self.constraints = {
         audio: true,
         video: {
@@ -530,7 +514,6 @@ function SrsRtcWhipWhepAsync() {
         }
     };
 
-    // See https://datatracker.ietf.org/doc/draft-ietf-wish-whip/
     // @url The WebRTC url to publish with, for example:
     //      http://localhost:1985/rtc/v1/whip/?app=live&stream=livestream
     // @options The options to control playing, supports:
@@ -557,7 +540,6 @@ function SrsRtcWhipWhepAsync() {
         }
         var stream = await navigator.mediaDevices.getUserMedia(self.constraints);
 
-        // @see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream#Migrating_to_addTrack
         stream.getTracks().forEach(function (track) {
             self.pc.addTrack(track);
 
@@ -589,7 +571,6 @@ function SrsRtcWhipWhepAsync() {
         return self.__internal.parseId(url, offer.sdp, answer);
     };
 
-    // See https://datatracker.ietf.org/doc/draft-ietf-wish-whip/
     // @url The WebRTC url to play with, for example:
     //      http://localhost:1985/rtc/v1/whep/?app=live&stream=livestream
     // @options The options to control playing, supports:
@@ -633,7 +614,6 @@ function SrsRtcWhipWhepAsync() {
     };
 
     // The callback when got local stream.
-    // @see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream#Migrating_to_addTrack
     self.ontrack = function (event) {
         // Add track to stream of SDK.
         self.stream.addTrack(event.track);
@@ -641,9 +621,6 @@ function SrsRtcWhipWhepAsync() {
 
     self.pc = new RTCPeerConnection(null);
 
-    // To keep api consistent between player and publisher.
-    // @see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream#Migrating_to_addTrack
-    // @see https://webrtc.org/getting-started/media-devices
     self.stream = new MediaStream();
 
     // Internal APIs.
@@ -663,7 +640,6 @@ function SrsRtcWhipWhepAsync() {
         },
     };
 
-    // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/ontrack
     self.pc.ontrack = function(event) {
         if (self.ontrack) {
             self.ontrack(event);
@@ -673,8 +649,6 @@ function SrsRtcWhipWhepAsync() {
     return self;
 }
 
-// Format the codec of RTCRtpSender, kind(audio/video) is optional filter.
-// https://developer.mozilla.org/en-US/docs/Web/Media/Formats/WebRTC_codecs#getting_the_supported_codecs
 function SrsRtcFormatSenders(senders, kind) {
     var codecs = [];
     senders.forEach(function (sender) {
@@ -702,4 +676,3 @@ function SrsRtcFormatSenders(senders, kind) {
     });
     return codecs.join(", ");
 }
-
