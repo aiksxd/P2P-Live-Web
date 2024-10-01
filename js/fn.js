@@ -156,6 +156,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                                 document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName();       
                                 break;
                             default:
+                                console.log("unknown type of room: "+ nodesMap[3]);
                                 break;
                         }
                         // console.log("aim id of node: "+ guest.peer)  // DEBUG
@@ -591,7 +592,17 @@ function askNavigatorMediaDevices(){
             console.error('Error getting local stream:', err);
         });
 }
-        
+function shareSRSMediaStream(url) {
+    const rtcPlayer = new SrsRtcPlayerAsync();
+    rtcPlayer.play(url);
+    localStream = rtcPlayer.stream;
+    if( ! document.getElementById("ifNotDisplayLocalStream").checked){
+        displayStream(rtcPlayer.stream);  // for debug
+    } else {
+        WebVideo.srcObject = null;
+    }
+}
+
 // display the remote stream and try to play it(if usr didn't do anything on web maybe be prohibited)
 function displayStream(stream) {
     if(WebVideo.srcObject){

@@ -60,6 +60,11 @@
         </div>
         <div class="box" style="margin-top: 10px;">
             <div style="font-weight: bold;">
+                Input SRS Media Stream url like "url/key"(rtmp -> srs -> webrtc)
+                <input id="streamUrlSRS" type="text" placeholder="input the url of srs media Stream here...">
+                <button type="button" id="uploadStreamSRS" onclick="shareSRSMediaStream(document.getElementById('streamUrlSRS').value)">share SRS Media Stream</button>    
+            </div>
+            <div style="font-weight: bold;">
                 Lend Media Stream From Others
                 <input id="lendAimId" type="text" placeholder="input ID OF AIM here...">
                 <button type="button" id="lendStream" onclick="tryConnect(1, document.getElementById('lendAimId').value, false, true)">lend aim stream( need be accepted )</button>    
@@ -124,6 +129,7 @@
     </div>
 
     <script src="js/peerjs.min.js"></script>
+    <script src="js/srs.sdk.js"></script>
     <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <script>
         const peer = new Peer({ debug: 2})      //use PeerJS official server

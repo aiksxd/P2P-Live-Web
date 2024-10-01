@@ -9,15 +9,11 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 
 ### Update:
-+ separete FiveOnline project
-+ fix the info of room lost
-+ UI adjust
-+ Room List update more frequently
++ fixed the problem of way to room by id directly
++ srs media stream extend(not very well support)
 
 ### Next Version Plan:
-+ media stream extend
 + new indenpent voice channel
-+ single version update
 
 ## [Multi-Room Type -> https://aiksxd.github.io/P2PLiveIndex.html](https://aiksxd.github.io/P2PLiveIndex.html)
 + Instructions of files:
@@ -30,6 +26,10 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 + [For Host]
 1. Visit the homepage(P2PLiveIndex.html), [create pravite room or enter and connect a root ID]
 2. Clicks **Create Room** and then clicks **Stream Source** button
+
+### **SRS support**：
+1. run srs with webRTC support
+2. push **rtmp** stream，pull in web of **Stream Source** button with url like "server/key" and click the button of **share SRS Media Stream**
 
 ### **Considerations**:
 1. If the connection is established before the host starts sharing the media stream, clicking the button again will **refresh the received media stream**(or refresh web)

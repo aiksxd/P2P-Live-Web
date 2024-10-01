@@ -260,7 +260,27 @@
         }
 
         document.getElementById('directConnectButton').addEventListener('click', () => {
-            tryConnect(1, document.getElementById('directConnectId').value, true);
+            if(guest){if(guest.open){
+                guest.close();
+            }}
+            guest = peer.connect(document.getElementById('directConnectId').value);
+            guest.on('open', () => {
+                console.log("successfully connected: "+ guest.peer)  // DEBUG
+            });
+            guest.on('data', (data) => {
+                nodesMap = data;
+                switch (nodesMap[3]) {  // room type
+                    case 0:
+                        document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName();       
+                        break;
+                    case 1:
+                        document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName();       
+                        break;
+                    default:
+                        console.log("unknown type of room: "+ nodesMap[3]);
+                        break;
+                }
+            });
         });
 
         // add rooms to box
