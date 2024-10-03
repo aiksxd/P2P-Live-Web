@@ -39,7 +39,7 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 1. If the connection is established before the host starts sharing the media stream, clicking the button again will **refresh the received media stream**(or refresh web)
 2. In the event of the host losing connection, the information from the host's child nodes will not be transmitted to other host's child nodes
 3. Video quality may initially be blurry when passed from child nodes to sub-child nodes; waiting for synchronization may resolve this (quality synchronization observed after 26 seconds in a test)
-4. By default, index request the id of "P2P-Live-Web-default-Id". If you want to establish it on your web, just put the files in your web and i recommand you modify the defaultId in the file of P2PLiveIndex.html where you can find the variety of defaultId between the <srcipt> 
+4. By default, index request the id of "P2P-Live-Web-default-Id". If you want to establish it on your web, just put these files in your web and I recommand you modify the defaultId in the file of P2PLiveIndex.html where you can find the variety of defaultId between the srcipt(or else rooms will be bridged between example web and your web)
 
 
 ## [Single Room Type Live Streaming -> https://aiksxd.github.io/SingleP2PLiveVersion.html](https://aiksxd.github.io/SingleP2PLiveVersion.html)
