@@ -33,6 +33,7 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 >
 > `docker run --rm -it -p 1935:1935 -p 1985:1985 -p 8080:8080 --env CANDIDATE=127.0.0.1 -p 8000:8000/udp registry.cn-hangzhou.aliyuncs.com/ossrs/srs:5 ./objs/srs -c conf/rtmp2rtc.conf`
 2. push **rtmp** stream，pull in web of **Stream Source** button with url like "server/key" and click the button of **share SRS Media Stream**
+> for example: live/livestream/123456
 
 ### **Considerations**:
 1. If the connection is established before the host starts sharing the media stream, clicking the button again will **refresh the received media stream**(or refresh web)
