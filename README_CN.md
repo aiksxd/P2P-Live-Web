@@ -30,8 +30,8 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 > + windows & docker:
 >
 > `docker run --rm -it -p 1935:1935 -p 1985:1985 -p 8080:8080 --env CANDIDATE=127.0.0.1 -p 8000:8000/udp registry.cn-hangzhou.aliyuncs.com/ossrs/srs:5 ./objs/srs -c conf/rtmp2rtc.conf`
-2. 向目标地址推rtmp协议流(rtmp://live/livestream)，拉取时在共享本地流填入"目标地址/密钥"并点分享按钮
-> 如obs推流密钥填123456时：live/livestream/123456
+2. 向目标地址推rtmp协议流(rtmp://localhost/live/livestream)，可选地自定义密钥，拉取时在共享本地流填入"目标地址/密钥"并点分享按钮
+> 如obs推流密钥填123456时，在网页共享本地流的srs选项填入：localhost/live/livestream/123456
 
 ### **注意事项**：
 1. 如果建立连接发生在主机开始共享流媒体之前，再次点击刷新按钮会**刷新接收的流媒体**（如不可用则刷新整个页面）
