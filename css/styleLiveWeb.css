@@ -1,10 +1,97 @@
+:root {
+    --theme-color: rgb(255,255,255);
+    --theme-ui-color: rgb(230,230,230);
+    --theme-font-color: rgb(0,0,0);
+    --theme-active-color: rgb(162, 255, 109);
+    --theme-input-color: rgb(241,242,243);
+    --theme-visited-color: rgb(23, 134, 245);
+}
+.pop {
+    width: 70%;
+    height: 70%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 5%;
+    transition: opacity 1s;
+    opacity: 0;
+    font-size: large;
+    visibility: hidden;
+    padding: 5%;
+    background-color: var(--theme-color);
+    z-index: 1000;
+    overflow-y: auto;
+}
+.pop_Menu {
+    display: flex;
+    font-size: 20px;
+    gap: 30px;
+
+    a:hover {
+        color: var(--theme-font-color);
+    }
+
+    a:visited {
+        color: var(--theme-visited-color);
+    }
+
+    .active {
+        background-color: var(--theme-active-color);
+    }
+    
+}
+.pop_Option {
+    background-color: var(--theme-ui-color);
+    border: 1px solid var(--theme-input-color);
+    border-radius: 10px;
+}
+.covert {
+    display: none;
+}
+
+#shadowCover {
+    background: #000;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    filter: alpha(opacity=30);
+    opacity: 0.3;
+    visibility: hidden;
+    z-index: 2;
+}
+.close_Button {
+    position: absolute;
+    font-size: 30px;
+    top: 5%;
+    right: 5%;
+}
+.confirm_Button {
+    min-height: 50px;
+    height: 10%;
+    width: 10%;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+.fadeout{
+   -webkit-transition:all 0.5s linear;
+   -moz-transition:all 0.5s linear;
+   -ms-transition:all 0.5s linear;
+   -o-transition:all 0.5s linear;
+   transition:all 0.5s linear;
+}
+.pop_Button:focus > .pop { visibility:visible; opacity:1; }
+
 html, body {
-    background: rgb(28,33,40);
+    background: var(--theme-color);
     height: 100%;
 	margin: 0; 
 	padding: 0;
 	border: 0;
-    color: rgb(197,209,216);
+    color: var(--theme-font-color);
 }
 video::-webkit-media-controls-timeline {
 display: none;
@@ -56,17 +143,19 @@ body::-webkit-scrollbar {
     width: 100%;
     white-space: nowrap;
     height: 14%;
-    background: rgb(28,33,40);
-    overflow-x: auto;
+    background: var(--theme-color);
     overflow-y: hidden;
+}
+.container::-webkit-scrollbar-thumb {
+    background: #afafaf;
+    -webkit-border-radius: 100px;
 }
 .box {
     display: inline-block;
-    border-right: 1px solid rgb(46, 46, 46);
+    border-right: 1px solid var(--theme-ui-color);
     box-sizing: border-box;
     padding: 10px;
     height: 98%;
-    width: 350px;
     padding-bottom: 0px;
     overflow-x: hidden;
 }
@@ -77,14 +166,14 @@ body::-webkit-scrollbar {
 }
 #chatContainer {
     float: right;
-    border:1px solid rgb(46, 46, 46);
+    border:1px solid var(--theme-ui-color);
     box-sizing: border-box;
     width: 30%;
     height: 100%;
     overflow: hidden;
 }
 #chatBox {
-    background-color: #373E47;
+    background-color: var(--theme-color);
     word-break: break-word;
     margin-bottom: 10px;
     height: 94%;
@@ -114,19 +203,19 @@ body::-webkit-scrollbar {
 }
 .rooms {
     position: relative;
-    border: 1px solid rgb(46, 46, 46);
-    background-color: rgb(46, 46, 46, 0.5);
+    border: 1px solid var(--theme-ui-color);
+    background-color: var(--theme-ui-color);  /*0.5 opacity*/
     display: block;
     float: left;
     height: 150px;
     width: 150px;
     font-size: 20px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--theme-font-color);    /*0.8 opacity*/
     overflow: auto;
 }
-#openRoomInfo {
-    border: 1px solid rgb(28,33,40);
-    background-color: rgb(34,39,46);
+/* #openRoomInfo {
+    border: 1px solid var(--theme-color);
+    background-color: /*rgb(34,39,46)*//* var(--theme-color);
     display: flex;
     align-items: flex-start;
     position: absolute;
@@ -135,17 +224,13 @@ body::-webkit-scrollbar {
     overflow-y: hidden;
     transition: 0.5s;
     height: 0px;
-}
+} */
 #roomCover {
     width: 150px;
     height: 150px;
     margin: 1%;
-    border: 1px solid rgb(0, 0, 0);
-}
-#roomText {
-    width: 70%;
-    height: 90%;
-    margin-top: 1%;
+    vertical-align: text-top;
+    border: 1px solid var(--theme-font-color);
 }
 .actionButton {
     position: relative;
@@ -157,24 +242,25 @@ body::-webkit-scrollbar {
     margin-top: 1%;
 }
 #roomTitle {
-    background-color: #373E47;
     height: 20%;
     margin: 1%;
-    border: 1px solid rgb(0, 0, 0);
+    font-size: large;
+    word-break: break-word;
+    vertical-align: text-top;
 }
 #roomSummary {
-    background-color: #373E47;
-    float: left;
+    background-color: var(--theme-input-color);
     height: 60%;
     margin: 1%;
-    border: 1px solid rgb(0, 0, 0);
+    border: 1px solid var(--theme-font-color);
     overflow: auto;
+    vertical-align: text-top;
 }
 #nodeInfo {
-    float: left;
-    width: 50%;
+    background-color: var(--theme-input-color);
+    min-height: 100px;
+    width: 80%;
     height: 60%;
-    padding-top: 2%;
 }
 #stable {
     float: left;
@@ -182,54 +268,51 @@ body::-webkit-scrollbar {
     height: 100%;
 }
 #hostBlock {
+    min-height: 50px;
     width: 100%;
     height: 50%;
 }
 #refreshMap {
+    min-height: 50px;
     font-size: 10px;
     width: 100%;
     height: 50%;
 }
 #block0 {
-    background-color: #373E47;
+    background-color: var(--theme-input-color);
     float: left;
     width: 40%;
     height: 100%;
-    border: 1px solid rgb(46, 46, 46);
+    border: 1px solid var(--theme-ui-color);
     overflow: auto;
 }
 #block1 {
-    background-color: #373E47;
+    background-color: var(--theme-input-color);
     float: left;
     width: 40%;
     height: 100%;
-    border: 1px solid rgb(46, 46, 46);
+    border: 1px solid var(--theme-ui-color);
     overflow: auto;
 }
 .childNodes {
     min-width: 100%;
 }
-#liveSetting {
-    background-color: rgb(28,33,40);
-    border: 1px solid rgb(46, 46, 46);
-    display: flex;
-    align-items: flex-start;
-    overflow: auto;
-    position: absolute;
-    z-index: 999;
-    width: 99%;
-    transition: 0.5s;
-    height: 0px;
+.menu {
+    background-color: var(--theme-ui-color);
+    border: 1px solid var(--theme-input-color);
+    border-radius: 20px;
+    margin-right: 10px;
+    height: 50px;
 }
 #LiveCover {
-    background-color: #373E47;
+    background-color: var(--theme-input-color);
     width: 150px;
     height: 150px;
     margin: 1%;
-    border: 1px solid rgb(28,33,40);
+    border: 1px solid var(--theme-color);
 }
 .liveInput {
-    background-color: #373E47;
+    background-color: var(--theme-input-color);
     min-width: 150px;
     width: 70%;
     height: 10%;
@@ -237,14 +320,14 @@ body::-webkit-scrollbar {
 }
 #LiveSummary {
     width: 70%;
-    background-color: #373E47;
+    background-color: var(--theme-input-color);
     height: 30%;
     word-wrap: break-word;
     overflow: scroll;
 }
 #streamSource {
-    background-color: rgb(34,39,46);
-    border: 1px solid rgb(28,33,40);
+    background-color: var(--theme-color)/*rgb(34,39,46)*/;
+    border: 1px solid var(--theme-color);
     display: flex;
     overflow-y: hidden;
     position: absolute;
@@ -257,55 +340,48 @@ body::-webkit-scrollbar {
     width: 40px;
 }
 input {
-    background-color: #373E47;
-    color: rgb(197,209,216);
+    background-color: var(--theme-input-color);
+    color: var(--theme-font-color);
+    border: unset;
+    border-radius: 5px;
 }
 button {
-    background-color: #373E47;
-    color: rgb(197,209,216);
+    background-color: var(--theme-input-color);
+    color: var(--theme-font-color);
+    border-radius: 10px;
 }
 input[type=checkbox]{
-    background-color: #373E47;
+    background-color: var(--theme-input-color);
+    border-radius: 10px;
 }
 input[type="file"]::file-selector-button {
-    color: rgb(197,209,216);
-    background-color: #373E47;
+    background-color: var(--theme-input-color);
+    color: var(--theme-font-color);
+    border-radius: 10px;
 }
 option{
-    color: rgb(197,209,216);
-    background-color: #373E47;
+    background-color: var(--theme-input-color);
+    color: var(--theme-font-color);
+    border-radius: 10px;
 }
 select{
-    color: rgb(197,209,216);
-    background-color: #373E47;
+    background-color: var(--theme-input-color);
+    color: var(--theme-font-color);
+    border-radius: 10px;
 }
 textarea {
-    background-color: #373E47;
-    color: rgb(197,209,216);
+    border-radius: 5px;
+    background-color: var(--theme-input-color);
+    color: var(--theme-font-color);
 }
 textarea::-webkit-scrollbar {
     width: 10px;
     height: 10px;
 }
 textarea::-webkit-scrollbar-thumb {
-    background: #afafaf;
+    background: var(--theme-input-color);
+/*    background: #afafaf*/;
     -webkit-border-radius: 100px;
-}
-#gameMap {
-    white-space: nowrap;
-    height: 100%;
-    width: 100%;
-    font-size:0;
-    overflow: auto;
-}
-#canvasMap {
-    height: 100%;
-    width: 70%;
-    float: left;
-    background-color: rgb(28,33,40);
-    border:1px solid #373E47;
-    box-sizing: border-box;
-    z-index: 99;
 }
 .icon {
     vertical-align: middle;
@@ -332,30 +408,26 @@ textarea::-webkit-scrollbar-thumb {
         width: 100%;
         height: 40%;
     }
-    #streamSource {
+    /* #streamSource {
         position: absolute;
         bottom: 0px;
-    }
+    } */
     #chatBox {
         height: 86%;
     }
-    #liveSetting {
-        position: absolute;
-        bottom: 0px;
-    }
-    #LiveCover {
+    /* #LiveCover {
         width: 80px;
         height: 80px;
-    }
-    #openRoomInfo {
+    } */
+    /* #openRoomInfo {
         position: absolute;
         bottom: 0px;
-    }
+    } */
     .indexContainer {
         position: absolute;
         bottom: 0px;
     }
-    #roomTitle {
+    /* #roomTitle {
         width: 100%;
     }
     #roomSummary {
@@ -377,29 +449,26 @@ textarea::-webkit-scrollbar-thumb {
     #roomCover {
         width: 60px;
         height: 60px;
-    }
+    } */
     .sendInput {
         width: 100%;
     }
     #sendMessageBox {
         width: 250px;
     }
-    #streamSourceMenuClose {
+    /* #streamSourceMenuClose {
         width: 50px;
         height: 50px;
-    }
+    } */
 }
 @media only screen and (orientation: landscape) {
-    #liveSetting {
+    /* #openRoomInfo {
         top: 0px;
-    }
-    #openRoomInfo {
-        top: 0px;
-    }
-    #roomTitle {
+    } */
+    /* #roomTitle {
         width: 86%;
-    }
-    #streamSource {
+    } */
+    /* #streamSource {
         top: 0;
-    }
+    } */
 }

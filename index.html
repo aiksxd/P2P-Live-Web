@@ -6,12 +6,20 @@
     <link rel="stylesheet" type="text/css" href="css/styleLiveWeb.css">
 </head>
 <body>
+    <div id="shadowCover"></div>
     <!-- Detail of Room -->
-    <div id="openRoomInfo">
-        <img id="roomCover" src="">
-        <div id="roomText">
-            <div id="roomTitle"></div>
-            <textarea id="roomSummary" rows="3" cols="32" readonly="readonly"></textarea>
+    <div class="pop" id="openRoomInfo">
+        <span class="close_Button" onclick="pop(document.getElementById('openRoomInfo'))">✕</span>
+        
+        <div class="pop_Content">
+            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(3)">auto<br>Join</button>
+            ------------------------------------------------<br>
+            <div style="display: flex;">
+                <img id="roomCover" src="">
+                <span id="roomTitle"></span>
+            </div>
+            <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
+            ------------------------------------------------<br>
             <div id="nodeInfo">
                 <div id="stable">
                     <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">Host Node</button>
@@ -20,18 +28,22 @@
                 <div id="block0"></div>
                 <div id="block1"></div>
             </div>
-        </div>
-        <div>
-            <button id="autoJoin" class="actionButton" onclick="autoJoin(2)">auto<br>Join</button>
-            <button id="closeInfo" class="actionButton" onclick="openRoomInfo()">Close</button>
+            <button id="copyURL">Copy Web Link to share</button>
         </div>
     </div>
     <!-- Host Setting -->
-    <div id="liveSetting">
-        <div id="liveInputBox" style="height: 100%; width: 100%; margin-top: 2%;">
-            Room Title : <input type="text" id="liveTitle" class="liveInput" placeholder="Room Title"><br>
-            Cover URL: <input type="text" id="liveCoverURL" class="liveInput" placeholder="URL of img served as Cover"><br>
-            Summary  : <textarea id="LiveSummary" name="roomSummary" rows="5" cols="20" placeholder="Input your Summary there..."></textarea><br>
+    <div class="pop" id="liveSetting">
+        <button class="confirm_Button" id="createRoom">Create Room</button>
+        <span class="close_Button" onclick="pop(document.getElementById('liveSetting'))">✕</span>
+        <div class="pop_Menu">
+            <a href="#menu_0" class="pop_Option active" onclick="changePopMenu(0);">Live Room Setting</a>
+            <a href="#menu_1" class="pop_Option" onclick="changePopMenu(1)">Peer Setting</a>
+        </div>
+        <div class="pop_Content">
+            ------------------------------------------------<br>
+            Room Title : <input type="text" id="liveTitle" placeholder="Room Title"><br>
+            Cover URL: <input type="text" id="liveCoverURL" placeholder="URL of img served as Cover"><br>
+            Summary:<br><textarea id="LiveSummary" name="roomSummary" rows="5" cols="20" placeholder="Input your Summary there..."></textarea><br>
             <!-- Notice: Upload Room Cover only become available after created room<br> -->
             <!-- Cover:<select id="roomCover" onchange="inputCoverURL(this.selectedIndex)">
                 <option value="null" selected="selected">Custome</option>
@@ -39,22 +51,31 @@
                 <option value="1">FiveOnline</option>
                 <option value="2">Multiplay</option>
             </select><br> -->
-        </div><div>
+            ------------------------------------------------<br>
             Options:<br>
-            1.pravite<input type="checkbox" id="ifPravite"><br>
-            2.Room Type:<select id="roomType">
+            &nbsp;&nbsp;&nbsp;&nbsp;
+                pravite:<input type="checkbox" id="ifPravite"><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+                Room Type:<select id="roomType">
                 <option value="0" selected="selected">Live</option>
-                <option value="1">FiveOnline</option>
-                <!-- <option value="2">Multiplay</option> -->
+                <option value="1">FiveOnline(external)</option>
+                <!-- <option value="2">RemoteControl(undone)</option> -->
             </select>
+            ------------------------------------------------<br>
+            In addition, you can upload your local photo after creating Room(Room Setting)
         </div>
-        <div>
-            <button id="createRoom" class="actionButton">Create Room</button>
-            <button id="closeLiveMenu" class="actionButton" onclick="showLive()">Close</button>
+        <div class="pop_Content covert">
+            ------------------------------------------------<br>
+            <!-- <button onclick="changeTheme()">Dark - Light Mode</button><br> -->
+            <button onclick="echoHistoricalConnectedId()">console.log( Historical Connected Ids )</button><br><br>
+            <button onclick="defaultConnect()">Click me to connect the deafult Root Id</button><br><br>
+            <button onclick="peer.reconnect()">Reconnect to Peer Server</button><br><br>
+            <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnect when connection closed<br> -->
+            
         </div>
     </div>
     <!-- Control Panel -->
-    <div class="container" id="control" style="height: 25%;">
+    <div class="container" id="control" style="height: 30%;">
         <!-- Join a live web -->
         <div class="box">
             <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div><br>
@@ -64,21 +85,20 @@
             <button id="directConnectButton">GoTo</button><br>
             
             <div style="font-weight: bold; font-size: 32px;">Rooms List:
-                <button id="live" onclick="showLive()">Create Room</button>
+                <button id="live" onclick="pop(document.getElementById('liveSetting'))">Create Room</button>
             </div>
             Display Room Type:<select id="roomSort" onchange="appearRooms()">
                 <option value="" selected="selected">All</option>
                 <option value="0">Live</option>
-                <option value="1">FiveOnline</option>
-                <option value="2">Multiplay</option>
+                <option value="1">FiveOnline(external)</option>
+                <!-- <option value="2">RemoteControl(undone)</option> -->
             </select>
         </div>
         <div class="box">
-            <!-- <button onclick="changeTheme()">Dark - Light Mode</button><br> -->
-            <button onclick="echoHistoricalConnectedId()">console.log( Historical Connected Ids )</button><br>
-            <button onclick="defaultConnect()">Click me to connect the deafult Root Id</button><br>
-            <button onclick="peer.reconnect()">Reconnect to Peer Server</button><br>
-            <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnect when connection closed<br> -->
+            Change Themes:<select id="themes" onchange="change_Theme(this.value)">
+                <option value="0" selected="selected">Light</option>
+                <option value="1">Dark</option>
+            </select>
             <!-- Connect box -->
             <div id="connectRoot" style="visibility: hidden;">
                 Join a root node:<input type="text" id="peerId" placeholder="Input counterpart's Id" autofocus="true">
@@ -92,6 +112,7 @@
     <script src="js/peerjs.min.js"></script>
     <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <script src="js/fn.js"></script>
+    <script type="text/javascript" src="config.txt"></script>
     <script>
         let openInfoTimes = 0;
         let openLiveTimes = 0;
@@ -109,18 +130,14 @@
         let lastLayerNumber = null;
         const MyName = null;
 
-        let switchDeg = 180;
         let connectHistroy = [];
-        let defaultId = 'P2P-Live-Web-default-Id';
-        let peer = null;
-        
-        peer = new Peer(defaultId, { debug: 2});
+        let peer = new Peer(defaultId, { debug: 2});
         // Listen for the event when a Peer connection is successfully opened
         // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
         peer.on('open', (id) => {
             console.log(id);
             document.getElementById("myid").innerHTML = "Your ID:<br/>" + id;
-            document.getElementById("status").innerHTML="Status: Root Node Created";
+            document.getElementById("status").innerHTML="Status: ✔ Root Node Created ✔";
         });
         peer.on('error', function(err) {
             if (err.type === 'unavailable-id') {
@@ -131,7 +148,7 @@
                 peer.on('open', (id) => {
                     console.log(id);
                     document.getElementById("myid").innerHTML = "Your ID:<br/>" + id;
-                    document.getElementById("status").innerHTML="Status: Need to connect to the Root Node";
+                    document.getElementById("status").innerHTML="Status: ✘ Need to connect to the Root Node ✘";
                     defaultConnect();
                 });
             } else {
@@ -316,34 +333,14 @@
             roomPosition = aimPosition;
             nodesMap = rooms[aimPosition];
             if(openInfoTimes===0){
-                openRoomInfo();
-            }
-        }
-
-        function openRoomInfo() {       // top menu for showing the detail of room
-            if(openInfoTimes==0){
-                openInfoTimes++;
-                document.getElementById('openRoomInfo').style.height = "25%";
+                pop(document.getElementById('openRoomInfo'));
                 indexRefreshMap(1);
-            }else{
-                openInfoTimes=0;
-                document.getElementById('openRoomInfo').style.height = "0px";
             }
         }
 
         function indexRefreshMap(fnOfEcho){
             nodesMap = rooms[roomPosition];
             refreshMap(fnOfEcho);
-        }
-
-        function showLive() {       // if usr want to live
-            if(openLiveTimes==0){
-                openLiveTimes++;
-                document.getElementById('liveSetting').style.height = "25%";
-            }else{
-                openLiveTimes=0;
-                document.getElementById('liveSetting').style.height = "0px";
-            }
         }
 
         document.getElementById('createRoom').addEventListener('click', () => {

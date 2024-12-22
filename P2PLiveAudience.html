@@ -6,71 +6,82 @@
     <link rel="stylesheet" type="text/css" href="css/styleLiveWeb.css">
 </head>
 <body>
-    <!-- Detail of Room -->
-    <div id="openRoomInfo">
-        <img id="roomCover">
-        <div id="roomText">
-            <div id="roomTitle"></div>
-            <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea>
-            <div id="nodeInfo">
-                <div id="stable">
-                    <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">Host Node</button>
-                    <button id="refreshMap" onclick="refreshMap(1)">Refresh</button>
-                </div>
-                <div id="block0"></div>
-                <div id="block1"></div>
-            </div>
-        </div>
-        <div>
-            <button id="autoJoin" class="actionButton" onclick="autoJoin(3)">auto<br>Join</button>
-            <button id="closeInfo" class="actionButton" onclick="openRoomInfo()">Close</button>
-        </div>
-    </div>
-    
-    <!-- Stream Source -->
-    <div id="streamSource">
-        <div class="box" id="onlyPC" style="margin-top: 10px;">
-            <div style="font-weight: bold;">
-                Share PC Desktop:<br>
-                <button type="button" id="browserDisplayMedia" onclick="useDisplayMedia()">Use Display Stream</button>
-            </div>
-        </div>
-        <div class="box" style="margin-top: 10px;">
-            <div style="font-weight: bold;">
-                Share Local Devices:
-                <button type="button" id="browserNavigatorMediaDevices" onclick="askNavigatorMediaDevices()">Upload Local Device</button><br>
-                <input type="checkbox" id="ifUseCamera">Camera
-                <input type="checkbox" id="ifUseMicrophone">Microphone
-            </div>
-        </div>
-        <div class="box" style="margin-top: 10px;">
-            <div style="font-weight: bold;">
-                Lend Media Stream From Others
-                <input id="lendAimId" type="text" placeholder="input ID OF AIM here...">
-                <button type="button" id="lendStream" onclick="tryConnect(1, document.getElementById('lendAimId').value, false, true)">lend aim stream( need be accepted )</button>    
-            </div>
-        </div>
-        <div class="box" style="margin-top: 10px;">
-            <div style="font-weight: bold;">
-                <input type="checkbox" id="ifNotDisplayLocalStream">If not Display the localStream <br>
-                —— enable for saving performance of devices
-            </div>
-        </div>
-        <button class="actionButton" id="submitMediaStream" onclick="streamSourceMenu()">submit</button>
-    </div>
+    <div id="shadowCover"></div>
+    <!-- Audience Setting -->
+    <div class="pop" id="liveSetting">
+        <span class="close_Button" onclick="pop(document.getElementById('liveSetting'))">✕</span>
 
+        <div class="pop_Menu">
+            <a href="#menu_0" class="pop_Option active" onclick="changePopMenu(0); refreshMap(0);">room View</a>
+            <a href="#menu_1" class="pop_Option covert" onclick="changePopMenu(1)">stream Source Menu</a>
+            <a href="#menu_2" class="pop_Option" onclick="changePopMenu(2)">Peer Setting</a>
+        </div>
+        <div class="pop_Content">
+            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(3)">auto<br>Join</button>
+            ------------------------------------------------<br>
+            <!-- Detail of Room -->
+            <div id="openRoomInfo">
+                <div style="display: flex;">
+                    <img id="roomCover" src="">
+                    <span id="roomTitle"></span>
+                </div>
+                <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
+                ------------------------------------------------<br>
+                <div id="nodeInfo">
+                    <div id="stable">
+                        <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">Host Node</button>
+                        <button id="refreshMap" onclick="refreshMap(1)">Refresh</button>
+                    </div>
+                    <div id="block0"></div>
+                    <div id="block1"></div>
+                </div>
+                <button id="copyURL">Copy Web Link to share</button>
+            </div>
+        </div>
+        <div class="pop_Content covert">
+            <button class="confirm_Button" id="submitMediaStream" onclick="pop(document.getElementById('liveSetting'))">submit</button> 
+            ------------------------------------------------<br><!-- Stream Source -->
+            <div id="onlyPC">
+                <div style="font-weight: bold;">
+                    Share PC Desktop:<br>
+                    <button type="button" id="browserDisplayMedia" onclick="useDisplayMedia()">Use Display Stream</button>
+                </div>
+            </div>
+            ------------------------------------------------<br>
+            <div>
+                <div style="font-weight: bold;">
+                    Share Local Devices:
+                    <button type="button" id="browserNavigatorMediaDevices" onclick="askNavigatorMediaDevices()">Upload Local Device</button><br>
+                    <input type="checkbox" id="ifUseCamera">Camera
+                    <input type="checkbox" id="ifUseMicrophone">Microphone
+                </div>
+            </div>
+            ------------------------------------------------<br>
+            <div>
+                <div style="font-weight: bold;">
+                    Lend Media Stream From Others
+                    <input id="lendAimId" type="text" placeholder="input ID OF AIM here...">
+                    <button type="button" id="lendStream" onclick="tryConnect(1, document.getElementById('lendAimId').value, false, true)">lend aim stream( need be accepted )</button>    
+                </div>
+            </div>
+        </div>
+        <div class="pop_Content covert">
+            ------------------------------------------------<br>
+            <!-- <button onclick="changeTheme()">Dark - Light Mode</button><br> -->
+            <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br><br>
+            <button onclick="defaultConnect()">Click me to connect the deafult Root Id</button><br><br>
+            <button onclick="peer.reconnect()">reconnect with original Id</button><br><br>
+            <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnect when connection closed<br> -->
+        </div>
+    </div>
     <!-- Id interaction -->
     <div class="container">
         <div class="box">
-            <!-- Sender -->
-            <div style="font-weight: bold;">Audience</div>
-                <!-- Connect box -->
-                <button id="refreshButton" onclick="refreshMedia()">Refresh</button>
-                <button id="openRoomInfoButton" onclick="openRoomInfo()">Room Info</button>
-                <button onclick="peer.reconnect()">Reconnect to Peer Server</button>
-                <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div>
-                <div id="status" style="font-weight: bold;">Status: Waiting to Connecting to PeerServer...</div>
-                <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br>
+            <!-- Connect box -->
+            <button id="refreshButton" onclick="refreshMedia()">Refresh</button>
+            <button id="openRoomInfoButton" onclick="pop(document.getElementById('liveSetting'));">Setting</button>
+            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div>
+            <div id="status" style="font-weight: bold;">Status: Waiting to Connecting to PeerServer...</div>
         </div>
         <div class="box">
             <button onclick="fullWebVideo()" id="fullScreen">Full Page Video</button><br>
@@ -83,6 +94,10 @@
             <span id="sumOfRoom">Members: 1</span><br>
             <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max->100]<br>
             <button onclick="cleanMsg()">CleanMsgs</button><br>
+            Change Themes:<select id="themes" onchange="change_Theme(this.value)">
+                <option value="0" selected="selected">Light</option>
+                <option value="1">Dark</option>
+            </select>
         </div>
     </div>
     
@@ -115,7 +130,6 @@
     </script>
     <script src="js/fn.js"></script>
     <script>
-        let openInfoTimes = 0;
         let lastAimId = null;
         let layers = [0];
         let mediaOpen = null;
@@ -222,7 +236,8 @@
                             } else if(remoteStream){
                                 peer.call(data[1], remoteStream);
                             } else {
-                                streamSourceMenu();
+                                pop(document.getElementById('liveSetting'));
+                                changePopMenu(1);
                                 document.getElementById('submitMediaStream').addEventListener('click', () => {
                                     peer.call(data[1], localStream);
                                 });
@@ -230,14 +245,19 @@
                         }
                         break;
                     case 4:
-                        if(remoteStream){
-                            peer.call(awaitedNodeId, remoteStream/*document.getElementById('RemoteVideo').srcObject*/);
-                            console.log("Media delivered successfully: "+ awaitedNodeId);
-                            awaitedNodeId = null;
-                        }else if(localStream){
-                            peer.call(awaitedNodeId, localStream);
-                            console.log("Media sent successfully: "+ awaitedNodeId);
-                            awaitedNodeId = null;
+                        // if(remoteStream){
+                        //     // peer.call(awaitedNodeId, remoteStream/*document.getElementById('RemoteVideo').srcObject*/);
+                        //     // console.log("Media delivered successfully: "+ awaitedNodeId);
+                        //     // awaitedNodeId = null;
+                        //     peer.call(data[1], remoteStream);
+                        //     console.log("Media delivered successfully: "+ data[1]);
+                        // }else 
+                        if(localStream){
+                            // peer.call(awaitedNodeId, localStream);
+                            // console.log("Media sent successfully: "+ awaitedNodeId);
+                            // awaitedNodeId = null;
+                            peer.call(data[1], localStream);
+                            console.log("Media delivered successfully: "+ data[1]);
                         }else if(parent){
                             awaitedNodeId = data[1];
                             if(parent.open){
@@ -304,6 +324,7 @@
                 } else {
                     displayStream(remoteStream);
                 }
+                remoteStream = null;    // empty source
                 console.log('Received stream:', stream);    // DEBUG
             });
             mediaOpen.answer(null);
@@ -330,14 +351,6 @@
                 openInfoTimes=0;
                 document.getElementById('openRoomInfo').style.height = "0px";
             }
-        }
-
-        function streamSourceMenu(){
-            if(document.getElementById('streamSource').style.height != "25%"){
-                document.getElementById('streamSource').style.height = "25%";
-            }else{
-                document.getElementById('streamSource').style.height = "0px";
-            } 
         }
 
         // autoScroll the scrollbar

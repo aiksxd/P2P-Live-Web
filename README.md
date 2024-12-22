@@ -1,19 +1,28 @@
-- [中文文档](README_CN.md)
+- [中文文档(项目文件中文语言版本见最新releases中chinese后缀)](README_CN.md)
 
 ### **About P2P & PeerJS**:
 P2P is a distributed network architecture where each participant (also known as a node) acts as both a client and a server
 Unlike the traditional client-server model, P2P allows direct communication between nodes without the need for relay through a central server
 
-PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication implementation
+[PeerJS](https://peerjs.com/): A JavaScript library based on WebRTC for simplifying P2P communication implementation
 
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 
 ### Update:
-+ fixed the problem of way to room by id directly
-+ srs media stream extend(not very well support)
++ new functions:
++ change theme button
++ newUI
++ better characters display
++ better feedback text
++ share room url button(associate the file name. If you need modify "P2PLiveAudience.html", modify the listener of 'copyURL' in "fn.js")
++ fixed:
++ child nodes of host's child nodes refresh problem
++ redo the stream sending sys.(in order to avoid outdated stream being shared, now the stream will be deliverd one by one from the host(longer arrive but no effect on stream quality & delay). So value of variety remoteStream will be released immediate.I f you need getting stream using parent.send([4，peer.id]) when you want to modify this project)
++ empty source of video src to promote efficiency
 
 ### Next Version Plan:
-+ new indenpent voice channel
++ meeting mode with voice channels
++ remember theme change
 
 ## [Multi-Room Type -> https://aiksxd.github.io/P2PLiveIndex.html](https://aiksxd.github.io/P2PLiveIndex.html)
 + Instructions of files:
@@ -32,14 +41,13 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 > + windows & docker:
 >
 > `docker run --rm -it -p 1935:1935 -p 1985:1985 -p 8080:8080 --env CANDIDATE=127.0.0.1 -p 8000:8000/udp registry.cn-hangzhou.aliyuncs.com/ossrs/srs:5 ./objs/srs -c conf/rtmp2rtc.conf`
-2. push **rtmp** stream((rtmp://localhost/live/livestream)，pull in web of **Stream Source** button with url like "server/key" and click the button of **share SRS Media Stream**
-> for example(obs stream with key like 123456), inputing in web srs input box: localhost/live/livestream/123456
+2. push **rtmp** stream，pull in web of **Stream Source** button with the key of stream and click the button of **share SRS Media Stream** in the zone of SRS api(localhost is the address of server, next void one is the key of stream which you need to input)
 
 ### **Considerations**:
 1. If the connection is established before the host starts sharing the media stream, clicking the button again will **refresh the received media stream**(or refresh web)
 2. In the event of the host losing connection, the information from the host's child nodes will not be transmitted to other host's child nodes
 3. Video quality may initially be blurry when passed from child nodes to sub-child nodes; waiting for synchronization may resolve this (quality synchronization observed after 26 seconds in a test)
-4. By default, index request the id of "P2P-Live-Web-default-Id". If you want to establish it on your web, just put these files in your web and I recommand you modify the defaultId in the file of P2PLiveIndex.html where you can find the variety of defaultId between the srcipt(or else rooms will be bridged between example web and your web)
+4. By default, index request the id of "P2P-Live-Web-Default-Id"
 
 
 ## [Single Room Type Live Streaming -> https://aiksxd.github.io/SingleP2PLiveVersion.html](https://aiksxd.github.io/SingleP2PLiveVersion.html)
@@ -66,7 +74,6 @@ PeerJS: A JavaScript library based on WebRTC for simplifying P2P communication i
 
 ### mark
 + dataTypes: 0 -> msg, 1 -> nodes Collecter, 2 -> streaming request, 3 -> remingder of replacing the parent node, 4 -> application of refresh media stream
-> for game+: 6 -> Game Info, 7 -> Game Chessman, 8 -> Game Player
 
 + Connection Mark: 0: parent, 1: guest(for the index), 2: bridge(when connect circle), 3: root, 4: indexRoot(for the index)
 

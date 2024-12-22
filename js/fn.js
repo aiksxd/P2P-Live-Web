@@ -11,6 +11,8 @@ let roomIds = new Array();
 let bridge = null;
 let guest = null;
 let guests = new Array();
+let lastPopIndex = 0;
+let pop_Doms = new Array();
 let temporaryChosedNodes = new Array();
 let liveCoverBase64 = null;
 let msgImgBase64 = null;
@@ -39,7 +41,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             parent.on('open', () => {
                 // changingParentConnection = false;
                 parent.send(hereNode);
-                document.getElementById("status").innerHTML="Status: Connected to Live Room Successfully!"
+                document.getElementById("status").innerHTML="Status:✔ Connected to Live Room Successfully! ✔"
                 appearMsg([ 0, null, "System", "Connected successfully"]);
             });
             
@@ -125,7 +127,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             });
 
             parent.on('close', () => {
-                document.getElementById("status").innerHTML="Status: Room Connection Closed. Please Refresh the Connection!"
+                document.getElementById("status").innerHTML="Status:✘ Room Connection Closed. Please Refresh the Connection! ✘"
 
                 if(document.getElementById("ifAutoReconnect").checked){
                     document.getElementById("status").innerHTML="Status: Reconnecting to room...";
@@ -210,6 +212,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             }
             bridge = peer.connect(id);
             alert("try to connect someone in rooms");
+            break;
         case 3:
             // Close old connection
             if (root) {
@@ -222,12 +225,11 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
 
             root.on('open', () => {
                 root.send(nodesMap);
-                document.getElementById("status").innerHTML="Status: Connected to Root Node Successfully!"
+                document.getElementById("status").innerHTML="Status:✔ Connected to Root Node Successfully! ✔"
             });
             
             root.on('close', () => {
-                document.getElementById("status").innerHTML="Status: Root Connection Closed!";
-                document.getElementById("connectRoot").style.visibility = 'visible';
+                document.getElementById("status").innerHTML="Status:✘ Root Connection Closed!(Reconnect in Setting) ✘";
                 // if(document.getElementById("ifAutoReconnect").checked){
                 //     document.getElementById("status").innerHTML="Status: Reconnecting to last Root Node...";
                     
@@ -245,7 +247,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             
             root.on('open', () => {
                 document.getElementById('peerId').value=id;
-                document.getElementById("status").innerHTML="Status: Connected to Root Node Successfully!"
+                document.getElementById("status").innerHTML="Status:✔ Connected to Root Node Successfully! ✔"
             });
 
             // Receive the reply of text: Host --> Guset
@@ -258,7 +260,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
 
             root.on('close', () => {
                 // root = null;
-                document.getElementById("status").innerHTML="Status: Root Connection Closed!";
+                document.getElementById("status").innerHTML="Status:✘ Root Connection Closed! ✘";
                 
                 // if(document.getElementById("ifAutoReconnect").checked){
                 //     document.getElementById("status").innerHTML="Status: Reconnecting to last Root Node...";
@@ -592,8 +594,8 @@ function askNavigatorMediaDevices(){
             console.error('Error getting local stream:', err);
         });
 }
-function shareSRSMediaStream(url) {
-    url = "webrtc://" + url;
+function shareSRSMediaStream() {
+    url = "webrtc://" + document.getElementById('streamIpSRS').value + "/live/livestream/" + document.getElementById('streamKeySRS').value;
     const rtcPlayer = new SrsRtcPlayerAsync();
     rtcPlayer.play(url);
     localStream = rtcPlayer.stream;
@@ -606,6 +608,9 @@ function shareSRSMediaStream(url) {
 
 // display the remote stream and try to play it(if usr didn't do anything on web maybe be prohibited)
 function displayStream(stream) {
+    WebVideo.pause();
+    WebVideo.removeAttribute('src'); // empty source
+    WebVideo.load();
     if(WebVideo.srcObject){
         WebVideo.srcObject = null;
     }
@@ -613,9 +618,8 @@ function displayStream(stream) {
 }
 
 function refreshMedia(){
-    if(remoteStream){
-        displayStream(remoteStream);
-    } else if(parent){
+    remoteStream = null;
+    if(parent){
         if(parent.open){
             parent.send([4, peer.id]);
         }
@@ -723,4 +727,91 @@ if(document.getElementById("myIcon")){
         document.getElementById("uploadIcon").click();
     });
 }
-// }
+
+function change_Theme(index) {
+console.log(index);
+// get
+//let getComputedStyle(document.documentElement).getPropertyValue('name')
+//     document.documentElement.style.setProperty('name', value);
+    // let theme_color = 'rgb(0,0,0)';  // default white
+    // let font_color = 'rgb(255,255,255)';
+    // let ui_color = 'rgb(173,195,192)';
+    // let input_color = 'rgb(200,200,200)';
+    // let active_color = 'rgb(162, 255, 109)';
+
+    let theme_color = 'rgb(255,255,255)';  // default white
+    let font_color = 'rgb(0,0,0)';
+    let ui_color = 'rgb(230,230,230)';
+    let input_color = 'rgb(241,242,243)';
+    let active_color = 'rgb(162,255,109)';
+    let visited_color = 'rgb(23, 134, 245)';
+    switch (index) {
+        case "1":   // dark mode
+            theme_color = 'rgb(28,33,40)';
+            font_color = 'rgb(197,209,216)';
+            ui_color = 'rgb(46,46,46)';
+            input_color = '#373E47';
+            break;
+        default:
+            break;
+    }
+    document.documentElement.style.setProperty('--theme-color', theme_color);
+    document.documentElement.style.setProperty('--theme-font-color', font_color);
+    document.documentElement.style.setProperty('--theme-ui-color', ui_color);
+    document.documentElement.style.setProperty('--theme-input-color', input_color);
+    document.documentElement.style.setProperty('--theme-active-color', active_color);
+    document.documentElement.style.setProperty('--theme-visited-color', visited_color);
+}
+
+function pop(dom) {
+    pop_Doms = dom;
+    let value = Math.abs(dom.style.opacity - 1);
+    dom.style.opacity = value;
+    if (value == 1){
+        value = 'visible';
+    } else {
+        value = 'hidden';
+    }
+    dom.style.visibility = value;
+    document.getElementById('shadowCover').style.visibility = value;
+}
+
+function changePopMenu(popIndex, freshInfo) {
+    if (pop_Doms.getElementsByClassName("pop_Content")[lastPopIndex]) {
+        pop_Doms.getElementsByClassName("pop_Content")[lastPopIndex].classList.add("covert");
+        pop_Doms.getElementsByClassName("pop_Option")[lastPopIndex].classList.remove("active");
+    } else {
+        pop_Doms.getElementsByClassName("pop_Content")[0].classList.add("covert");
+        pop_Doms.getElementsByClassName("pop_Option")[0].classList.remove("active");
+    }
+
+    lastPopIndex = popIndex;
+    pop_Doms.getElementsByClassName("pop_Content")[lastPopIndex].classList.remove("covert");
+    pop_Doms.getElementsByClassName("pop_Option")[lastPopIndex].classList.add("active");
+
+    if (freshInfo) {
+        
+    }
+}
+
+document.getElementById('copyURL').addEventListener('click', function() {
+    let currentUrl = window.location.href;
+    let index = currentUrl.indexOf("P2PLive");
+    if (index === -1) {
+        console.error('ERROR url');
+        return;
+    }
+    if (parent) {
+        currentUrl = currentUrl.substring(0, index + 7) +"Audience.html?id="+ parent.peer +"&name=undefined";
+    } else {  // host or audience partly unloaded
+        currentUrl = currentUrl.substring(0, index + 7) +"Audience.html?id="+ peer.id +"&name=undefined";
+    }
+    
+    navigator.clipboard.writeText(currentUrl)
+        .then(() => {
+            alert('Copy Successfully' + currentUrl);
+        })
+        .catch(err => {
+            console.error('ERROR:', err);
+        });
+});

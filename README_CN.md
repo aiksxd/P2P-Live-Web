@@ -1,17 +1,29 @@
+项目文件中文语言版本见最新releases中chinese后缀
+
 ### **关于P2P & PeerJS**：
 P2P 是一种分布式网络架构，其中每个参与者（也称为节点）充当客户端和服务器的角色。
 与传统的客户端-服务器模型不同，P2P 允许直接的节点之间通信，而无需通过中央服务器进行转发。
 
-PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实现。
+[PeerJS](https://peerjs.com/)：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实现。
 
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 
 ### 更新:
-+ 修复了首页无法通过id加入房间的问题
-+ 流媒体渠道拓宽 (不完全的srs推流支持，但能用)
++ 新功能：
++ 主题切换功能
++ 新主题
++ 新样式中的字符显示补偿
++ 程序反馈文本提示丰富
++ 分享房间链接(如需重命名项目下P2PLiveAudience.html请于fn.js下'copyURL'的监听器一并更改识别与文件名)
++ 修复：
++ 修复了子子节点刷新无反馈的问题
++ 流传输大改：修复了刷新的父节点没有释放remoteStream从而导致子子节点刷新后获取的是过时的流媒体以及remoteStream没有释放导致刷新使video标签获取的是过时的remoteStream
+（PS：为防止流过时，现在流请求都会请求到房主并随着连接关系逐级传输下去（收发延迟增大但不影响视频延迟），现在remoteStream变量在使用后即被释放，值为null，现在作用仅用于在编程中区分流，以后可能会替代，如需获取流使用parent.send([4, peer.id])来获取来自房主的流
++ 修复了因修复后而产生的remoteStream复用产生的video标签中src复用导致的高cpu占用以及内存泄漏
 
 ### 下个版本的计划:
-+ 新建独立的音频通道
++ 会议功能(与独立音频功能合并)
++ 记忆主题改变
 
 ## [多房间型 -> https://aiksxd.github.io/CN/P2PLiveIndex.html](https://aiksxd.github.io/CN/P2PLiveIndex.html)
 + 文件说明：
@@ -25,13 +37,12 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 1. 联网并使用浏览器读取主页(P2PLiveIndex.html)，(若根节点连接不成功，则创建不公开房间 或 填个根节点的ID连接)
 2. 点击**创建房间**之后点击**共享本地流**，选择合适的方式共享流媒体
 
-### **SRS支持**：
+### **SRS support**：
 1. 运行srs服务器并添加webRTC支持
 > + windows & docker:
 >
 > `docker run --rm -it -p 1935:1935 -p 1985:1985 -p 8080:8080 --env CANDIDATE=127.0.0.1 -p 8000:8000/udp registry.cn-hangzhou.aliyuncs.com/ossrs/srs:5 ./objs/srs -c conf/rtmp2rtc.conf`
-2. 向目标地址推rtmp协议流(rtmp://localhost/live/livestream)，可选地自定义密钥，拉取时在共享本地流填入"目标地址/密钥"并点分享按钮
-> 如obs推流密钥填123456时，在网页共享本地流的srs选项填入：localhost/live/livestream/123456
+2. 向目标地址推rtmp协议流，拉取时在共享本地流SRS功能区域的密钥位置填入"密钥"并点分享按钮(第一个是SRS服务器地址，默认localhost。第二个是推流时填入的密钥，需要手动填写)
 
 ### **注意事项**：
 1. 如果建立连接发生在主机开始共享流媒体之前，再次点击刷新按钮会**刷新接收的流媒体**（如不可用则刷新整个页面）
@@ -64,7 +75,6 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 
 ### 标识
 + 消息类型: 0 -> 互动信息, 1 -> 节点信息收集用, 2 -> 流媒体请求, 3 -> 提醒更换父节点， 4 -> 流媒体呼叫刷新请求
-> for game+: 6 -> Game Info, 7 -> Game Chessman, 8 -> Game Player
 
 + Connection Mark: 0: parent, 1: guest(for the index), 2: bridge(when connect circle), 3: root, 4: indexRoot(for the index)
 
@@ -74,7 +84,7 @@ PeerJS：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实�
 
 ## Issue: 
 ### 连接无反馈
-+ 由于P2P本身的局限性，有些网络之间难以建立P2P连接，不过可以通过桥接都可以连接网络来解决
++ 由于P2P本身的局限性，有些网络之间难以建立P2P连接，不过有时可以通过桥接都可以连接网络来解决
 
 ## **关于本地Peer服务器**：
 **PS(如果不想本地运行自行忽略):**
