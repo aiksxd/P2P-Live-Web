@@ -1,0 +1,154 @@
+let theme_Index = "0";
+let last_Index = 0;
+let language = 'en'
+let app_Mode = true;
+
+function reboot_App_Language() {
+    document.getElementById('homePage').src = "./"+ language + "/index.html";
+}
+switch (navigator.language) {
+    case 'zh-CN':
+        language = "zh";
+        break;
+    default:
+        break;
+}
+reboot_App_Language(language);
+
+function changeMenu(index) {
+    let sidebar = document.getElementsByClassName('sidebar')[0];
+    let menus = sidebar.getElementsByTagName("svg");
+    let contents = document.getElementsByClassName('content')[0];
+    if (index < 0) {
+        index = menus.length + index;
+        if (index < 0) {
+            index = 0;
+            alert("Error aim menu");    // debug
+        }
+    }
+    contents = contents.getElementsByTagName("div");
+    if (!menus[last_Index]) {
+        last_Index = 0;
+    } else {
+        contents[last_Index].classList.add("covert");
+        menus[last_Index].classList.remove("active");
+    }
+    if (!menus[index]) {
+        popIndex = 0;
+    }
+    last_Index = index;
+    contents[index].classList.remove("covert");
+    menus[index].classList.add("active");
+}
+
+function add_Extension(exist, svg, text) {
+    let index = '';
+    switch (exist) {
+        case 1:
+            let len = document.getElementsByClassName('liveMenu').length;
+            let newDom = document.getElementsByClassName('liveMenu')[len - 1].cloneNode(true);
+            let newIframe = document.getElementById('livePage').cloneNode(true);
+            newIframe.id = newIframe.id + len;
+            newIframe.src = "";
+            let newContentDiv = document.createElement('div');
+            newContentDiv.appendChild(newIframe);
+            newContentDiv.classList.add("iframeContainer", "covert");
+
+            newDom.setAttribute('onclick', "changeMenu("+ (len + 1) + ")");
+            newDom.classList.remove('active');  //
+            document.getElementsByClassName('content')[0].getElementsByTagName('div')[len - 1].insertAdjacentElement('afterend', newContentDiv);
+            document.getElementsByClassName('liveMenu')[len - 1].insertAdjacentElement('afterend', newDom);
+            
+            if (len < 2) {  // old len(hasnot updated)
+                document.getElementsByClassName('liveMenu')[len].classList.add('covert');
+            } else {
+                document.getElementsByClassName('liveMenu')[len - 1].classList.remove('covert');
+            }
+            index = len;
+            break;
+        default:
+            break;
+    }
+    return index;
+}
+
+function change_App_Theme(
+    index,
+    theme_color,
+    sidebar_color,
+    sidebar_ui_color,
+    sidebar_font_color,
+    sidebar_active_color
+) {
+    // --sidebar_color: rgb(243,243,243);    /* #fae5a0; */
+    // --sidebar_ui_color: rgb(174,221,129);     /* rgb(193, 238, 31); */
+    // --sidebar_font_color: rgb(21,26,34);
+    // --sidebar_active_color: rgb(107,194,53);
+    // --window_width: 100vh;
+    // --window_height: 100vh;
+    if (document.getElementById('uselocalStorage').checked && index !== undefined) {
+        localStorage.setItem('themeIndex', index);
+    }
+    switch (index) {
+        case "1":   // dark
+            theme_color = 'rgb(46,46,46)';
+            sidebar_color = 'rgb(28,33,40)';
+            sidebar_ui_color = 'rgb(46,46,46)';
+            sidebar_font_color = 'rgb(209,215,224)';
+            sidebar_active_color = 'rgb(128, 128, 128)';
+            break;
+        default:  // default white
+            theme_color = theme_color || 'rgb(243,243,243)';
+            sidebar_color = sidebar_color || 'rgb(216, 224, 209)';
+            sidebar_ui_color = sidebar_ui_color || 'rgb(174,221,129)';
+            sidebar_font_color = sidebar_font_color || 'rgb(21,26,34)';
+            sidebar_active_color = sidebar_active_color || 'rgb(107,194,53)';
+            break;
+    }
+    document.documentElement.style.setProperty('--theme-color', theme_color);
+    document.documentElement.style.setProperty('--sidebar-color', sidebar_color);
+    document.documentElement.style.setProperty('--sidebar-ui-color', sidebar_ui_color);
+    document.documentElement.style.setProperty('--sidebar-font-color', sidebar_font_color);
+    document.documentElement.style.setProperty('--sidebar-active-color', sidebar_active_color);
+    theme_Index = index;
+    let currentUrl = window.location.href;
+    // let urlIndex = currentUrl.indexOf("P2PLi");
+    // if (urlIndex === -1) {
+    //     urlIndex = currentUrl.indexOf("index");
+    // }
+    // if (urlIndex !== -1) {
+    //     currentUrl = currentUrl.substring(0, urlIndex);
+    // }
+    // console.log(currentUrl);    // debug
+    let iframeWindow = document.getElementById('homePage').contentWindow;
+    iframeWindow.postMessage(theme_Index, currentUrl);
+    iframeWindow = document.getElementById('livePage').contentWindow;
+    iframeWindow.postMessage(theme_Index, currentUrl);
+    let i = 1;
+    while (i < (document.getElementsByClassName('livePages').length)) {
+        let iframeWindow = document.getElementById('livePage' + i).contentWindow;
+        iframeWindow.postMessage(theme_Index, currentUrl);
+        i++;
+    }
+}
+
+window.addEventListener('message', (e)=>{
+    let index = '';
+    if (document.getElementById('multiLivePage').checked) {
+        index = add_Extension(1);
+        changeMenu(index);
+    } else {
+        changeMenu(-2);     // original live menu
+    }
+    console.log(e.data +"\n"+ index);  // debug
+    document.getElementById("livePage" + index).src = "./"+ language +"/"+ e.data;
+},false);
+
+document.getElementById('multiLivePage').addEventListener('click', () => {
+    if (!document.getElementById('multiLivePage').checked) {
+        let len = document.getElementsByClassName('liveMenu').length;
+        if (len > 1) {
+            document.getElementsByClassName('liveMenu')[len - 1].classList.remove('covert');
+        }
+    }
+});

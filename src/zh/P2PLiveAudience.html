@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
+    <link rel="stylesheet" type="text/css" href="css/styleLiveWeb.css">
+</head>
+<body>
+    <div id="shadowCover"></div>
+    <!-- Audience Setting -->
+    <div class="pop" id="liveSetting">
+        <span class="close_Button" onclick="pop(document.getElementById('liveSetting'))">✕</span>
+
+        <div class="pop_Menu">
+            <a href="#menu_0" class="pop_Option active" onclick="changePopMenu(0); refreshMap(0);">房间信息</a>
+            <a href="#menu_1" class="pop_Option covert" onclick="changePopMenu(1)">流媒体源</a>
+            <a href="#menu_2" class="pop_Option" onclick="changePopMenu(2)">Peer设置</a>
+            <a href="#menu_3" class="pop_Option" onclick="changePopMenu(3)">会议</a>
+        </div>
+        <div class="pop_Content">
+            <!-- Detail of Room -->
+            <div id="openRoomInfo">
+                <div style="display: flex;">
+                    <img id="roomCover" src="">
+                    <span id="roomTitle"></span>
+                </div>
+                <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
+                <div id="nodeInfo">
+                    <div id="stable">
+                        <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">房主</button>
+                        <button id="refreshMap" onclick="refreshMap(1)">刷新</button>
+                    </div>
+                    <div id="block0"></div>
+                    <div id="block1"></div>
+                </div>
+                <button id="copyURL">复制房间分享直链</button>
+            </div>
+            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(4, 1)">自动<br>加入</button>
+        </div>
+        <div class="pop_Content covert">
+            <!-- Stream Source -->
+            <div id="onlyPC">
+                <div class="stress">
+                    分享电脑屏幕画面:<br>
+                    <button type="button" id="browserDisplayMedia" onclick="useDisplayMedia()">使用浏览器捕捉桌面流</button>
+                </div>
+            </div>
+            <div>
+                <div class="stress">
+                    分享本地设备:
+                    <button type="button" id="browserNavigatorMediaDevices" onclick="askNavigatorMediaDevices()">上传本地设备</button><br>
+                    <input type="checkbox" id="ifUseCamera">摄像头
+                    <input type="checkbox" id="ifUseMicrophone">麦克风
+                </div>
+            </div>
+            <div>
+                <div class="stress">
+                    输入"SRS推流地址/密钥"(rtmp -> srs -> webrtc)<br>
+                    <input id="streamIpSRS" value="localhost" type="text" placeholder="输入本地部署的SRS服务器地址..."><br>
+                    <input id="streamKeySRS" type="text" placeholder="填入串流密钥..."><br>
+                    <button type="button" id="uploadStreamSRS" onclick="shareSRSMediaStream()">分享SRS视频流</button><br><br>
+                </div>
+                <div class="stress">
+                    借用他人流媒体(需要对方同意)
+                    <input id="lendAimId" type="text" placeholder="填入对方ID...">
+                    <button type="button" id="lendStream" onclick="tryConnect(1, document.getElementById('lendAimId').value, false, true)">发起请求</button>    
+                </div>
+            </div>
+            <button class="confirm_Button" id="submitMediaStream" onclick="pop(document.getElementById('liveSetting'))">Submit<br>[Enter]</button>
+        </div>
+        <div class="pop_Content covert">
+            <input type="checkbox" id="ifAutoReconnect" checked="checked">自动重连<br><br>
+            <button onclick="peer.reconnect()">再次申请原ID</button><br><br>
+        </div>
+        <div class="pop_Content covert">
+            <input type="checkbox" onclick="join_Conference()" id="joinConference">加入会议<br>
+            
+            选择你想要分享的设备:<br>
+            <input type="checkbox" id="ifConferenceUseCamera">摄像头
+            <input type="checkbox" id="ifConferenceUseMicrophone">麦克风<br>
+            <input type="checkbox" onclick="upload_Conferee_Video()" id="uploadConfereeVideo">获取本地设备<br><br>
+            <video id="conferee_Local_Video"></video><br>
+            确认公开本地流:
+            <input type="checkbox" onclick="askNavigatorMediaDevices(true)" id="uploadConfereeVideo">公开流<br><br>
+            
+         </div>
+        </div>
+    <!-- Id interaction -->
+    <input type="checkbox" id="toggleContainer" style="display: none;">
+    <label for="toggleContainer" onclick="document.getElementById('expandVideoBox').click()" class="containerShowcaseSwitch fadeout">▲</label>
+    <div class="container">
+        <div class="box">
+            <!-- Connect box -->
+            <button id="refreshButton" onclick="refreshMedia()">刷新</button>
+            <button id="openRoomInfoButton" onclick="pop(document.getElementById('liveSetting'));">设置</button>
+            <div id="myid" style="font-weight: bold;">正在等待连接到Peer服务器...</div>
+            <div id="status" style="font-weight: bold;">正在等待连接到Peer服务器...</div>
+        </div>
+        <div class="box">
+            <button onclick="fullWebVideo()" id="fullScreen">铺满屏幕</button><br>
+            <div>
+                <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">自定义头像与昵称<br/><input type="text" id="name" placeholder="填入你的名字..." /></div><br>
+                <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
+            </div>
+        </div>
+        <div class="box">
+            <span id="sumOfRoom">成员数: 1</span><br>
+            <input type="checkbox" id="ifAutoClean">自动清理信息[最大->100]<br>
+            <button onclick="cleanMsg()">清理信息</button><br>
+            <button onclick="document.getElementById('toggleChatBox').click()">隐藏侧边栏</button><br>
+            切换主题:<select id="themes" onchange="change_Theme(this.value)">
+                <option value="0" selected="selected">白天</option>
+                <option value="1">黑暗</option>
+            </select>
+        </div>
+        <div class="box">
+            <div id="confereesContainer">
+                <div class="conferees">
+                    <button onclick="pop(document.getElementById('liveSetting'), 3);">会议 <br> 设置</button><br>
+                    <button onclick="conference_Play()">播放所有 <br> 会议视频</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Live interaction-->
+    <input type="checkbox" id="expandVideoBox" style="display: none;">
+    <div class="videoBox">
+        <input type="checkbox" id="toggleChatBox" style="display: none;">
+        <video id="webVideo" controls autoplay></video>
+        <!-- Message box -->
+        <div id="chatContainer">
+            <div id="chatBox"></div>
+            <div class="sendInput">
+                <!-- Send box -->
+                <input type="text" id="sendMessageBox" placeholder="填入你想发的信息..." autofocus="true" />
+                <button type="button" id="uploadImgButton">图片</button>
+                <button type="button" id="sendButton" onclick="sendMsg()">发送</button><br>
+                <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
+            </div>
+        </div>
+    </div>
+
+    <!-- 2.3 Local video debug>
+    <h2>Local Video</h2>
+    <video id="localVideo" autoplay></video-->
+    <!--if you want to check the availability of localStream, here are <2.3localvideo>, desplayLocalStream(), -->
+    
+    <script src="js/peerjs.min.js"></script>
+    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
+    <script>
+        const peer = new Peer({ debug: 2})      //use PeerJS official server
+    </script>
+    <script src="js/fn.js"></script>
+    <script>
+        let lastAimId = null;
+        let layers = [0];
+        let ifAutoScroll = true;
+        let ifConnectedAim = false;
+        let remoteStream = null;
+        let localStream = null;
+        let audiences = new Array();
+        let audienceIds = new Array();
+        let conn = null;
+        let conns = new Array();
+        let connIds = new Array();
+        let nodesMap = new Array();
+        let params = new URLSearchParams(document.location.search.substring(1));
+        let urlId = params.get("id");
+        let urlName = params.get("name");
+        let hereNode = new Array();
+        let changingparent_NodeConnection = false;
+        let ifHitAim = false;
+        let lastLayerNumber = null;
+        let awaitedNodeId = null;
+        const MyName = document.getElementById("name");
+        const WebVideo = document.getElementById('webVideo');
+
+        // the function of getting local stream(It can't work on most of mobile phone)
+        // Please note! In order for the getDisplayMedia() method to work properly, you need to use the HTTPS protocol or run it on localconn in a local development environment.
+        // Otherwise, the browser may restrict access to the camera and microphone.
+        // function getLocalStream() {
+        //     return navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        // }
+
+        // Listen for the event when a Peer connection is successfully opened
+        // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
+        peer.on('open', (id) => {
+            MyName.value = urlName;
+            hereNode = [ 1, 0, 0, [], id, getMyName(), []]
+            console.log(id);
+            document.getElementById("myid").innerHTML = "你的ID:<br/>" + id;
+            document.getElementById("status").innerHTML="状态:正在连接到直播间...";
+            tryConnect( 0, urlId, false);   // try to connect to the room
+        });
+
+        // When a new connection request is received, this code creates a data channel and sends the local or remote stream (if available) and text messages.
+        peer.on('connection', (connPort) => {
+            connIds.push(connPort.peer);
+            conns.push(connPort);
+            conn = connPort;
+            if (my_Conferee_Index) {
+                if (nodesMap[11][1].includes(conn.peer)) {
+                    conferee = conn;
+                    conferee_Nodes.push(conferee);
+
+                    conferee.on('open', () => {
+
+                    });
+
+                    conferee.on('data', (data) => {
+                        if (data[1] === 3) {    // 5,3,index,stream,img
+                            if (data[3]) {      // stream
+                                nodesMap[11][3][data[2]] = data[3];
+                                document.getElementsByClassName('confereeVideos')[data[2]].src = data[3];
+                            } else {    // img
+                                document.getElementsByClassName('conferees')[data[2]].style.background = data[4];
+                            }
+                        }
+                    });
+
+                    conferee.on('close', () => {
+                        if (nodesMap[11][1].includes(conferee.peer)) {
+                            let delete_index = nodesMap[11][1].indexOf(conferee.peer);
+                            document.getElementsByClassName('conferees')[delete_index].remove();
+                        }
+                    });
+                    conn = null;
+                    return;
+                }
+            }
+            conn.on('open', () => {
+                // for guest in index
+                let sendNodesMap = nodesMap;
+                sendNodesMap[2] = -1;
+                conn.send(sendNodesMap);
+            });
+
+            // Receive the text: Host <-- parent_Node
+            conn.on('data', (data) => {
+                // data[0]:
+                //  0: msg
+                //  1: nodeInfo or indexRoomInfo 
+                //  2: roomInfoModfied
+                //  3: for reconnect: Remind the child node to replace the parent_Node node
+                //  4: for refresh: apply to the new media Stream for daliver to child
+                switch (data[0]) {
+                    case 0:
+                        console.log('Received data:', data);
+                        deliverId = data[1];
+                        data[1] = peer.id;  // make sure msg[2] keep last id of deliver
+                        
+                        if ( liveSend(data) > 0 ) {
+                            console.log("Msg delivered successfully: " + data);
+                        }else{console.log('Msg delivered failed');}
+                        
+                        appearMsg(data);
+                        break;
+                    case 1:
+                        if ( ! audienceIds.includes(data[4])){
+                            let aimPosition = connIds.indexOf(data[4]);
+                            audienceIds.push(connIds[aimPosition]);
+                            audiences.push(conns[aimPosition]);
+
+                            console.log("Msg Connected to: " + data[4]);
+
+                            if(remoteStream){      // speed debug todo
+                                peer.call(data[4], remoteStream);
+                                console.log("Media delivered successfully: "+ data[4]);
+                            }else if(localStream){
+                                peer.call(data[4], localStream);
+                                console.log("Media sent successfully: "+ data[4]);
+                                // If you want to receive the reply of the stream
+                                // usage: let temp peer.call(conn.peer, localStream);
+                                // temp.on('stream', (stream) = displayStream);
+                                // PS:
+                                // It can only receive the previous one, so you need to deliver a new stream. 
+                            }
+                        }
+                        recorder(data);
+                        break;
+                    case 2:
+                        if(data[1] && confirm(data[2]+"("+ data[1] +") 请求获得你的流媒体")){
+                            if(localStream){
+                                peer.call(data[1], localStream);
+                            } else if(remoteStream){
+                                peer.call(data[1], remoteStream);
+                            } else {
+                                pop(document.getElementById('liveSetting'));
+                                changePopMenu(1);
+                                document.getElementById('submitMediaStream').addEventListener('click', () => {
+                                    peer.call(data[1], localStream);
+                                });
+                            }
+                        }
+                        break;
+                    case 4:
+                        // if(remoteStream){
+                        //     // peer.call(awaitedNodeId, remoteStream/*document.getElementById('RemoteVideo').srcObject*/);
+                        //     // console.log("Media delivered successfully: "+ awaitedNodeId);
+                        //     // awaitedNodeId = null;
+                        //     peer.call(data[1], remoteStream);
+                        //     console.log("Media delivered successfully: "+ data[1]);
+                        // }else 
+                        if(localStream){
+                            // peer.call(awaitedNodeId, localStream);
+                            // console.log("Media sent successfully: "+ awaitedNodeId);
+                            // awaitedNodeId = null;
+                            peer.call(data[1], localStream);
+                            console.log("Media delivered successfully: "+ data[1]);
+                        }else if(parent_Node){
+                            awaitedNodeId = data[1];
+                            if(parent_Node.open){
+                                parent_Node.send([4, peer.id]);
+                            }
+                        }
+                        break;
+                    case 5:     // Conference
+                        switch (data[1]) {
+                            case 0:
+                                parent_Node.send(data);
+                            case 1:     // useless?
+                                break;
+                            case 2:     // delete
+                                if (my_Conferee_Index) {
+                                    
+                                } else {
+                                    
+                                }
+                            case 3:
+                                break;
+                            case 4:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        console.log("unknown data: " + data);
+                }
+            });
+
+            
+            conn.on('close', () => {
+                for (let i = 0; i< conns.length; i++){
+                    if(conns[i]){
+                        if (conns[i].open){
+                            continue;
+                        }else{
+                            let disconnectedGuest = connIds.indexOf(conns[i].peer);   // locate old data
+                            if (disconnectedGuest !== -1){
+
+                                let disconnectedAudience = audienceIds.indexOf(conns[i].peer);
+                                if (disconnectedAudience !== -1){
+                                    console.log("Disconnected and deleted: " + audienceIds[disconnectedAudience]);     //DEBUG
+                                    audiences.splice(disconnectedAudience, 1);
+                                    audienceIds.splice(disconnectedAudience, 1);
+                                    
+                                    let sameId = hereNode.indexOf(conns[i].peer);
+                                    if(sameId !== -1){
+                                        hereNode.splice(sameId, 3);     // remove disconnected audiences
+                                        hereNode[2] = audienceIds.length;
+                                    
+                                        // one of child nodes closed the connection
+                                        console.log("nodesMap update after somebody closed")    // DEBUG
+                                        if (parent_Node){
+                                            if (parent_Node.open){
+                                                parent_Node.send(hereNode);
+                                            }
+                                        }
+
+                                    }
+                                }
+                                // console.log("Disconnected and deleted: " + conns[i].peer);     //DEBUG
+                                conns.splice(disconnectedGuest, 1);
+                                connIds.splice(disconnectedGuest, 1);
+                            }
+                        }
+                    }else{break;}
+                }
+            });
+            
+        });
+
+        peer.on('call', (mediaConnection) => {
+            // Receive the stream
+            mediaConnection.on('stream', (stream) => {
+                remoteStream = stream;
+                if (nodesMap[11]) {
+                    if (my_Conferee_Index && nodesMap[11][3].includes(stream.id)) {
+                        document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = stream;
+                        
+                        mediaConnection.on('close', function() {    // test to do
+                            document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = null;
+                        });
+                        return;
+                    }
+                }
+                if(awaitedNodeId){
+                    peer.call(awaitedNodeId, stream/*document.getElementById('RemoteVideo').srcObject*/);
+                    console.log("Media delivered successfully: "+ awaitedNodeId);
+                    awaitedNodeId = null;
+                } else {
+                    displayStream(stream);
+                }
+                // remoteStream = null;    // empty source
+                
+                mediaConnection.on('close', function() {
+                    remoteStream = null;
+                    displayStream(null);
+                });
+                console.log('Received stream:', stream);    // DEBUG
+            });
+            mediaConnection.answer(null);
+        });
+
+        // // Click event for the send message button && parent_Node uploads, conn receives the reply from the receiving party.
+        // // *Explanation: In the given code snippet, here is an event listener attached to the "connectButton" element, which triggers a function when the button is clicked.
+        // // *Inside the function, the "parent_Node" variable is assigned the value of the connection made with the peer using the peer Id obtained from the input field with the Id "peerId".
+        // document.getElementById('refreshButton').addEventListener('click', () => {
+        //     document.getElementById("status").innerHTML="Status: Connecting..."
+        //     tryConnect( 0, urlId, false);
+        // });
+
+        // function openRoomInfo() {       // top menu for showing the detail of room
+        //     if(nodesMap[0] == undefined){
+        //         alert("Error: void nodesMap");
+        //         return;
+        //     }
+        //     if(openInfoTimes==0){
+        //             openInfoTimes++;
+        //             document.getElementById('openRoomInfo').style.height = "25%";
+        //             refreshMap(1);
+        //     }else{
+        //         openInfoTimes=0;
+        //         document.getElementById('openRoomInfo').style.height = "0px";
+        //     }
+        // }
+
+        // autoScroll the scrollbar
+        document.getElementById("chatBox").addEventListener('onmouseover', ()=>{ ifAutoScroll = false;});
+        document.getElementById("chatBox").addEventListener('onmouseout', ()=>{ ifAutoScroll = true;});
+
+        // Listen for press enter in message box
+        document.getElementById("sendMessageBox").addEventListener('keypress', enter);
+        function enter(e) {
+            let event = e && window.event;
+            if (event.which && event.keyCode == '13'){
+                document.getElementById("sendButton").click();
+            }
+        }
+        
+        MyName.addEventListener(
+            "focusout",
+            () => {
+                if (MyName.value != hereNode[5] && MyName.value){
+                    hereNode[5] = MyName.value;
+                    parent_Node.send(hereNode);
+                }
+                if (my_Conferee_Index) {
+                    parent_Node.send([5,4, my_Conferee_Index, getMyName(), null]);
+                }
+            },
+            true,
+        );
+
+        function recorder(data){    // todo :debug
+            switch (data[1]){
+                case 0:     // 0 means unfinished
+                    let sameId = hereNode.indexOf(data[4]);   // locate old data
+                    console.log('Info of nodes updated:', data);
+                    // let idTemp = Object.assign({}, connPeers);     // make connIds value stable
+                    if(sameId === -1){
+                        hereNode.push(data[4]);
+                        hereNode.push(data[5]);
+                        hereNode.push(data);
+                    } else {
+                        hereNode[ sameId + 1 ] = data[5];
+                        hereNode[ sameId + 2 ] = data;      // replace old data
+                    }
+                    // let idTemp = Object.assign({}, connIds);     // make connIds value stable
+                    // idTemp[sameId] = data;      // replace old data
+                    // hereMap = [1, peer.id, idTemp, null, 0];  //record this node's info
+                    hereNode[2] = audienceIds.length;
+                    if(parent_Node){
+                        if(parent_Node.open){       // collect information about the connection map and send to parent_Node node
+                            if (audienceIds.includes(parent_Node.peer)){    // fix connect mutually
+                                for(let i=0; i<audiences.length; i++){  // send nodesMap to all of child nodes
+                                    if(audiences[i] || audienceIds[i] == parent_Node.peer){
+                                        continue;
+                                    }
+                                    if(audiences[i].open){
+                                        audiences[i].send([ 1, 1, audienceIds.length, 0, null, null, null, peer.id, getMyName(), hereNode, null]);
+                                    }
+                                }
+                            } else {
+                                parent_Node.send(hereNode);   // if not root node
+                            }
+                        }
+                    }
+                    break;
+                case 1:    // once collection of data is completed            
+                    for(let i=0; i<audiences.length; i++){     // send nodesMap to everyone
+                        if(audiences[i]){
+                            if(audiences[i].open){
+                                audiences[i].send(data);
+                            }
+                        }
+                    }
+                    nodesMap = data;
+                    document.getElementById("sumOfRoom").innerHTML = "成员数: "+ nodesMap[2].length;
+                    break;
+                default:
+                    console.log("unknown data" + data);
+                    break;
+            }
+        }
+
+        // destroy connection when someone closed the web
+        window.addEventListener("beforeunload", (event) => {
+            if(audiences[0]){
+                for(let i=0; i<audiences.length; i++){
+                    audiences[i].close();
+                }
+            }
+            // event.preventDefault();
+        });
+
+    if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+        document.getElementById("onlyPC").remove();
+    }
+    </script>
+</body>
+</html>
