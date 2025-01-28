@@ -35,7 +35,9 @@
                 <option value="1">FiveOnline(external)</option>
                 <!-- <option value="2">RemoteControl(undone)</option> -->
             </select><br>
-            In addition, you can upload your local photo after creating Room(Room Setting)<br>
+            In addition,
+            1. you can upload your local photo after creating Room(Room Setting)<br>
+            2. you can blank input to use localStorage(default enable in config.js & clean in index setting)<br>
         <button class="confirm_Button" id="createRoom">Create Room</button>
         </div>
         <div class="pop_Content covert">
@@ -51,7 +53,7 @@
         <div class="pop_Content">
             <h2>Create / Join a peer netWork name</h2>
             <span id="remindNetworkNameText">Only support ' A-z 0-9 - '</span><br>
-            <input type="text" name="netWorkName" id="netWorkName">
+            <input type="text" name="netWorkName" id="netWorkName"><br>
             <button class="confirm_Button" onclick="modify_NetWork_Name()" style="top: 100%;">Confirm<br>[Enter]</button>
         </div>
     </div>
@@ -110,6 +112,9 @@
             </div>
             <button class="covert" id="onlineButton" onclick="window.open('https://aiksxd.github.io/peerlive/update.html')">Open updated Online Page</button><br>
             <button onclick="pop(document.getElementById('modifyNetWorkName'));">New netWorkName</button>
+            <!-- <button onclick="alert(app_Mode)">app_mode</button>
+            <button onclick="alert(theme_Index)">theme_Index</button>
+            <button onclick="alert(use_Local_Storage)">use_Local_Storage</button> -->
             <!-- Connect box -->
             <div id="connectRoot" style="visibility: hidden;">
                 Join a Peer NetWork Name:<input type="text" id="peerId" placeholder="Input counterpart's Id">
@@ -143,10 +148,6 @@
 
         let connectHistroy = [];
         let peer;
-
-        if (app_Mode) {
-            // theme_Index = localStorage.getItem('themeIndex');
-        }
 
         pop(document.getElementById('modifyNetWorkName'));
         document.getElementById('netWorkName').value = defaultId;
@@ -349,9 +350,18 @@
                 nodesMap = data;
                 switch (nodesMap[3]) {  // room type
                     case 0:
-                        document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName();       
+                        if (app_Mode) {
+                            window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                        } else {
+                            document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index;       
+                        }
                         break;
                     case 1:
+                    if (app_Mode) {
+                            window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                        } else {
+                            document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index;       
+                        }
                         document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName();       
                         break;
                     default:
@@ -418,7 +428,7 @@
             switch (document.getElementById("roomType").selectedIndex) {
                 case 0:
                     if (app_Mode) {
-                        window.parent.postMessage("/P2PLiveHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("LiveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value +"&themeIndex="+ theme_Index);
+                        window.parent.postMessage("P2PLiveHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("LiveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value +"&themeIndex="+ theme_Index);
                     } else {
                         window.open("./P2PLiveHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("LiveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value +"&themeIndex="+ theme_Index, '_blank');
                     }

@@ -23,9 +23,12 @@
             <div id="openRoomInfo">
                 <div style="display: flex;">
                     <img id="roomCover" src="">
-                    <span id="roomTitle"></span>
+                    <div>
+                        <h2 id="roomTitle"></h2>
+                        <button id="copyURL">Copy Web Link to share</button><br>
+                        <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
+                    </div>
                 </div>
-                <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
                 <div id="nodeInfo">
                     <div id="stable">
                         <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">Host Node</button>
@@ -34,7 +37,6 @@
                     <div id="block0"></div>
                     <div id="block1"></div>
                 </div>
-                <button id="copyURL">Copy Web Link to share</button>
             </div>
             <button id="autoJoin" class="confirm_Button" onclick="autoJoin(4, 1)">auto<br>Join</button>
         </div>
@@ -78,12 +80,12 @@
            <input type="checkbox" onclick="join_Conference()" id="joinConference">Join Conference<br><br>
            
            What will you Share Local Devices:<br>
-           <input type="checkbox" id="ifConferenceUseCamera">Camera
-           <input type="checkbox" id="ifConferenceUseMicrophone">Microphone<br>
-           <input type="checkbox" onclick="upload_Conferee_Video()" id="uploadConfereeVideo">Get Local Video<br><br>
+           <input type="checkbox" id="ifUseConferenceCamera">Camera
+           <input type="checkbox" id="ifUseConferenceMicrophone">Microphone<br>
+           <button onclick="askNavigatorMediaDevices(true)">Get Local Video</button><br>
            <video id="conferee_Local_Video"></video><br>
            Confirm public your Local Devices:
-           <input type="checkbox" onclick="askNavigatorMediaDevices(true)" id="uploadConfereeVideo">Public Stream<br><br>
+           <button onclick="upload_Conferee_Video()" id="uploadConfereeVideo">Public Stream</button><br>
            
         </div>
         </div>
@@ -99,7 +101,7 @@
             <div id="status" style="font-weight: bold;">Status: Waiting to Connecting to PeerServer...</div>
         </div>
         <div class="box">
-            <button onclick="fullWebVideo()" id="fullScreen">Full Page Video</button><br>
+            <!-- <button onclick="fullWebVideo()" id="fullScreen">Full Page Video</button> -->
             <button onclick="document.getElementById('fakeInputText').focus()" class="covert" id="mobileInput">Wake Mobile Input</button><br>
             <input type="text" class="covert" id="fakeInputText">
             <div>
@@ -156,7 +158,7 @@
     <script src="js/peerjs.min.js"></script>
     <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <script>
-        const peer = new Peer({ debug: 2})      //use PeerJS official server
+        const peer = new Peer({ debug: 2});      //use PeerJS official server
     </script>
     <script src="js/fn.js"></script>
     <script>
@@ -551,5 +553,6 @@
         change_Theme(event.data);
     });
     </script>
+    <script src="js/srs.sdk.js"></script>
 </body>
 </html>

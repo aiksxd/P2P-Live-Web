@@ -140,11 +140,17 @@ iframe {
         margin-left: 0;
         height: 87.5%;
     }
+    .menuContainer {
+        width: max-content;
+    }
 }
 
 @media only screen and (orientation: landscape) {
     .sidebar a {
         text-align: center;
         float: none;
+    }
+    .menuContainer {
+        display: grid;
     }
 }

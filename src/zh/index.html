@@ -109,7 +109,7 @@
             <button onclick="pop(document.getElementById('modifyNetWorkName'));">更换网络名称</button>
             <!-- Connect box -->
             <div id="connectRoot" style="visibility: hidden;">
-                加入一个根节点:<input type="text" id="peerId" placeholder="填入对方Id">
+                加入一个根节点:<input type="text" id="peerId" placeholder="填入对方Id" autofocus="true">
                 <button id="connectButton">Connect</button><br>
             </div>
             <div id="status" style="font-weight: bold;">状态: 正在连接到Peer服务器...</div>
@@ -423,11 +423,6 @@
                     console.log("错误的房间类型");
                     break;
             }
-        });
-
-        window.addEventListener('message', function(event) {
-            if (event.origin !== 'https://127.0.0.1') return;
-            change_Theme(event.data);
         });
     </script>
 </body>

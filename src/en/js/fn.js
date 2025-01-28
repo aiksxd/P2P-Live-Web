@@ -7,16 +7,16 @@
 */
 // choose one of both
 // const peer = new Peer({ host: 'localhost', port: 9000, path: '/myapp', debug: 2})     //if you use local peer server
-
-let language = "en";
 /*
-    var peer = new Peer({
-        config: {'iceServers': [
-            { url: 'stun:stun.l.google.com:19302' },
-            { url: 'turn:homeo@turn.bistri.com:80', credential: 'homeo' }
-        ]}
-    });
+var peer = new Peer({
+    config: {'iceServers': [
+        { url: 'stun:stun.l.google.com:19302' },
+        { url: 'turn:homeo@turn.bistri.com:80', credential: 'homeo' }
+    ]}
+});
 */
+language = 'en';
+
 let roomIds = new Array();
 let conferee = null;
 let guest = null;
@@ -47,10 +47,9 @@ theme_Index = params.get("themeIndex");
 
 if (theme_Index !== null) {
     change_Theme(theme_Index);
-    console.log(theme_Index)
-} else if (app_Mode) {
-    theme_Index = localStorage.getItem('themeIndex');
-    console.log(theme_Index)
+    document.getElementById('themeController').value = theme_Index;
+} else if (use_Local_Storage) {
+    theme_Index = localStorage.themeIndex;
 }
 // let large_Nodes_Map = [];   // with img
 let myIcon = "";
@@ -198,7 +197,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                                 nodesMap[11][0].push(new_Conferee[0]);
                                 nodesMap[11][1].push(new_Conferee[1]);
                                 nodesMap[11][2].push(new_Conferee[2]);
-                                nodesMap[11][3].push(undefined);
+                                nodesMap[11][3].push(null);    // stream.id
                                 if (document.getElementById("joinConference").checked) {
                                     append_Conferee_Dom(new_Conferee);
                                 }
@@ -239,23 +238,23 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                             case 0:
                                 if (ifJump === 2) {
                                     if (app_Mode) {
-                                        window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() +"&themeIndex="+ theme_Index);
+                                        window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
                                     } else {
-                                        window.open("./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() +"&themeIndex="+ theme_Index);
+                                        window.open("./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
                                     }
                                 } else {
-                                    document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() +"&themeIndex="+ theme_Index;
+                                    document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index;
                                 }
                                 break;
                             case 1:
                                 if (ifJump === 2) {
                                     if (app_Mode) {
-                                        window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() +"&themeIndex="+ theme_Index);
+                                        window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
                                     } else {
-                                        window.open("./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName() +"&themeIndex="+ theme_Index);
+                                        window.open("./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
                                     }
                                 } else {
-                                    document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName() +"&themeIndex="+ theme_Index;
+                                    document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index;
                                 }
                                 break;
                             default:
@@ -364,7 +363,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             });
             // alert("try to connect someone in rooms");
             break;
-        case 3:
+        case 3:     // 3: hostRoot
             // Close old connection
             if (root) {
                 root.close();
@@ -413,7 +412,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                     pop(document.getElementById('modifyNetWorkName'));
                 }
                 peer_Conn_Lock = false;
-                document.getElementById("myid").innerHTML = "Your ID:<br/>" + id;
+                document.getElementById("myid").innerHTML = "Your ID:<br/>" + peer.id;
                 document.getElementById("status").innerHTML="Status:✔ Connected to Root Node Successfully! ✔"
             });
 
@@ -579,17 +578,25 @@ function echoNodesMap(arr, layerNumber, aimId, fnOfEcho){
             case 1:     // button for joining a node
                 if(aimId == peer.id){alert(aimId);break;}
                 if (parent_Node) {
-                    document.location.href = "./P2PLiveAudience.html?id=" + aimId +"&name="+ getMyName();
+                    document.location.href = "./P2PLiveAudience.html?id=" + aimId +"&name="+ getMyName() + "&themeIndex="+ theme_Index;
                 } else {
-                    window.open("./P2PLiveAudience.html?id=" + aimId +"&name="+ getMyName());
+                    if (app_Mode) {
+                        window.parent.postMessage("P2PLiveAudience.html?id=" + aimId +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                    } else {
+                        window.open("./P2PLiveAudience.html?id=" + aimId +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                    }
                 }
                 break;
             case 2:     // button for joining a node
                 if(aimId == peer.id){alert(aimId);break;}
                 if (parent_Node) {
-                    document.location.href = "./P2PGameFiveOnLinePlayer.html?id=" + aimId +"&name="+ getMyName();
+                    document.location.href = "./P2PGameFiveOnLinePlayer.html?id=" + aimId +"&name="+ getMyName() + "&themeIndex="+ theme_Index;
                 } else {
-                    window.open("./P2PGameFiveOnLinePlayer.html?id=" + aimId +"&name="+ getMyName());
+                    if (app_Mode) {
+                        window.parent.postMessage("P2PGameFiveOnLinePlayer.html?id=" + aimId +"&name="+ getMyName()) + "&themeIndex="+ theme_Index;
+                    } else {
+                        window.open("./P2PGameFiveOnLinePlayer.html?id=" + aimId +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                    }
                 }
                 break;
         }
@@ -721,10 +728,10 @@ function appearMsg(msg) {
             }
         }
     }
-    if(fullWebVideoTimes === 1){
-        document.getElementById("chatBox").style.visibility="true";
-        setTimeout(function(){document.getElementById("chatBox").style.visibility="false";}, 5000)
-    }
+    // if(fullWebVideoTimes === 1){
+    //     document.getElementById("chatBox").style.visibility="true";
+    //     setTimeout(function(){document.getElementById("chatBox").style.visibility="false";}, 5000)
+    // }
 }
 
 function cleanMsg(){    // DEBUG
@@ -737,11 +744,15 @@ function cleanMsg(){    // DEBUG
 function getMyName(){
     if(MyName){
         if (MyName.value){
+            if (use_Local_Storage) {
+                localStorage.myName = MyName.value;
+            }
             return MyName.value;
         } else {
             return peer.id;
         }
     }
+    return "";
 }
 
 function conference_Play() {
@@ -753,7 +764,7 @@ function conference_Play() {
 }
 
 function upload_Conferee_Video() {
-    if ( document.getElementById('uploadConfereeVideo').checked && conference_Stream) {
+    if (conference_Stream) {
         if (my_Conferee_Index) {
             if (!parent_Node) {
                 conferee_Map[3][my_Conferee_Index] = my_Conferee_Stream_Id;
@@ -766,18 +777,11 @@ function upload_Conferee_Video() {
                 conferee_Nodes[i].call(conference_Stream);
                 i++;
             }
+            document.getElementsByClassName('confereeVideos')[my_Conferee_Index - 1].srcObject = conference_Stream;
+            document.getElementById('conferee_Local_Video').srcObject = null;
+        } else {
+            alert('Join the conference at first');
         }
-        document.getElementById('conferee_Local_Video').srcObject = null;
-    } else {
-        my_Conferee_Index = null;
-    }
-}
-
-function conference_Send(data) {
-    let i = 0;
-    while (i < conferee_Nodes.length) {
-        conferee_Nodes.send(data);
-        i++;
     }
 }
 
@@ -793,6 +797,14 @@ function update_Conferee_Info() {
         } else if (myIcon) {
             conference_Send([5,3, my_Conferee_Index, null, myIcon, getMyName()]);
         }
+    }
+}
+
+function conference_Send(data) {
+    let i = 0;
+    while (i < conferee_Nodes.length) {
+        conferee_Nodes.send(data);
+        i++;
     }
 }
 
@@ -813,7 +825,7 @@ function join_Conference() {
         if (parent_Node) {
             parent_Node.send([5, 0, [null, peer.id, getMyName()]]);
         } else {
-            my_Conferee_Index = conferee_Map[0].length -1;
+            my_Conferee_Index = conferee_Map[0].length + 1;
             liveSend([5,1, [my_Conferee_Index, peer.id, getMyName()]]);
             let i = 0;
             while (i < nodesMap[11][1].length) {
@@ -823,7 +835,7 @@ function join_Conference() {
             nodesMap[11][0].push(my_Conferee_Index);
             nodesMap[11][1].push(peer.id);
             nodesMap[11][2].push(getMyName());
-            nodesMap[11][3].push(undefined);
+            nodesMap[11][3].push(null);
             conferee_Map = nodesMap[11];
             append_Conferee_Dom();
         }
@@ -833,13 +845,16 @@ function join_Conference() {
         } else {
             let i = 0;
             while (i < conferee_Map.length) {
-                conferee_Map[i][my_Conferee_Index] = undefined;
+                conferee_Map[i][my_Conferee_Index] = undefined;     // leave blank
                 i++;
             }
             nodesMap[11] = conferee_Map;
             liveSend(nodesMap);
         }
         my_Conferee_Index = null;
+        if (conference_Stream) {
+            conference_Stream.getTracks().forEach(track => track.stop());
+        }
         conference_Stream = null;
     }
 }
@@ -908,14 +923,14 @@ function askNavigatorMediaDevices(if_Conference){
     let constraints;
     if (if_Conference) {    // conference format
         constraints = {
-            audio: document.getElementById("ifUseConferenceCamera").checked,
-            video: document.getElementById("ifConferenceUseMicrophone").checked,
+            video: document.getElementById("ifUseConferenceCamera").checked,
+            audio: document.getElementById("ifUseConferenceMicrophone").checked,
             width: { ideal: 320, max: 720 },
             height: { ideal: 320, max: 720 },
             frameRate: { ideal: 30, max: 60 }
         };
     } else {
-        constraints = { audio: document.getElementById("ifUseCamera").checked, video: document.getElementById("ifUseMicrophone").checked };
+        constraints = { video: document.getElementById("ifUseCamera").checked, audio: document.getElementById("ifUseMicrophone").checked };
     }
     
     navigator.mediaDevices
@@ -955,19 +970,6 @@ function shareSRSMediaStream() {
     const rtcPlayer = new SrsRtcPlayerAsync();
     rtcPlayer.play(url);
     localStream = rtcPlayer.stream;
-    if( ! document.getElementById("ifNotDisplayLocalStream").checked){
-        displayStream(rtcPlayer.stream);  // for debug
-    } else {
-        WebVideo.srcObject = null;
-    }
-    liveSend([4, peer.id]);
-}
-function share_Ordinary_MediaStream() {
-    if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-    }
-    WebVideo.src = "webrtc://" + document.getElementById('streamIpSRS').value + "/live/livestream/" + document.getElementById('streamKeySRS').value;
-    localStream = WebVideo.srcObject;
     if( ! document.getElementById("ifNotDisplayLocalStream").checked){
         displayStream(rtcPlayer.stream);  // for debug
     } else {
@@ -1027,6 +1029,9 @@ function iconInput(){
             reader.onloadend = () => {
                 myIcon = reader.result;
                 document.getElementById("myIcon").src = myIcon;
+                if (use_Local_Storage) {
+                    localStorage.myIcon = myIcon;
+                }
             }
         } else {
             alert("it can't over 1MB");
@@ -1037,54 +1042,54 @@ function iconInput(){
 }
 
 
-let middleX = 0;
-function fullWebVideo(){
-    if(fullWebVideoTimes === 0){
-        if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-            WebVideo.style.height = window.innerWidth + "px";
-            WebVideo.style.width = window.innerHeight + "px";
-            WebVideo.style.transform = "rotate(90deg)";
-            WebVideo.style.position = "absolute";
-            if(middleX === 0){middleX = WebVideo.offsetWidth - window.innerWidth;}
-            WebVideo.style.right = -middleX + "px";
-            WebVideo.style.top = (WebVideo.offsetWidth*0.25 + 10) + "px";
-            document.getElementsByClassName("container")[0].style.bottom = -20 + "px";
-            let fullScreen = document.getElementById("fullScreen");
-            fullScreen.style.position = "absolute";
-            fullScreen.style.bottom = 0 + "px";
-        } else {
-            WebVideo.style.height = window.innerHeight + "px";
-            WebVideo.style.width = window.innerWidth + "px";
-            WebVideo.style.position = "absolute";
-            window.scrollBy({
-                top: document.documentElement.scrollHeight,
-                behavior: "smooth",
-            });
-        }
-        fullWebVideoTimes++;
-        setTimeout(
-            function(){
-            if(fullWebVideoTimes === 1){
-                document.getElementById("chatBox").style.visibility="hidden";
-            }
-        }, 3000);
-    } else {
-        if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-            WebVideo.style.transform = "none";
-            WebVideo.style.width = "100%";
-            WebVideo.style.height = "35%";
-            WebVideo.style.position = "static";
-            document.getElementById("fullScreen").style.position = "static";
-            document.getElementsByClassName("container")[0].style.bottom = 0 + "px";
-            WebVideo.style.position = "static";
-        } else {
-            WebVideo.style.height = "85%";
-            WebVideo.style.width = "70%";
-        }
-        fullWebVideoTimes = 0;
-        document.getElementById("chatBox").style.visibility="visible";
-    }
-}
+// let middleX = 0;
+// function fullWebVideo(){
+//     if(fullWebVideoTimes === 0){
+//         if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+//             WebVideo.style.height = window.innerWidth + "px";
+//             WebVideo.style.width = window.innerHeight + "px";
+//             WebVideo.style.transform = "rotate(90deg)";
+//             WebVideo.style.position = "absolute";
+//             if(middleX === 0){middleX = WebVideo.offsetWidth - window.innerWidth;}
+//             WebVideo.style.right = -middleX + "px";
+//             WebVideo.style.top = (WebVideo.offsetWidth*0.25 + 10) + "px";
+//             document.getElementsByClassName("container")[0].style.bottom = -20 + "px";
+//             let fullScreen = document.getElementById("fullScreen");
+//             fullScreen.style.position = "absolute";
+//             fullScreen.style.bottom = 0 + "px";
+//         } else {
+//             WebVideo.style.height = window.innerHeight + "px";
+//             WebVideo.style.width = window.innerWidth + "px";
+//             WebVideo.style.position = "absolute";
+//             window.scrollBy({
+//                 top: document.documentElement.scrollHeight,
+//                 behavior: "smooth",
+//             });
+//         }
+//         fullWebVideoTimes++;
+//         setTimeout(
+//             function(){
+//             if(fullWebVideoTimes === 1){
+//                 document.getElementById("chatBox").style.visibility="hidden";
+//             }
+//         }, 3000);
+//     } else {
+//         if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+//             WebVideo.style.transform = "none";
+//             WebVideo.style.width = "100%";
+//             WebVideo.style.height = "35%";
+//             WebVideo.style.position = "static";
+//             document.getElementById("fullScreen").style.position = "static";
+//             document.getElementsByClassName("container")[0].style.bottom = 0 + "px";
+//             WebVideo.style.position = "static";
+//         } else {
+//             WebVideo.style.height = "85%";
+//             WebVideo.style.width = "70%";
+//         }
+//         fullWebVideoTimes = 0;
+//         document.getElementById("chatBox").style.visibility="visible";
+//     }
+// }
 
 // window.onload=function(){
 if(document.getElementById("uploadImgButton")){
@@ -1213,19 +1218,17 @@ function changePopMenu(popIndex) {
 
 if (document.getElementById('copyURL')) {
     document.getElementById('copyURL').addEventListener('click', function() {
-        let currentUrl = window.location.href;
-        let index = currentUrl.indexOf("P2PLi");
-        if (index === -1) {
-            let index = currentUrl.indexOf("index");
-            if (index === -1) {
-                console.error('ERROR url');
-                return;
-            }
+        let url = window.location.href;
+        let index = url.indexOf("?");
+        if (index !== -1) {
+            url = url.substring(0, index);
         }
+        index = url.lastIndexOf("/");
+        url = url.substring(0, index+1);
         if (parent_Node) {
-            currentUrl = currentUrl.substring(0, index) +"P2PLiveAudience.html?id="+ parent_Node.peer +"&name=undefined";
+            url = url +"P2PLiveAudience.html?id="+ parent_Node.peer +"&name=";
         } else {  // host or audience partly unloaded
-            currentUrl = currentUrl.substring(0, index) +"P2PLiveAudience.html?id="+ peer.id +"&name=undefined";
+            url = url +"P2PLiveAudience.html?id="+ peer.id +"&name=";
         }
         
         navigator.clipboard.writeText(currentUrl)
@@ -1238,18 +1241,67 @@ if (document.getElementById('copyURL')) {
     });
 }
 
-if (app_Mode) {
-    window.addEventListener('message', function(event) {
-        let currentUrl = window.location.href;
-        let urlIndex = currentUrl.indexOf(language);
-        if (urlIndex !== -1) {
-            currentUrl = currentUrl.substring(0, urlIndex - 1);
+window.addEventListener('message', function(event) {
+    // let currentUrl = window.location.origin;
+    // let urlIndex = currentUrl.indexOf(language);
+    // if (urlIndex !== -1) {
+    //     currentUrl = currentUrl.substring(0, urlIndex - 1);
+    // }
+    console.log(event.origin+"=\n"+window.location.origin +"=\n" + event.data);  // debug
+    if (event.origin === window.location.origin) {
+        switch (event.data[0]) {
+            case 0:
+                switch (event.data[1]) {
+                    case 0:
+                        use_Local_Storage = event.data[2];
+                        break;
+                    case 1:     // switch app_Mode (msg from window.parent)
+                        if(event.data[2]){
+                            app_Mode = true;
+                            if (document.getElementById("onlineButton")) {
+                                document.getElementById("onlineButton").classList.remove("covert");
+                            }
+                            if (document.getElementById("themeController")) {
+                                document.getElementById("themeController").classList.add("covert");
+                            }
+                        } else {
+                            app_Mode = false;
+                            if (document.getElementById("onlineButton")) {
+                                document.getElementById("onlineButton").classList.add("covert");
+                            }
+                            if (document.getElementById("themeController")) {
+                                document.getElementById("themeController").classList.remove("covert");
+                            }
+                        }
+                    default:
+                        break;
+                }
+                break;
+            case 1:
+                theme_Index = event.data[1];
+                change_Theme(theme_Index);
+                document.getElementById('themeController').value = theme_Index;
+                break;
+            default:
+                break;
         }
-        // console.log(event.origin+"=\n"+currentUrl + event.data);  // debug
-        if (event.origin === currentUrl) {
-            change_Theme(event.data);
-        }
-    });
+    }
+});
 
-    document.getElementById('themeController').classList.add('covert')
+if (use_Local_Storage) {
+    if(localStorage.themeIndex !== undefined){
+        change_Theme(localStorage.themeIndex);
+        document.getElementById('themeController').value = localStorage.themeIndex;
+    }
+    if(localStorage.myIcon) {
+        myIcon = localStorage.myIcon;
+        if (document.getElementById("myIcon")) {
+            document.getElementById("myIcon").src = myIcon;
+        }
+    }
+    if (localStorage.myName) {
+        if (document.getElementById("name")) {
+            document.getElementById("name").value = localStorage.myName;
+        }
+    }
 }

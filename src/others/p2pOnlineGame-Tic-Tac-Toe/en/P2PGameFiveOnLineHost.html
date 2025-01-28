@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
+    <link rel="stylesheet" type="text/css" href="css/styleFiveOnline.css">
+</head>
+<body>
+    <!-- Host Setting -->
+    <div id="liveSetting">
+        <img id="LiveCover">
+        <div style="height: 100%; width: 30%; margin-top: 2%;">
+            <input type="text" id="LiveTitle" class="liveInput" placeholder="Input your Room Title there..."><br>
+            <textarea id="LiveSummary" rows="5" cols="33" placeholder="Input your Summary there..."></textarea><br>
+        </div>
+        <div style="height: 100%; width: 30%; margin-top: 2%;">
+            <input type="text" id="LiveCoverURL" class="liveInput" placeholder="URL of img served as Cover"><br>
+            <input id="LiveCoverInput" type="file" onchange="liveCoverInput()">Upload Local Image<br/><br/>
+            <button onclick="peer.disconnect()">Lock the room<br>(disconnect to PeerServer)</button><br/>
+            <button onclick="peer.reconnect()">reconnect with original Id</button><br/>
+            <button onclick="resetMap()">reset canvas map</button>
+        </div>
+        <div>
+            <button id="closeLiveMenu" class="actionButton" onclick="showLive()">Close</button>
+            <button id="modify" class="actionButton" onclick="modify()">modify</button>
+        </div>
+    </div>
+    <!-- Detail of Room -->
+    <div id="openRoomInfo">
+        <img id="roomCover" src="">
+        <div id="roomText">
+            <div id="roomTitle"></div>
+            <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea>
+            <div id="nodeInfo">
+                <div id="stable">
+                    <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 0)">me</button>
+                    <button id="refreshMap" onclick="refreshMap(0)">Refresh</button>
+                </div>
+                <div id="block0"></div>
+                <div id="block1"></div>
+            </div>
+        </div>
+        <button id="closeInfo" class="actionButton" onclick="openRoomInfo()">Close</button>
+    </div>
+
+    <!-- ID interaction -->
+    <div class="container">
+        <div class="box">
+            <!-- Receiver -->
+            <div style="font-weight: bold;">Host</div>
+            <button id="refreshButton" onclick="refreshMap()">Refresh</button>
+            <button id="openRoomInfoButton" onclick="openRoomInfo()">Room Info</button>
+            <button type="button" id="roomSetting" onclick="showLive()">Room Setting</button>
+            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div>
+            <div id="connectRoot" style="visibility: hidden;">
+                Join a root node:<input type="text" id="peerId" placeholder="Input Id of Root node...">
+                <button id="connectButton">Connect</button><br>
+            </div>
+            <div id="status" style="font-weight: bold;">Status: Waiting to Connecting to PeerServer...</div>
+            <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br> -->
+        </div>
+        <div class="box">
+            <button onclick="fullWebVideo()" id="fullScreen">Full Page Video</button>
+            <button onclick="hiddenAbility()" id="hiddenAbility">hidden Ability</button><br>
+            <div>
+                <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Avatar & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br>
+                <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
+            </div>
+        </div>
+        <div class="box">
+            <div id="playersList"></div>
+            <span id="nowTurn">Now Turn: 1 </span>
+            <span id="sumOfRoom">Members: 1</span>
+            <span id="modeOutput">Spare Time: ∞</span><br>
+            <input type="checkbox" id="ifAutoClean">Auto-clean Msgs[max->100]<br>
+            <button onclick="cleanMsg()">CleanMsgs</button><br>
+            Click number to kick player in game.
+        </div>
+    </div>
+    
+    <!-- Live interaction-->
+    <div class="videoBox">
+        <div id="canvasMap">
+            <br><br>
+            MapSize: Height:<input type="number" id="maxHeight" class="setting" value="10" min="1"> Width:<input type="number" id="maxWidth" class="setting" value="10" min="1"><br>
+            MaxPlayers: <input type="number" id="maxPlayers" class="setting" value="5" min="1"><br>
+            GameMode: <select id="gameMode" onchange="modeModify(this.selectedIndex)">
+                <option value="0" selected="selected">SLG Mode</option>
+                <option value="1">Energy Mode</option>
+                <!-- <option value="2">Card Mode</option> -->
+            </select><br>
+            HostJoinGame: <input type="checkbox" class="setting" checked="true" id="hostJoinGame"><br>
+            <div id="modeMenu">
+            </div>
+            <button id="start" onclick="start()">Start Game</button>
+        </div>
+        <!-- Message box -->
+        <div id="chatContainer">
+            <div id="chatBox"></div>
+            <div class="sendInput">
+                <!-- Send box -->
+                <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
+                <button type="button" id="uploadImgButton">Img</button>
+                <button type="button" id="sendButton" onclick="sendMsg()">Send</button><br>
+                <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
+            </div>
+        </div>
+    </div>
+
+    <script src="js/peerjs.min.js"></script>
+    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
+    <script>
+        const peer = new Peer({ debug: 2})      //use PeerJS official server
+    </script>
+    <script src="js/fn.js"></script>
+    <script src="js/fiveOnlineFn.js"></script>
+    <script>
+        let urlInfo = [params.get("rootId"), params.get("title"), params.get("summary"), params.get("coverURL")]
+        const LiveTitle = document.getElementById("LiveTitle");
+        const LiveSummary = document.getElementById("LiveSummary");
+        const LiveCoverURL= document.getElementById("LiveCoverURL");
+        let coverURL = "";
+        // Listen for the event when a Peer connection is successfully opened
+        // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
+        peer.on('open', (id) => {
+            if (LiveTitle.value || LiveSummary.value || LiveCoverURL.value){
+                nodesMap = [ 1, 1, [id], 1, LiveTitle.value, LiveSummary.value, LiveCoverURL.value, id, getMyName(), childNodes, urlInfo[0]];
+            } else {
+                // childNodes=[0.dataType, 1.sourceMark, 2.NumberOfchildNodes, 3.unused for you ]
+                childNodes = [ 1, 1, 0, [], id, getMyName(), []];
+                // nodesMap=[0.dataType, 1.sourceMark, 2.idsOfMembersInRoom, 3.roomType]
+                nodesMap = [ 1, 1, [id], 1, urlInfo[1], urlInfo[2], urlInfo[3], id, getMyName(), childNodes, urlInfo[0]];
+            }
+            console.log(id);
+            document.getElementById("myid").innerHTML = "Your ID:<br/>" + id;
+            document.getElementById("status").innerHTML="Status: Connecting to Root Node...";
+            if(urlInfo[0]){
+                tryConnect(3, urlInfo[0], false, false);
+            } else {
+                document.getElementById("status").innerHTML="Root Node here now(private)";
+            }
+        });
+
+        // When a new connection request is received, this code creates a data channel and sends the local or remote stream (if available) and text messages.
+        peer.on('connection', (openPort) => {
+            connIds.push(openPort.peer);
+            conns.push(openPort);
+            conn = openPort;
+
+            conn.on('open', () => {
+                // for guest in index
+                let sendNodesMap = nodesMap;
+                sendNodesMap[2] = -1;
+                conn.send(sendNodesMap);
+            });
+            
+            // Receive the text: Host <-- Guest
+            conn.on('data', (data) => {
+                // data[0]:
+                //  0: msg
+                //  1: nodeInfo or indexRoomInfo 
+                //  2: roomInfoModfied
+                //  3: for reconnect: Remind the child node to replace the parent node
+                //  4: for refresh: apply to the new media Stream for daliver to child
+                switch (data[0]) {
+                    case 0:
+                        console.log('Received data:', data);
+                        deliverId = data[1];
+                        data[1] = peer.id;  // make sure msg[2] keep last id of deliver
+                        
+                        // if ( liveSend(data) > 0 ) {
+                        //     console.log("Msg delivered successfully: " + data);
+                        // }else{console.log('Msg delivered failed');}
+
+                        liveSend(data);
+                        
+                        appearMsg(data);
+                        break;
+                    case 1:
+                        if ( ! audienceIds.includes(data[4])){
+                            let aimPosition = connIds.indexOf(data[4]);
+                            audienceIds.push(connIds[aimPosition]);
+                            audiences.push(conns[aimPosition]);
+
+                            // for game:
+                            gameInfo = [6, players, gameMap, gameMode, startTime, unavailablePosition, positionOwners, modeSetting];
+                            conns[aimPosition].send(gameInfo);
+
+                            console.log("Msg Connected to: " + data[4]);
+                        }
+                        recorder(data);
+                        break;
+                    case 7:
+                        data[1] = 1;
+                        let effect = effectFeedBack(data[2][0], data[2][1], data[2][2]);    // effect TODO
+                        data.push(effect);
+                        liveSend(data);
+                        gameMap.push(data[2]);
+                        drawChessman(data[2], data[3]);
+                        break;
+                    case 8:
+                        if(startTime){  // has already started: join() -> replace()
+                            if(data[2] instanceof Number && offlinePlayer.includes(data[2])){
+                                players[data[2]] = data.slice(2, 5);
+                                liveSend(gameInfo);
+                            }   // new sort power by splice TODO
+                        } else if (players.length <= players[0]){    // hasn't started: join()
+                            if (players.length == players[0]){
+                                let msg = [ 0, peer.id, "System", "The room is up to Full", null];
+                                liveSend(msg);
+                                appearMsg(msg);
+                            }
+                            let i = 1;
+                            let position = false;
+                            while(i<players.length){    // check the same id for this player cancel ready
+                                if(players[i] instanceof Array){
+                                    if(position){   // if somebody left was found, player with the nuber after his number will be modified
+                                        players[i][0]--;
+                                        player = players[i];
+                                        document.getElementsByClassName("playersInfo")[i-1].children[0].innerHTML = i+": ";
+                                        if(!player[2]){
+                                            let colour = 255*((player[0] + 2)/(player[0] + 4));
+                                            document.getElementsByClassName("playersInfo")[i-1].children[1].setAttribute("style", "background-color: rgb("+parseInt(((((player[0]+1) % 5) + 1)/5)*colour)+", "+parseInt(((((player[0]+1) % 4) + 1)/4)*colour)+", "+parseInt(((((player[0]+1) % 3) + 1)/3)*colour)+")");
+                                        }
+                                        document.getElementsByClassName("playersInfo")[i-1].children[0].setAttribute("onclick", "kick("+ player[0] +")");
+                                    }
+                                    if(players[i][1] == data[2]){   // refer to id
+                                        players.splice(i, 1);
+                                        document.getElementsByClassName("playersInfo")[i-1].remove();
+                                        position = i;
+                                        liveSend([8, 2, position]);
+                                    } else {
+                                        i++;
+                                    }
+                                }
+                            }
+                            if(! position){
+                                let newPlayer = [players.length, data[2], data[3], data[4], data[5]];    // [number, peerId, icon, name]
+                                players.push(newPlayer);
+                                displayNewPlayer(newPlayer);
+                                liveSend([8, 1, newPlayer]);
+                            }
+                        } else if (players.length > players[0]){
+                            let msg = [ 0, peer.id, "System", "The room is already Full!", null];
+                            liveSend(msg);
+                            appearMsg(msg); 
+                        }
+                        break;
+                    default:
+                        console.log("unknown data: " + data);
+                }
+            });
+
+            conn.on('close', () => {
+                for (let i = 0; i< conns.length; i++){
+                    if(conns[i]){
+                        if (conns[i].open){
+                            continue;
+                        }else{
+                            let disconnectedGuest = connIds.indexOf(conns[i].peer);   // locate old data
+                            if (disconnectedGuest !== -1){
+                            
+                                let disconnectedAudience = audienceIds.indexOf(conns[i].peer);
+                                if (disconnectedAudience !== -1){
+                                    console.log("Disconnected and deleted: " + audienceIds[disconnectedAudience]);     //DEBUG
+                                    audiences.splice(disconnectedAudience, 1);
+                                    audienceIds.splice(disconnectedAudience, 1);
+                                
+                                    let sameId = childNodes.indexOf(conns[i].peer);
+                                    if(sameId !== -1){
+                                        childNodes.splice(sameId, 3);     // remove disconnected audiences
+                                        nodesMap[2] = getRoomIds();
+                                        childNodes[2] = audienceIds.length;
+                                    }
+
+                                    if(startTime){
+                                        players.forEach(player => {
+                                            if(player[1] == conns[i].peer){
+                                                liveSend([8, player[0]]);   // TODO
+
+                                            }
+                                        });
+                                    }
+                                    // child nodes of host closed the connection
+                                    console.log("nodesMap update after somebody closed")    // DEBUG
+                                    liveSend(nodesMap);
+                                    if(root){
+                                        if(root.open){
+                                            root.send(nodesMap);
+                                        }
+                                    }
+                                }
+                                // console.log("Disconnected and deleted: " + conns[i].peer);     //DEBUG
+                                conns.splice(disconnectedGuest, 1);
+                                connIds.splice(disconnectedGuest, 1);
+                            }
+                        }
+                    }else{break;}
+                }
+            });
+        });
+
+        let inputs = Array.from(document.getElementsByClassName('setting'));
+        inputs.forEach(input => {
+            input.addEventListener('focusout',() => {
+                    maxWidth = Number(document.getElementById("maxWidth").value);
+                    maxHeight = Number(document.getElementById("maxHeight").value);
+                    mapSize = [maxHeight, maxWidth];
+                    gameMap = [mapSize]
+                    players[0] = Number(document.getElementById("maxPlayers").value);
+                    gameMode = [document.getElementById("gameMode").selectedIndex, document.getElementById("hostJoinGame").checked];
+                    // gameInfo = [6, players, gameMap, gameMode, startTime, unavailablePosition, positionOwners];
+                    liveSend([6, [players[0]], gameMap, gameMode, startTime, unavailablePosition, positionOwners, modeSetting]);
+                },
+                true,
+            );
+        });
+        document.getElementById("gameMode").addEventListener(
+            "focusout",() => {
+                gameMode = [document.getElementById("gameMode").selectedIndex, document.getElementById("hostJoinGame").checked];
+                liveSend([6, [players[0]], gameMap, gameMode, startTime, unavailablePosition, positionOwners, modeSetting]);
+            },
+            true,
+        );
+        
+        function modeModify(mode) {
+            switch (mode) {
+                case 0:
+                    document.getElementById("modeMenu").innerHTML = 'WaitingTime: <input type="checkbox" id="ifCountDown"><input type="number" id="waitingTime" class="setting" value="60" min="1"><br>';
+                    document.getElementById("ifCountDown").addEventListener('focusout',() => {
+                        if (document.getElementById("ifCountDown").checked && (gameMode[0] === 0)) {
+                            maxWaitingTime = document.getElementById("waitingTime").value;
+                        } else {
+                            maxWaitingTime = null;
+                        }
+                        modeSetting[0] = [maxWaitingTime];
+                        liveSend([6, [players[0]], gameMap, gameMode, startTime, unavailablePosition, positionOwners, modeSetting]);
+                    });
+                    document.getElementById("waitingTime").addEventListener('focusout',() => {
+                        if (document.getElementById("ifCountDown").checked && (gameMode[0] === 0)) {
+                            maxWaitingTime = document.getElementById("waitingTime").value;
+                        } else {
+                            maxWaitingTime = null;
+                        }
+                        modeSetting[0] = [maxWaitingTime];
+                        liveSend([6, [players[0]], gameMap, gameMode, startTime, unavailablePosition, positionOwners, modeSetting]);
+                    });
+                    break;
+                case 1:
+                    document.getElementById("modeMenu").innerHTML = 'choose your ability: ';
+                    document.getElementById("modeOutput").innerHTML ="Spare Energy: 0";
+                    abilitiesURLS.slice(1).forEach(abilitiesURL => {
+                        let ability = document.createElement("img");
+                        ability.setAttribute('src', abilitiesURL);
+                        ability.setAttribute('onclick', "chooseAbility("+ abilitiesURLS.indexOf(abilitiesURL) +")");
+                        ability.classList.add('cells');
+                        ability.classList.add('abilities');
+                        document.getElementById("modeMenu").appendChild(ability);
+                    });
+                    document.getElementById("modeMenu").appendChild(document.createElement("br"));
+                    let input = document.createElement("input");
+                    input.setAttribute('type', "number");
+                    input.classList.add('mode2Setting');
+                    input.setAttribute('min', "0");
+
+                    let input1 = input.cloneNode();
+                    input1.id = "commonChessmanCost";
+                    input1.setAttribute('value', modeSetting[1][1]);
+                    document.getElementById("modeMenu").appendChild(document.createTextNode("commonChessmanCost: "));
+                    document.getElementById("modeMenu").appendChild(input1);
+                    document.getElementById("modeMenu").appendChild(document.createElement("br"));
+
+                    let input2 = input.cloneNode();
+                    input2.id = "maxEnergy";
+                    input2.setAttribute('value', maxEnergy);
+                    document.getElementById("modeMenu").appendChild(document.createTextNode("MaxEnergy: "));
+                    document.getElementById("modeMenu").appendChild(input2);
+                    document.getElementById("modeMenu").appendChild(document.createElement("br"));
+
+                    input.remove();
+
+                    let mode2Inputs = Array.from(document.getElementsByClassName('mode2Setting'));
+                    mode2Inputs.forEach(input => {
+                        input.addEventListener('focusout',() => {
+                            modeSetting[1][1] = Number(document.getElementById("commonChessmanCost").value);
+                            maxEnergy = Number(document.getElementById("maxEnergy").value);
+                            modeSetting[1][0] = maxEnergy;
+                            liveSend([6, [players[0]], gameMap, gameMode, startTime, unavailablePosition, positionOwners, modeSetting]);
+                        });
+                    });
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function displayNewPlayer(player){
+            let newPlayer = document.createElement("div");
+            newPlayer.classList.add('playersInfo');
+
+            let newPlayerTag = document.createElement("span");
+            newPlayerTag.setAttribute("onclick", "kick("+ player[0] +")");
+            // newPlayer.setAttribute("id", "playerTag" + String(player[0]));
+            newPlayerTag.appendChild(document.createTextNode(String(player[0]) + ": "));
+            newPlayerTag.classList.add('icon');
+            newPlayer.appendChild(newPlayerTag);
+
+            let newPlayerIcon = document.createElement("img");
+            if(player[2]){
+                newPlayerIcon.setAttribute("src", player[2]);
+            } else {  // for different colour
+                let colour = 255*((player[0] + 2)/(player[0] + 4));
+                newPlayerIcon.setAttribute("style", "background-color: rgb("+parseInt(((((player[0]+1) % 5) + 1)/5)*colour)+", "+parseInt(((((player[0]+1) % 4) + 1)/4)*colour)+", "+parseInt(((((player[0]+1) % 3) + 1)/3)*colour)+")");
+            }
+            newPlayerIcon.classList.add('icon');
+            newPlayer.appendChild(newPlayerIcon);
+
+            if(gameMode[0] == 1){
+                let newPlayerAbility = document.createElement("img");
+                if (player[4]) {
+                    newPlayerAbility.setAttribute("src", abilitiesURLS[player[4]]);
+                } else {
+                    newPlayerAbility.setAttribute("src", abilitiesURLS[1]);
+                }
+                newPlayerAbility.classList.add('icon');
+                newPlayer.appendChild(newPlayerAbility);
+            }
+
+            let newPlayerName = document.createElement("span");
+            newPlayerName.appendChild(document.createTextNode(player[3]));
+            newPlayerName.setAttribute("style", " vertical-align: middle; text-overflow: ellipsis;");
+            newPlayer.appendChild(newPlayerName);
+            
+            newPlayer.appendChild(document.createElement("br"));
+            document.getElementById("playersList").appendChild(newPlayer);
+        }
+
+        function start(){
+            // check setting
+            document.getElementById("start").focus;     // for save modified
+            mapSize = [maxHeight, maxWidth];
+            gameMap = [mapSize]
+            // players[0] = Number(document.getElementById("maxPlayers").value);
+            gameMode = [document.getElementById("gameMode").selectedIndex, document.getElementById("hostJoinGame").checked];
+            if(maxHeight < 0 || maxWidth < 0 || maxHeight * maxWidth > 20250000){
+                alert("over the number of Mapsize(X*Y <= 20250000 & X, Y > 0)");
+                return;
+            }
+            if( maxPlayers < 0 || maxPlayers > 2500){
+                alert("over the number of Players(0, 2500)");
+                return;
+            }
+
+            // game start
+            let now = new Date();
+            startTime = now.getTime();
+
+            // sort player
+            // let temp = [players[0]]
+            // let i = 1;
+            // let t = 1;
+            if(gameMode[1]){    // host join game
+                myNumber = players.length;
+                newPlayer = [players.length, peer.id, myIcon, getMyName(), myAbility];
+                liveSend([8, 1, newPlayer]);
+                players.push(newPlayer);
+                displayNewPlayer(newPlayer);
+                // temp.push([1, peer.id, myIcon, getMyName()]);
+                // t = 2;
+            }
+            // while (i<players.length) {
+            //     if(players[i]){
+            //         players[i][0] = t;
+            //         temp.push(players[i]);
+            //         t++;
+            //     }
+            //     i++;
+            // }
+            // players = temp;
+
+            gameInfo = [6, players, gameMap, gameMode, startTime, unavailablePosition, positionOwners, modeSetting];
+            drawMap();
+            liveSend([6, [players[0]], gameMap, gameMode, startTime, unavailablePosition, positionOwners, modeSetting]);
+            
+            switch (gameMode[0]) {
+                case 0:
+                    if (myNumber == 1) {
+                        document.getElementById("canvasMap").style.backgroundColor = 'rgb(80,83,80)';
+                    }
+                    if (modeSetting[0][0]) {
+                        waitingTime = maxWaitingTime;
+                        timer = setInterval(countDown, 1000);
+                    }
+                    break;
+                case 1:
+                    setInterval(()=>{document.getElementById("modeOutput").innerHTML = "Spare Energy: "+ (energy()*0.001).toFixed(3).slice(0, -2)}, 100);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function effectFeedBack(position, type){    // TODO
+            return null;
+        }
+
+        function kick(number) {
+            if(confirm("Do you want to kick the "+number+"th player?")){
+                liveSend([8, 2, Number(number)]);
+                if (startTime) {
+                    kickNumbers.push(number);
+                    document.getElementsByClassName("playersInfo")[number-1].childNodes[2].innerHTML = document.getElementsByClassName("playersInfo")[number-1].childNodes[2].innerHTML + "(kicked)";
+                    if (number == myNumber) {
+                        document.getElementById("canvasMap").style.backgroundColor = 'rgb(34,39,46)';
+                        myNumber = null;
+                    }
+                    if (turn == number && startTime && (gameMode[0] == 0)) {
+                        nextTurn();
+                    }
+                    appearMsg([ 0, null, "System", "player: "+ players[number][3]+" was kicked"]);
+                } else {
+                    let i = number;
+                    players.splice(i, 1);
+                    document.getElementsByClassName("playersInfo")[i-1].remove();
+                    while(i<players.length){
+                        if(players[i] instanceof Array){
+                            players[i][0]--;
+                            let player = players[i];
+                            if(!player[2]){      // kick and change default color
+                                let colour = 255*((player[0] + 2)/(player[0] + 4));
+                                document.getElementsByClassName("playersInfo")[i-1].children[1].setAttribute("style", "background-color: rgb("+parseInt(((((player[0]+1) % 5) + 1)/5)*colour)+", "+parseInt(((((player[0]+1) % 4) + 1)/4)*colour)+", "+parseInt(((((player[0]+1) % 3) + 1)/3)*colour)+")");
+                            }
+                            document.getElementsByClassName("playersInfo")[i-1].children[0].setAttribute("onclick", "kick("+ player[0] +")");
+                            document.getElementsByClassName("playersInfo")[i-1].children[0].innerHTML = i+": ";
+                        }
+                        i++;
+                    }
+                }
+            }
+        }
+
+        document.getElementById("connectButton").addEventListener("click", () => {
+            tryConnect(3, document.getElementById("peerId").value, false, false);
+        });
+
+        function showLive() {       // if usr want to live
+            if(openLiveTimes==0){
+                openLiveTimes++;
+                document.getElementById('liveSetting').style.height = "25%";
+                LiveTitle.value = nodesMap[4];
+                LiveSummary.value = nodesMap[5];
+                LiveCoverURL.value = coverURL;
+            }else{
+                openLiveTimes=0;
+                document.getElementById('liveSetting').style.height = "0px";
+            }
+        }
+
+        function modify(){
+            nodesMap[4] = LiveTitle.value;   // nodesMap update
+            nodesMap[5] = LiveSummary.value;
+            if(liveCoverBase64){
+                nodesMap[6] = liveCoverBase64;
+            } else {
+                coverURL = LiveCoverURL.value;
+                nodesMap[6] = LiveCoverURL.value;
+            }
+            liveSend(nodesMap);
+            if(root){
+                if(root.open){
+                    root.send(nodesMap);
+                }
+            }
+            showLive();
+        }
+        
+        function openRoomInfo() {       // top menu for showing the detail of room
+            if(openInfoTimes==0){
+                openInfoTimes++;
+                document.getElementById('openRoomInfo').style.height = "25%";
+                refreshMap(0);
+            }else{
+                openInfoTimes=0;
+                document.getElementById('openRoomInfo').style.height = "0px";
+            }
+        }
+
+        MyName.addEventListener(
+            "focusout",
+            () => {
+                if (MyName.value != nodesMap[8] && MyName.value){
+                    nodesMap[8] = MyName.value;
+                    childNodes[5] = MyName.value;
+                    liveSend(nodesMap);
+                    if(root){
+                        if(root.open){
+                            root.send(nodesMap);
+                        }
+                    }
+                }
+            },
+            true,
+        );
+
+        function recorder(data){
+            let sameId = childNodes.indexOf(data[4]);   // locate old data
+            console.log('Info of nodes updated:', data);
+            // let idTemp = Object.assign({}, audienceIds);     // make audiencesPeers value stable
+            if(sameId === -1){
+                childNodes.push(data[4]);
+                childNodes.push(data[5]);
+                childNodes.push(data);
+            } else {
+                childNodes[ sameId + 1 ] = data[5];
+                childNodes[ sameId + 2 ] = data;      // replace old data
+            }
+            childNodes[2] = audienceIds.length;
+            // [0] => format, [1] => if from Root of room, [3] => numbers of child nodes from parent node
+            nodesMap = [ 1, 1, getRoomIds(), 1, nodesMap[4], nodesMap[5], nodesMap[6], peer.id, getMyName(), childNodes, urlInfo[0]];  //record this node's info
+            if(root){
+                if(root.open){
+                    root.send(nodesMap);
+                }
+            }
+            liveSend(nodesMap);
+            document.getElementById("sumOfRoom").innerHTML = "Members: "+ nodesMap[2].length;
+        }
+
+        // destroy connection when someone closed the web
+        window.addEventListener("beforeunload", (event) => {
+            if(audiences[0]){
+                for(let i=0; i<audiences.length; i++){
+                    audiences[i].send([5]);
+                    audiences[i].close();
+                }
+            }
+            root.close();
+            // event.preventDefault();
+        });
+    if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+        document.getElementById("playersList").style.maxHeight = '200px';
+    }
+    modeModify(0);
+    </script>
+</body>
+</html>

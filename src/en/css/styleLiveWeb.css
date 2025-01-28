@@ -7,6 +7,15 @@
     --input-color: rgb(241,242,243);
     --visited-color: rgb(23, 134, 245);
 }
+html, body {
+    background: var(--theme-color);
+    color: var(--font-color);
+    font-family: "Lato", sans-serif;
+    height: 100%;
+	margin: 0; 
+	padding: 0;
+	border: 0;
+}
 .containerShowcaseSwitch {
     position: absolute;
     right: 50%;
@@ -45,6 +54,7 @@
     z-index: 1000;
     overflow: auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    scrollbar-gutter: stable;
 }
 .stress {
     padding-bottom: 1%;
@@ -56,7 +66,7 @@
     font-size: 20px;
     gap: 10%;
     border-bottom: 2px solid var(--font-color);
-
+    text-decoration: none;
     a:hover {
         color: var(--font-color);
     }
@@ -151,22 +161,14 @@
 }
 .pop_Button:focus > .pop { visibility:visible; opacity:1; }
 
-html, body {
-    background: var(--theme-color);
-    color: var(--font-color);
-    height: 100%;
-	margin: 0; 
-	padding: 0;
-	border: 0;
-}
 video::-webkit-media-controls-timeline {
-display: none;
+    display: none;
 }
 video::-webkit-media-controls-current-time-display {
-display: none;
+    display: none;
 }
 video::-webkit-media-controls-time-remaining-display {
-display: none;
+    display: none;
 }
 
 body::-webkit-scrollbar {
@@ -218,14 +220,14 @@ body::-webkit-scrollbar {
     -webkit-border-radius: 100px;
 }
 .box {
-    min-width: 300px;
+    /* min-width: 300px; */
     display: inline-block;
     border-right: 1px solid var(--ui-color);
     box-sizing: border-box;
     padding: 10px;
     height: 98%;
     padding-bottom: 0px;
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
 }
 .videoBox {
     position: absolute;

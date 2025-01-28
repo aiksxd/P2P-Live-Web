@@ -27,7 +27,6 @@ let conference_Stream;
 let not_Inputting = true;
 let inputting_Timeout;
 let textareas = document.querySelectorAll('textarea');
-let theme_index = 0;
 // let popContent = document.querySelectorAll('.pop_Content');
 let active_confirm_Button;
 let peer_Conn_Lock = false;
@@ -1071,9 +1070,6 @@ function change_Theme(index, theme_color, font_color, ui_color, input_color, act
     input_color = input_color || 'rgb(241,242,243)';
     active_color = active_color || 'rgb(162,255,109)';
     visited_color = visited_color || 'rgb(23, 134, 245)';
-    if (index) {
-        theme_index = index;
-    }
     switch (index) {
         case "1":   // dark mode
             theme_color = 'rgb(28,33,40)';

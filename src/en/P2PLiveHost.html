@@ -72,13 +72,16 @@
         <div class="pop_Content covert">
             <div style="display: flex;">
                 <img id="roomCover" src="">
-                <span id="roomTitle"></span>
+                <div>
+                    <h2 id="roomTitle"></h2>
+                    <button id="copyURL">Copy Web Link to share</button><br>
+                    <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
+                </div>
             </div>
-            <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
             <div id="nodeInfo">
                 <div id="stable">
-                    <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 0)">me</button>
-                    <button id="refreshMap" onclick="refreshMap(0)">Refresh</button>
+                    <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">Host Node</button>
+                    <button id="refreshMap" onclick="refreshMap(1)">Refresh</button>
                 </div>
                 <div id="block0"></div>
                 <div id="block1"></div>
@@ -95,12 +98,12 @@
            <input type="checkbox" onclick="join_Conference()" id="joinConference">Join Conference<br><br>
            
            What will you Share Local Devices:<br>
-           <input type="checkbox" id="ifConferenceUseCamera">Camera
-           <input type="checkbox" id="ifConferenceUseMicrophone">Microphone<br>
-           <input type="checkbox" onclick="upload_Conferee_Video()" id="uploadConfereeVideo">Get Local Video<br><br>
+           <input type="checkbox" id="ifUseConferenceCamera">Camera
+           <input type="checkbox" id="ifUseConferenceMicrophone">Microphone<br>
+           <button onclick="askNavigatorMediaDevices(true)">Get Local Video</button><br>
            <video id="conferee_Local_Video"></video><br>
            Confirm public your Local Devices:
-           <input type="checkbox" onclick="askNavigatorMediaDevices(true)" id="uploadConfereeVideo">Public Stream<br><br>
+           <button onclick="upload_Conferee_Video()">Public Stream</button><br>
            
         </div>
         
@@ -118,7 +121,7 @@
             <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br> -->
         </div>
         <div class="box">
-            <button onclick="fullWebVideo()" id="fullScreen">Full Page Video</button><br>
+            <!-- <button onclick="fullWebVideo()" id="fullScreen">Full Page Video</button><br> -->
             <div>
                 <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Avatar & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br>
                 <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
@@ -199,12 +202,22 @@
         // Listen for the event when a Peer connection is successfully opened
         // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
         peer.on('open', (id) => {
+            //childNodes=[0.dataType, 1.sourceMark, 2.NumberOfchildNodes, 3.unused for you ]
+            childNodes = [ 1, 1, 0, [], id, getMyName(), []];
             if (LiveTitle.value || LiveSummary.value || LiveCoverURL.value){
                 nodesMap = [ 1, 1, [id], 0, LiveTitle.value, LiveSummary.value, LiveCoverURL.value, id, getMyName(), childNodes, urlInfo[0], false];
-            } else {
-                //childNodes=[0.dataType, 1.sourceMark, 2.NumberOfchildNodes, 3.unused for you ]
-                childNodes = [ 1, 1, 0, [], id, getMyName(), []];
+            } else if (urlInfo[1] || urlInfo[2] || urlInfo[3]) {
                 //nodesMap=[0.dataType, 1.sourceMark, 2.idsOfMembersInRoom, 3.roomType]
+                nodesMap = [ 1, 1, [id], 0, urlInfo[1], urlInfo[2], urlInfo[3], id, getMyName(), childNodes, urlInfo[0], false];
+            } else if (use_Local_Storage) {
+                LiveTitle.value = localStorage.liveTitle;
+                if (localStorage.liveCoverURL) {
+                    document.getElementById("LiveCover").src = localStorage.liveCoverURL;
+                }
+                LiveSummary.value = localStorage.liveSummary;
+                nodesMap = [ 1, 1, [id], 0, LiveTitle.value, '', LiveCoverURL.value, id, getMyName(), childNodes, urlInfo[0], false];
+                nodesMap[6] = localStorage.liveCoverURL;
+            } else {
                 nodesMap = [ 1, 1, [id], 0, urlInfo[1], urlInfo[2], urlInfo[3], id, getMyName(), childNodes, urlInfo[0], false];
             }
             console.log(id);
@@ -337,11 +350,19 @@
                     case 5:     // Conference
                         switch (data[1]) {
                             case 0:     // append
-                                let new_Conferee = [conferee_Map[0].length -1, data[2][1], data[2][2]]
+                                let i = 0;
+                                while (i <= conferee_Map[0].length) {
+                                    if (conferee[0][i] == undefined) {
+                                        index = i;
+                                        return;
+                                    }
+                                    i++;
+                                }
+                                let new_Conferee = [index, data[2][1], data[2][2]]
                                 conferee_Map[0].push(new_Conferee[0]);
                                 conferee_Map[1].push(new_Conferee[1]);
                                 conferee_Map[2].push(new_Conferee[2]);
-                                conferee_Map[3].push(undefined);
+                                conferee_Map[3].push(null);
                                 nodesMap[11] = conferee_Map;
 
                                 liveSend([5,1, new_Conferee]);
@@ -454,6 +475,11 @@
                 if(root.open){
                     root.send(nodesMap);
                 }
+            }
+            if (use_Local_Storage) {
+                localStorage.liveTitle = nodesMap[4];
+                localStorage.liveSummary = nodesMap[5];
+                localStorage.liveCoverURL = nodesMap[6];
             }
             pop(document.getElementById('liveSetting'));
         }

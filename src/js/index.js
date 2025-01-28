@@ -1,7 +1,5 @@
-let theme_Index = "0";
 let last_Index = 0;
 let language = 'en'
-let app_Mode = true;
 
 function reboot_App_Language() {
     document.getElementById('homePage').src = "./"+ language + "/index.html";
@@ -79,19 +77,19 @@ function change_App_Theme(
     sidebar_ui_color,
     sidebar_font_color,
     sidebar_active_color
-) {
+) {  // string index
     // --sidebar_color: rgb(243,243,243);    /* #fae5a0; */
     // --sidebar_ui_color: rgb(174,221,129);     /* rgb(193, 238, 31); */
     // --sidebar_font_color: rgb(21,26,34);
     // --sidebar_active_color: rgb(107,194,53);
     // --window_width: 100vh;
     // --window_height: 100vh;
-    if (document.getElementById('uselocalStorage').checked && index !== undefined) {
-        localStorage.setItem('themeIndex', index);
+    if (use_Local_Storage && index !== undefined) {
+        localStorage.themeIndex = index;
     }
     switch (index) {
         case "1":   // dark
-            theme_color = 'rgb(46,46,46)';
+            theme_color = 'rgb(28,33,40)';
             sidebar_color = 'rgb(28,33,40)';
             sidebar_ui_color = 'rgb(46,46,46)';
             sidebar_font_color = 'rgb(209,215,224)';
@@ -111,37 +109,30 @@ function change_App_Theme(
     document.documentElement.style.setProperty('--sidebar-font-color', sidebar_font_color);
     document.documentElement.style.setProperty('--sidebar-active-color', sidebar_active_color);
     theme_Index = index;
-    let currentUrl = window.location.href;
-    // let urlIndex = currentUrl.indexOf("P2PLi");
-    // if (urlIndex === -1) {
-    //     urlIndex = currentUrl.indexOf("index");
-    // }
-    // if (urlIndex !== -1) {
-    //     currentUrl = currentUrl.substring(0, urlIndex);
-    // }
-    // console.log(currentUrl);    // debug
     let iframeWindow = document.getElementById('homePage').contentWindow;
-    iframeWindow.postMessage(theme_Index, currentUrl);
+    iframeWindow.postMessage([1, theme_Index], window.location.origin);
     iframeWindow = document.getElementById('livePage').contentWindow;
-    iframeWindow.postMessage(theme_Index, currentUrl);
+    iframeWindow.postMessage([1, theme_Index], window.location.origin);
     let i = 1;
     while (i < (document.getElementsByClassName('livePages').length)) {
         let iframeWindow = document.getElementById('livePage' + i).contentWindow;
-        iframeWindow.postMessage(theme_Index, currentUrl);
+        iframeWindow.postMessage([1, theme_Index], window.location.origin);
         i++;
     }
 }
 
 window.addEventListener('message', (e)=>{
-    let index = '';
-    if (document.getElementById('multiLivePage').checked) {
-        index = add_Extension(1);
-        changeMenu(index);
-    } else {
-        changeMenu(-2);     // original live menu
+    if (app_Mode) {
+        let index = '';
+        if (document.getElementById('multiLivePage').checked) {
+            index = add_Extension(1);
+            changeMenu(index);
+        } else {
+            changeMenu(-2);     // original live menu
+        }
+        // console.log(e.data +"\n"+ index);  // debug
+        document.getElementById("livePage" + index).src = "./"+ language +"/"+ e.data;
     }
-    console.log(e.data +"\n"+ index);  // debug
-    document.getElementById("livePage" + index).src = "./"+ language +"/"+ e.data;
 },false);
 
 document.getElementById('multiLivePage').addEventListener('click', () => {
@@ -152,3 +143,41 @@ document.getElementById('multiLivePage').addEventListener('click', () => {
         }
     }
 });
+
+function switch_App_Mode() {
+    if (document.getElementById('appMode').checked) {
+        app_Mode = true;
+    } else {
+        app_Mode = false;
+    }
+    let currentUrl = window.location.href;
+    let iframeWindow = document.getElementById('homePage').contentWindow;
+    iframeWindow.postMessage([0, 1, app_Mode], currentUrl);   // setting iframe Enable app_Mode
+}
+
+if (app_Mode) {
+    if (!document.getElementById('appMode').checked) {
+        document.getElementById('appMode').click();
+    }
+}
+
+function switch_Enable_Local_Storage() {
+    if (document.getElementById('useLocalStorage').checked) {
+        use_Local_Storage = true;
+    } else {
+        use_Local_Storage = false;
+    }
+    let currentUrl = window.location.href;
+    let iframeWindow = document.getElementById('homePage').contentWindow;
+    iframeWindow.postMessage([0, 0, use_Local_Storage], currentUrl);   // setting iframe Enable_Local_Storage
+}
+if (use_Local_Storage) {
+    if (!document.getElementById('useLocalStorage').checked) {
+        document.getElementById('useLocalStorage').click();
+    }
+
+    if(localStorage.themeIndex !== undefined){
+        change_App_Theme(localStorage.themeIndex);
+        document.getElementById('themeController').value = localStorage.themeIndex;
+    }
+}
