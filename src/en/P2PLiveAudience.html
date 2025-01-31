@@ -76,14 +76,14 @@
             <button onclick="peer.reconnect()">reconnect with original Id</button><br><br>
         </div>
         <div class="pop_Content covert">
-           <input type="checkbox" onclick="initial_Conference()" id="EnableConference">Enable Conference<br><br>
-           <input type="checkbox" onclick="join_Conference()" id="joinConference">Join Conference<br><br>
+           <input type="checkbox" onclick="join_Conference()" id="joinConference">Join Conference<br>
            
            What will you Share Local Devices:<br>
            <input type="checkbox" id="ifUseConferenceCamera">Camera
            <input type="checkbox" id="ifUseConferenceMicrophone">Microphone<br>
-           <button onclick="askNavigatorMediaDevices(true)">Get Local Video</button><br>
-           <video id="conferee_Local_Video"></video><br>
+           <button onclick="askNavigatorMediaDevices(true)">Get Local Video</button>
+           <button onclick="stop_Conference_Stream()">Stop Conference Stream</button><br>
+           <video id="conferee_Local_Video" controls></video><br>
            Confirm public your Local Devices:
            <button onclick="upload_Conferee_Video()" id="uploadConfereeVideo">Public Stream</button><br>
            
@@ -102,7 +102,7 @@
         </div>
         <div class="box">
             <!-- <button onclick="fullWebVideo()" id="fullScreen">Full Page Video</button> -->
-            <button onclick="document.getElementById('fakeInputText').focus()" class="covert" id="mobileInput">Wake Mobile Input</button><br>
+            <button onclick="document.getElementById('fakeInputText').focus()" class="covert" id="mobileInput">Wake Mobile Input</button>
             <input type="text" class="covert" id="fakeInputText">
             <div>
                 <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Avatar & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br>
@@ -194,8 +194,14 @@
         // Listen for the event when a Peer connection is successfully opened
         // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
         peer.on('open', (id) => {
-            MyName.value = urlName;
-            hereNode = [ 1, 0, 0, [], id, getMyName(), []]
+            if (urlName) {
+                MyName.value = urlName;
+            } else if (use_Local_Storage) {
+                if (localStorage.myName) {
+                    MyName.value = localStorage.myName;
+                }
+            }
+            hereNode = [ 1, 0, 0, [], id, getMyName(), []];
             console.log(id);
             document.getElementById("myid").innerHTML = "Your Id:<br/>" + id;
             document.getElementById("status").innerHTML="Status: Connecting to Live Room...";
@@ -210,42 +216,67 @@
             if (my_Conferee_Index) {
                 if (nodesMap[11][1].includes(conn.peer)) {
                     conferee = conn;
-                    conferee_Nodes.push(conferee);
 
                     conferee.on('open', () => {
-
+                        if (conference_Stream) {
+                            conferee.send([5,3, my_Conferee_Index, conference_Stream.id, null, getMyName()]);
+                            peer.call(conferee.peer, conference_Stream);
+                        } else if (myIcon) {
+                            conferee.send([5,3, my_Conferee_Index, null, myIcon, getMyName()]);
+                        } else {
+                            conferee.send([5,3, my_Conferee_Index, null, null, getMyName()]);
+                        }
+                        conferee_Nodes.push(conferee);
                     });
 
                     conferee.on('data', (data) => {
                         switch (data[1]) {
                             case 2:
                                 if (data[2]) {
-                                } else {    // stop conference
-                                    let i = 1;  // without first dom
-                                    while (i < document.getElementsByClassName('conferees').length) {
-                                        document.getElementsByClassName('conferees')[i].remove();
-                                        i++;
+                                    let delete_index = nodesMap[11][1].indexOf(data[2]);
+                                    if (delete_index !== -1) {
+                                        document.getElementById('conferees'+ delete_index).remove();
+                                        conferee_Nodes.splice(delete_index - 1, 1);
                                     }
                                 }
                                 break;
                             case 3:   // [5,3, my_Conferee_Index, my_Conferee_Stream_Id, myIcon, getMyName()]);
-                                if (data[3]) {      // stream
+                                if (data[3]) {      // stream & choose one of img and stream
                                     nodesMap[11][3][data[2]] = data[3];
                                 } else if (data[4]){    // img
-                                    document.getElementsByClassName('conferees')[data[2]].style.background = data[5];
+                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeIcon')[0].src = data[4];
+                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeVideos')[0].srcObject = null;
+                                    document.getElementById('conferees'+ data[2]).removeAttribute('src'); // empty source
                                 }
-                                document.getElementsByClassName('confereeName')[data[2]].innerHTML = data[6];
+                                if (data[5]){    // name
+                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeName')[0].innerHTML = data[5];
+                                    nodesMap[11][2][data[2]] = data[5];
+                                }
                                 break;
                         }
                     });
 
                     conferee.on('close', () => {
-                        if (nodesMap[11][1].includes(conferee.peer)) {
-                            let delete_index = nodesMap[11][1].indexOf(conferee.peer);
-                            document.getElementsByClassName('conferees')[delete_index].remove();
+                        if (my_Conferee_Index) {
+                            let i = 0;
+                            while (i < conferee_Nodes.length) {
+                                if (conferee_Nodes[i]) {
+                                    if (!conferee_Nodes[i].open) {
+                                        if (nodesMap[11][1].includes(conferee_Nodes[i].peer)) {
+                                            if (parent_Node) {
+                                                if ((!nodesMap[11][1].includes(nodesMap[7])) && (nodesMap[11][1] !== conferee_Nodes[i].peer && parent.open)) {
+                                                    console.log((!nodesMap[11][1].includes(nodesMap[7])) +"&&"+ nodesMap[9] +"=="+ conferee_Nodes[i].peer)  //debug
+                                                    parent_Node.send([5,2, conferee_Nodes[i].peer]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                i++;
+                            }
                         }
                     });
-                    conn = null;
+                    conn = null;    // stop connection bridge deeply
                     return;
                 }
             }
@@ -338,16 +369,26 @@
                     case 5:     // Conference
                         switch (data[1]) {
                             case 0:
-                                parent_Node.send(data);
-                            case 1:     // useless?
+                                if (parent_Node.open) {
+                                    parent_Node.send(data);
+                                }
+                                break;
+                            case 1:         // [index, id, name]
+                                // if (my_Conferee_Index) {
+                                //     conferee_Map[0][data[2][1]] = data[2][1];
+                                //     conferee_Map[1][data[2][1]] = data[2][2];
+                                //     conferee_Map[2][data[2][1]] = data[2][3];
+                                //     conferee_Map[3][data[2][1]] = null;
+                                // }
                                 break;
                             case 2:     // delete
-                                if (my_Conferee_Index) {
-                                    
-                                } else {
-                                    
+                                if (parent_Node.open) {
+                                    parent_Node.send(data);
                                 }
-                            case 3:
+                            case 3:     // update nodesMap
+                                if (parent_Node.open) {
+                                    parent_Node.send(data);
+                                }
                                 break;
                             case 4:
                                 break;
@@ -388,7 +429,6 @@
                                                 parent_Node.send(hereNode);
                                             }
                                         }
-
                                     }
                                 }
                                 // console.log("Disconnected and deleted: " + conns[i].peer);     //DEBUG
@@ -406,17 +446,19 @@
             // Receive the stream
             mediaConnection.on('stream', (stream) => {
                 remoteStream = stream;
-                if (nodesMap[11]) {
-                    if (my_Conferee_Index && nodesMap[11][3].includes(stream.id)) {
-                        document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = stream;
-                        
-                        mediaConnection.on('close', function() {    // test to do
-                            document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = null;
-                        });
+                if (nodesMap[11] && my_Conferee_Index && nodesMap[11][3].includes(stream.id)) {
+                        let index = nodesMap[11][3].indexOf(stream.id);
+                        index = nodesMap[11][0][index];
+                        if (index !== -1) {
+                            document.getElementById('conferees'+ index).getElementsByClassName('confereeVideos')[0].classList.remove('covert');
+                            document.getElementById('conferees'+ index).srcObject = stream;
+                        }
+
+                        // mediaConnection.on('close', function() {    // test to do
+                        //     document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = null;
+                        // });
                         return;
-                    }
-                }
-                if(awaitedNodeId){
+                } else if(awaitedNodeId){
                     peer.call(awaitedNodeId, stream/*document.getElementById('RemoteVideo').srcObject*/);
                     console.log("Media delivered successfully: "+ awaitedNodeId);
                     awaitedNodeId = null;
@@ -475,9 +517,14 @@
             () => {
                 if (MyName.value != hereNode[5] && MyName.value){
                     hereNode[5] = MyName.value;
-                    parent_Node.send(hereNode);
+                    if (parent_Node.open) {
+                        parent_Node.send(hereNode);
+                    }
+                    if (use_Local_Storage) {
+                        localStorage.myName = MyName.value;
+                    }
+                    update_Conferee_Info();
                 }
-                update_Conferee_Info();
             },
             true,
         );
@@ -548,10 +595,6 @@
         document.getElementById("onlyPC").remove();
         document.getElementById('mobileInput').classList.remove('covert')
     }
-    window.addEventListener('message', function(event) {
-        if (event.origin !== 'https://127.0.0.1') return;
-        change_Theme(event.data);
-    });
     </script>
     <script src="js/srs.sdk.js"></script>
 </body>

@@ -302,7 +302,7 @@
         }
 
         function defaultConnect(){
-            if (peer.id == defaultId){
+            if (peer.id === defaultId){
                 alert("Root node can't connect others");
                 return;
             }
@@ -316,7 +316,7 @@
         // *Explanation: In the given code snippet, there is an event listener attached to the "connectButton" element, which triggers a function when the button is clicked.
         // *Inside the function, the "root" variable is assigned the value of the connection made with the peer using the peer Id obtained from the input field with the Id "peerId".
         document.getElementById('connectButton').addEventListener('click', () => {
-            if (peer.id == defaultId){
+            if (peer.id === defaultId){
                 alert("Root node can't connect others");
                 return;
             }
@@ -351,18 +351,17 @@
                 switch (nodesMap[3]) {  // room type
                     case 0:
                         if (app_Mode) {
-                            window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                            window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
                         } else {
-                            document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index;       
+                            window.open("./P2PLiveAudience.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
                         }
                         break;
                     case 1:
                     if (app_Mode) {
-                            window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                            window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
                         } else {
-                            document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index;       
-                        }
-                        document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName();       
+                            window.open("./P2PLiveAudience.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);       
+                        }      
                         break;
                     default:
                         console.log("unknown type of room: "+ nodesMap[3]);

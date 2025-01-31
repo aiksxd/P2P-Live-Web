@@ -29,7 +29,7 @@ let liveCoverBase64 = null;
 let msgImgBase64 = null;
 let fullWebVideoTimes = 0;
 let deliverId = null;
-let conferee_Map = [[],[],[],[]];     // indexs, ids, names, stream.id
+let conferee_Map = [[0],[0],[0],[0]];     // [indexs], [ids], [names], [stream.id] ; [0:sum, 1...:conferee]
 let conferee_Nodes = [];
 let my_Conferee_Index = null;
 let my_Conferee_Stream_Id = null;
@@ -105,6 +105,25 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                         break;
                     case 1:
                         if (data[1] == -1){ break; }    // refused to receive msg for guest
+                        if (nodesMap[11]) {
+                            if (!data[11]) {
+                                // stop conference
+                                let i = 1;  // without first dom [0]
+                                while (i < nodesMap[11][0].length) {
+                                    if (nodesMap[11][0][i]) {
+                                        document.getElementById('conferees'+ nodesMap[11][0][i]).remove();
+                                    }
+                                    i++;
+                                }
+                                my_Conferee_Index = null;
+                                my_Conferee_Stream_Id = null;
+                                if(conference_Stream){
+                                    conference_Stream.getTracks().forEach(track => track.stop());
+                                }
+                                conference_Stream = null;
+                                document.getElementById("joinConference").checked = false;
+                            }
+                        }
                         recorder(data);
                         break;
                     case 3:     // remind reconnect
@@ -174,32 +193,26 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                     case 5:
                         switch (data[1]) {
                             case 1:      // append conferee dom
-                                // console.log(data);  // debug
+                                // console.log("parent get:"+data);  // debug
+                                deliverId = parent_Node.peer;
                                 liveSend(data);
-                                let new_Conferee = data[2];
-                                if (new_Conferee[1] === peer.id) {
-                                    my_Conferee_Index = new_Conferee[0];
-                                    if (myIcon) {
-                                        let i = 0;
-                                        while (i < conferee_Nodes.length) {
-                                            conferee_Nodes[i].send([5,3, my_Conferee_Index, null, myIcon, getMyName()])
+                                if (document.getElementById("joinConference").checked) {
+                                    console.log("parent get:"+data[2]);  // debug
+                                    let new_Conferee = data[2];     // [index, id, name]
+                                    if (new_Conferee[1] === peer.id) {
+                                        my_Conferee_Index = new_Conferee[0];
+                                        let i = 1;
+                                        while (i < nodesMap[11][1].length) {
+                                            if (nodesMap[11][1][i] && (nodesMap[11][1][i] !== peer.id)) {
+                                                tryConnect(2, nodesMap[11][1][i]);
+                                            }
                                             i++;
                                         }
+                                        console.log("parent get:"+ my_Conferee_Index);  // debug
+                                        append_Conferee_Dom();
+                                    } else {
+                                        append_Conferee_Dom(new_Conferee);
                                     }
-                                    let i = 0;
-                                    while (i < nodesMap[11][1].length) {
-                                        if (nodesMap[11][i] !== peer.id) {
-                                            tryConnect(2, nodesMap[11][1][i]);
-                                        }
-                                        i++;
-                                    }
-                                }
-                                nodesMap[11][0].push(new_Conferee[0]);
-                                nodesMap[11][1].push(new_Conferee[1]);
-                                nodesMap[11][2].push(new_Conferee[2]);
-                                nodesMap[11][3].push(null);    // stream.id
-                                if (document.getElementById("joinConference").checked) {
-                                    append_Conferee_Dom(new_Conferee);
                                 }
                                 break;
                             default:
@@ -238,9 +251,9 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                             case 0:
                                 if (ifJump === 2) {
                                     if (app_Mode) {
-                                        window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                                        window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
                                     } else {
-                                        window.open("./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                                        window.open("./P2PLiveAudience.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
                                     }
                                 } else {
                                     document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index;
@@ -249,9 +262,9 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                             case 1:
                                 if (ifJump === 2) {
                                     if (app_Mode) {
-                                        window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                                        window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
                                     } else {
-                                        window.open("./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                                        window.open("./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
                                     }
                                 } else {
                                     document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index;
@@ -308,46 +321,56 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             }
             break;
         case 2:
-            if (conferee) {
-                conferee.close();
-            }
+            // if (conferee) {
+            //     conferee.close();
+            // }
             conferee = peer.connect(id);
-
+            conferee_Nodes.push(conferee);
+            
             conferee.on('open', () => {
-                if (myIcon) {
-                    conferee.send([5,3, my_Conferee_Index, null, myIcon, getMyName()]);
-                }
                 if (conference_Stream) {
-                    conferee.call(conference_Stream);
+                    conferee.send([5,3, my_Conferee_Index, conference_Stream.id, null, getMyName()]);
+                    peer.call(conferee.peer, conference_Stream);
+                } else if (myIcon) {
+                    conferee.send([5,3, my_Conferee_Index, null, myIcon, getMyName()]);
+                } else {
+                    conferee.send([5,3, my_Conferee_Index, null, null, getMyName()]);
                 }
-                conferee_Nodes.push(conferee);
             });
             
             conferee.on('data', (data) => {
                 switch (data[1]) {
                     case 2:
-                        if (data[2]) {
-                        } else {    // stop conference
-                            let i = 1;  // without first dom
-                            while (i < document.getElementsByClassName('conferees').length) {
-                                document.getElementsByClassName('conferees')[i].remove();
-                                i++;
+                        if (parent_Node && data[2]) {
+                            // need faster than update nodesMap
+                            let delete_index = nodesMap[11][1].indexOf(data[2]);
+                            if (delete_index !== -1) {
+                                document.getElementById('conferees'+ delete_index).remove();
+                                conferee_Nodes.splice(delete_index - 1, 1);
                             }
                         }
                         break;
                     case 3:   // [5,3, my_Conferee_Index, my_Conferee_Stream_Id, myIcon, getMyName()]);
-                            if (data[3]) {      // stream
+                            // console.log("conference[3]:"+data)  //debug
+                            if (data[3]) {      // stream & choose one of img and stream
                                 nodesMap[11][3][data[2]] = data[3];
                                 if (!parent_Node) {  // for host
                                     conferee_Map[3][data[2]] = data[3];
                                 }
+                                console.log("conference[3]:"+data[3])  //debug
                             } else if (data[4]){    // img
-                                document.getElementsByClassName('conferees')[data[2]].style.background = data[5];
+                                document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeIcon')[0].src = data[4];
+                                document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeVideos')[0].classList.add('covert');
+                                document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeVideos')[0].srcObject = null;
+                                document.getElementById('conferees'+ data[2]).removeAttribute('src');   // empty source
                             }
-                            document.getElementsByClassName('confereeName')[data[2]].innerHTML = data[6];
-                            if (!parent_Node) {  // for host
-                                conferee_Map[2][data[2]] = data[6];
-                                liveSend(nodesMap);
+                            if (data[5]){    // name
+                                document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeName')[0].innerHTML = data[5];
+                                nodesMap[11][2][data[2]] = data[5];
+                                if (!parent_Node) {  // for host
+                                    conferee_Map[2][data[2]] = data[5];
+                                    liveSend(nodesMap);
+                                }
                             }
                             break;
                     default:
@@ -356,9 +379,37 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             });
 
             conferee.on('close', () => {
-                if (conferee_Map[1].includes(conferee.peer)) {
-                    let delete_index = conferee_Map[1].indexOf(conferee.peer);
-                    document.getElementsByClassName('conferees')[delete_index].remove();
+                if (my_Conferee_Index) {
+                    let i = 0;
+                    while (i < conferee_Nodes.length) {
+                        if (conferee_Nodes[i]) {
+                            if (!conferee_Nodes[i].open) {
+                                if (nodesMap[11][1].includes(conferee_Nodes[i].peer)) {
+                                    if (parent_Node) {
+                                        if ((!nodesMap[11][1].includes(nodesMap[7])) && (nodesMap[11][1] !== conferee_Nodes[i].peer) && parent_Node.open) {
+                                            // console.log((!nodesMap[11][1].includes(nodesMap[9])) +"&&"+ nodesMap[7] +"=="+ conferee_Nodes[i].peer)  //debug
+                                            parent_Node.send([5,2, conferee_Nodes[i].peer]);
+                                        }
+                                    } else {
+                                        let delete_index = nodesMap[11][1].indexOf(conferee_Nodes[i].peer);
+                                        console.log("close"+delete_index);  //debug
+                                        if (delete_index !== -1) {
+                                            i = 0;
+                                            while (i < conferee_Map.length) {
+                                                conferee_Map[i][delete_index] = null;     // leave blank
+                                                i++;
+                                            }
+                                            nodesMap[11] = conferee_Map;
+                                            liveSend(nodesMap);
+                                            conferee_Nodes.splice(delete_index - 1, 1);
+                                            document.getElementById('conferees'+ delete_index).remove();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        i++;
+                    }
                 }
             });
             // alert("try to connect someone in rooms");
@@ -521,7 +572,7 @@ function liveSend (msg){
     let source = NaN;
     if(msg instanceof Array){
         // if(msg[0] && msg[0] instanceof Number && (!msg[1] instanceof Number)){
-        if((msg[0] instanceof Number) && (msg[1] instanceof String)){
+        if((msg[0] instanceof Number) && (msg[1] instanceof String)){   // [number, idA, ...] => don't send to idA
             source = msg[1];    // mark source id for send data in a single direction
         }
     }
@@ -581,9 +632,9 @@ function echoNodesMap(arr, layerNumber, aimId, fnOfEcho){
                     document.location.href = "./P2PLiveAudience.html?id=" + aimId +"&name="+ getMyName() + "&themeIndex="+ theme_Index;
                 } else {
                     if (app_Mode) {
-                        window.parent.postMessage("P2PLiveAudience.html?id=" + aimId +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                        window.parent.postMessage("P2PLiveAudience.html?id=" + aimId +"&name=&themeIndex="+ theme_Index);
                     } else {
-                        window.open("./P2PLiveAudience.html?id=" + aimId +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                        window.open("./P2PLiveAudience.html?id=" + aimId +"&name=&themeIndex="+ theme_Index);
                     }
                 }
                 break;
@@ -593,9 +644,9 @@ function echoNodesMap(arr, layerNumber, aimId, fnOfEcho){
                     document.location.href = "./P2PGameFiveOnLinePlayer.html?id=" + aimId +"&name="+ getMyName() + "&themeIndex="+ theme_Index;
                 } else {
                     if (app_Mode) {
-                        window.parent.postMessage("P2PGameFiveOnLinePlayer.html?id=" + aimId +"&name="+ getMyName()) + "&themeIndex="+ theme_Index;
+                        window.parent.postMessage("P2PGameFiveOnLinePlayer.html?id=" + aimId +"&name=&themeIndex="+ theme_Index);
                     } else {
-                        window.open("./P2PGameFiveOnLinePlayer.html?id=" + aimId +"&name="+ getMyName() + "&themeIndex="+ theme_Index);
+                        window.open("./P2PGameFiveOnLinePlayer.html?id=" + aimId +"&name=&themeIndex="+ theme_Index);
                     }
                 }
                 break;
@@ -744,13 +795,14 @@ function cleanMsg(){    // DEBUG
 function getMyName(){
     if(MyName){
         if (MyName.value){
-            if (use_Local_Storage) {
-                localStorage.myName = MyName.value;
-            }
             return MyName.value;
-        } else {
-            return peer.id;
+        } else if (use_Local_Storage) {
+            if (localStorage.myName) {
+                return localStorage.myName;
+            }
         }
+    } else if (peer) {
+        return peer.id;
     }
     return "";
 }
@@ -766,19 +818,23 @@ function conference_Play() {
 function upload_Conferee_Video() {
     if (conference_Stream) {
         if (my_Conferee_Index) {
+            conferee_Map[3][my_Conferee_Index] = my_Conferee_Stream_Id;
             if (!parent_Node) {
-                conferee_Map[3][my_Conferee_Index] = my_Conferee_Stream_Id;
                 nodesMap[11] = conferee_Map;
                 liveSend(nodesMap);     // not enough to be useful;
             }
             let i = 0;
             while (i < conferee_Nodes.length) {
-                conferee_Nodes[i].send([5,3, my_Conferee_Index, my_Conferee_Stream_Id, null, getMyName()]);
-                conferee_Nodes[i].call(conference_Stream);
+                if (conferee_Nodes[i].open) {
+                    conferee_Nodes[i].send([5,3, my_Conferee_Index, my_Conferee_Stream_Id, null, getMyName()]);
+                    peer.call(conferee_Nodes[i].peer, conference_Stream);
+                }
                 i++;
             }
+            document.getElementsByClassName('confereeVideos')[my_Conferee_Index - 1].classList.remove('covert');
             document.getElementsByClassName('confereeVideos')[my_Conferee_Index - 1].srcObject = conference_Stream;
             document.getElementById('conferee_Local_Video').srcObject = null;
+            document.getElementById('conferee_Local_Video').removeAttribute('src'); // empty source
         } else {
             alert('Join the conference at first');
         }
@@ -787,85 +843,160 @@ function upload_Conferee_Video() {
 
 function update_Conferee_Info() {
     if (my_Conferee_Index) {
+        nodesMap[11][2][my_Conferee_Index] = getMyName();
+
+        let msg = [5,3, my_Conferee_Index, null, null, getMyName()]
+        if (conference_Stream) {
+            msg[3] = my_Conferee_Stream_Id;
+            if (parent_Node) {
+                parent_Node.send(msg);
+            }
+            nodesMap[11][3][my_Conferee_Index] = my_Conferee_Stream_Id;
+        } else if (myIcon) {
+            msg[4] = myIcon;
+            document.getElementById('conferees'+ my_Conferee_Index).getElementsByClassName('confereeIcon')[0].src = msg[4];
+        }
         if (!parent_Node) {
-            conferee_Map[3][my_Conferee_Index] = getMyName();
+            conferee_Map = nodesMap[11];
             liveSend(nodesMap);
         }
-        nodesMap[11][3][my_Conferee_Index] = getMyName();
-        if (conference_Stream) {
-            conference_Send([5,3, my_Conferee_Index, my_Conferee_Stream_Id, null]);
-        } else if (myIcon) {
-            conference_Send([5,3, my_Conferee_Index, null, myIcon, getMyName()]);
-        }
+        conference_Send(msg);
+        document.getElementById('conferees'+ my_Conferee_Index).getElementsByClassName('confereeName')[0].innerHTML = msg[5];
     }
 }
 
 function conference_Send(data) {
+    // console.log("conference_Send"+data)//debug
     let i = 0;
     while (i < conferee_Nodes.length) {
-        conferee_Nodes.send(data);
+        if (conferee_Nodes[i].open) {
+            conferee_Nodes[i].send(data);
+        }
         i++;
     }
 }
 
 function join_Conference() {
+    let operation_Time = Date.now();
+    if (operation_Time - last_Operation_Time < 500) {
+        document.getElementById('joinConference').checked = !document.getElementById('joinConference').checked;
+        return;
+    }
     if (document.getElementById('joinConference').checked) {
+        if (conferee) {
+            conferee.close();
+        }
         if (!nodesMap[11]) {
             alert('Host had not open conference');
+            document.getElementById('joinConference').checked = false;
             return;
         }
-        let i = 0;
+        let i = 1;      // without first aim [0]
         while (i < nodesMap[11][0].length) {
-            if (nodesMap[11][0][i] !== null) {
-                conferee_Info = [nodesMap[11][0][i], nodesMap[11][1][i], nodesMap[11][2][i]]
-                append_Conferee_Dom(conferee_Info);
-                i++;
+            if (nodesMap[11][0][i]) {
+                append_Conferee_Dom([nodesMap[11][0][i], nodesMap[11][1][i], nodesMap[11][2][i]]);
             }
+            i++;
         }
         if (parent_Node) {
-            parent_Node.send([5, 0, [null, peer.id, getMyName()]]);
+            if (parent_Node.open) {
+                parent_Node.send([5, 0, [null, peer.id, getMyName()]]);
+            }
+            // conferee_Map = nodesMap[11];    // local bak for delay update
         } else {
-            my_Conferee_Index = conferee_Map[0].length + 1;
-            liveSend([5,1, [my_Conferee_Index, peer.id, getMyName()]]);
-            let i = 0;
-            while (i < nodesMap[11][1].length) {
+            let index = 1;
+            while (index < conferee_Map[0].length) {
+                if((conferee_Map[0][index] === null) || (conferee_Map[0][index] === undefined)){
+                    break;
+                }
+                index++;
+            }
+            my_Conferee_Index = index;
+            // liveSend([5,1, [my_Conferee_Index, peer.id, getMyName()]]);
+            let i = 1;
+            while (i < nodesMap[11][1].length && (nodesMap[11][1][i] !== peer.id)) {
                 tryConnect(2, nodesMap[11][1][i]);
                 i++;
             }
-            nodesMap[11][0].push(my_Conferee_Index);
-            nodesMap[11][1].push(peer.id);
-            nodesMap[11][2].push(getMyName());
-            nodesMap[11][3].push(null);
+            nodesMap[11][0][index] = my_Conferee_Index;
+            nodesMap[11][1][index] = peer.id;
+            nodesMap[11][2][index] = getMyName();
+            nodesMap[11][3][index] = null;
             conferee_Map = nodesMap[11];
+            liveSend(nodesMap);
             append_Conferee_Dom();
         }
-    } else {
+    } else {    // leave conference
+        console.log('leave')    //debug
+        let i = 1;  // without first dom
+        while (i < nodesMap[11][0].length) {
+            if (nodesMap[11][0][i]) {
+                document.getElementById('conferees'+ nodesMap[11][0][i]).remove();
+            }
+            i++;
+        }
         if (parent_Node) {
-            parent_Node.send([5,2, peer.id]);
+            if (parent_Node.open) {
+                parent_Node.send([5,2, peer.id]);   // dieliver msg to host update nodesMap info
+            }
         } else {
             let i = 0;
+            console.log("kill4:"+my_Conferee_Index)  //debug
             while (i < conferee_Map.length) {
-                conferee_Map[i][my_Conferee_Index] = undefined;     // leave blank
+                conferee_Map[i][my_Conferee_Index] = null;     // leave blank
                 i++;
             }
             nodesMap[11] = conferee_Map;
             liveSend(nodesMap);
         }
         my_Conferee_Index = null;
+        my_Conferee_Stream_Id = null;
         if (conference_Stream) {
             conference_Stream.getTracks().forEach(track => track.stop());
         }
         conference_Stream = null;
+        let t = 0;
+        while (t < conferee_Nodes.length) {
+            conferee_Nodes[t].close();
+            t++;
+        }
+        conferee_Nodes = [];    // clean connections
+    }
+    last_Operation_Time = operation_Time;
+}
+
+function stop_Conference_Stream() {
+    if (conference_Stream) {
+        conference_Stream.getTracks().forEach(track => track.stop());
+    }
+    conference_Stream = null;
+    my_Conferee_Stream_Id = null;
+    update_Conferee_Info();
+    document.getElementById('conferee_Local_Video').srcObject = null;
+    document.getElementById('conferee_Local_Video').removeAttribute('src'); // empty source
+    if (document.getElementById('conferees'+ my_Conferee_Index)) {
+        document.getElementById('conferees'+ my_Conferee_Index).srcObject = null;
+        document.getElementById('conferees'+ my_Conferee_Index).removeAttribute('src'); // empty source
+        document.getElementById('conferees'+ my_Conferee_Index).getElementsByClassName('confereeVideos')[0].classList.add('covert');
     }
 }
 
-function append_Conferee_Dom(conferee) {  // conferee = [index, peer_Id, name]
+function append_Conferee_Dom(conferee) {  // conferee = [index, peer_Id, name, icon]
     if (!conferee) {        // append self
-        conferee = [my_Conferee_Index, peer.id, getMyName()];
+        conferee = [my_Conferee_Index, undefined, getMyName(), myIcon];
     }
+    console.log(conferee);//debug
     
     let conferee_Dom = document.createElement("div");
     conferee_Dom.classList.add('conferees');
+    conferee_Dom.id = 'conferees'+ conferee[0];
+
+    let conferee_Icon = document.createElement("img");
+    conferee_Icon.classList.add("confereeIcon");
+    if (conferee[3]) {
+        conferee_Icon.setAttribute('src', conferee[3]);
+    }
+    conferee_Dom.appendChild(conferee_Icon);
     
     let conferee_Name = document.createElement("span");
     conferee_Name.appendChild(document.createTextNode(conferee[2]));
@@ -873,7 +1004,8 @@ function append_Conferee_Dom(conferee) {  // conferee = [index, peer_Id, name]
     conferee_Dom.appendChild(conferee_Name);
     
     let conferee_Video = document.createElement("video");
-    conferee_Video.classList.add("confereeVideos");
+    conferee_Video.classList.add("confereeVideos", "covert");
+    conferee_Video.setAttribute('controls', 'controls');
     conferee_Dom.appendChild(conferee_Video);
 
     document.getElementById("confereesContainer").appendChild(conferee_Dom);
@@ -895,6 +1027,16 @@ function append_Conferee_Dom(conferee) {  // conferee = [index, peer_Id, name]
 //     }
 //     liveSend([4, peer.id]);
 // }
+
+
+function stop_Live_Stream() {
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+    }
+    localStream = null;
+    WebVideo.srcObject = null;
+    WebVideo.removeAttribute('src'); // empty source
+}
 
 // the function of getting local stream(It can't work on most of mobile phone)
 // Please note! In order for the getDisplayMedia() method to work properly, you need to use the HTTPS protocol or run it on localhost in a local development environment.
@@ -922,6 +1064,9 @@ function useDisplayMedia() {
 function askNavigatorMediaDevices(if_Conference){
     let constraints;
     if (if_Conference) {    // conference format
+        if (! (document.getElementById("ifUseConferenceCamera").checked || document.getElementById("ifUseConferenceMicrophone").checked)) {
+            return;
+        }
         constraints = {
             video: document.getElementById("ifUseConferenceCamera").checked,
             audio: document.getElementById("ifUseConferenceMicrophone").checked,
@@ -930,6 +1075,9 @@ function askNavigatorMediaDevices(if_Conference){
             frameRate: { ideal: 30, max: 60 }
         };
     } else {
+        if (! (document.getElementById("ifUseConferenceCamera").checked || document.getElementById("ifUseConferenceMicrophone").checked)) {
+            return;
+        }
         constraints = { video: document.getElementById("ifUseCamera").checked, audio: document.getElementById("ifUseMicrophone").checked };
     }
     
@@ -937,11 +1085,17 @@ function askNavigatorMediaDevices(if_Conference){
         .getUserMedia(constraints)
         .then(function (stream) {
             if (if_Conference) {
-                if (conference_Stream) {
-                    conference_Stream.getTracks().forEach(track => track.stop());
+                if (my_Conferee_Index) {
+                    if (conference_Stream) {
+                        conference_Stream.getTracks().forEach(track => track.stop());
+                    }
+                    conference_Stream = stream;
+                    my_Conferee_Stream_Id = conference_Stream.id;
+                    update_Conferee_Info();
+                    document.getElementById('conferee_Local_Video').srcObject = conference_Stream;
+                } else {
+                    alert('Join the conference at first');
                 }
-                conference_Stream = stream;
-                document.getElementById('conferee_Local_Video').srcObject = conference_Stream;
             } else {
                 if (localStream) {
                     localStream.getTracks().forEach(track => track.stop());
@@ -962,6 +1116,7 @@ function askNavigatorMediaDevices(if_Conference){
             console.error('Error getting local stream:', err);
         });
 }
+
 function shareSRSMediaStream() {
     if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
@@ -1028,6 +1183,9 @@ function iconInput(){
             reader.readAsDataURL(file);
             reader.onloadend = () => {
                 myIcon = reader.result;
+                if (document.getElementById("myIcon").src !== myIcon) {
+                    update_Conferee_Info();
+                }
                 document.getElementById("myIcon").src = myIcon;
                 if (use_Local_Storage) {
                     localStorage.myIcon = myIcon;
@@ -1231,7 +1389,7 @@ if (document.getElementById('copyURL')) {
             url = url +"P2PLiveAudience.html?id="+ peer.id +"&name=";
         }
         
-        navigator.clipboard.writeText(currentUrl)
+        navigator.clipboard.writeText(url)
             .then(() => {
                 alert('Copy Successfully' + currentUrl);
             })
@@ -1247,7 +1405,7 @@ window.addEventListener('message', function(event) {
     // if (urlIndex !== -1) {
     //     currentUrl = currentUrl.substring(0, urlIndex - 1);
     // }
-    console.log(event.origin+"=\n"+window.location.origin +"=\n" + event.data);  // debug
+    // console.log(event.origin+"=\n"+window.location.origin +"=\n" + event.data);  // debug
     if (event.origin === window.location.origin) {
         switch (event.data[0]) {
             case 0:

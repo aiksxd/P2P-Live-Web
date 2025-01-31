@@ -62,14 +62,16 @@ P2P 是一种分布式网络架构，其中每个参与者（也称为节点）�
 
  ![DeliverGIF](https://github.com/aiksxd/material/blob/main/img/DeliverGIF.gif)
 
-### 常用数组
-+ nodesMap[ **0消息类型** -> 1, **1来源**: 0(child)/1(host), **2房间内所有成员ID**: number, **3房间类型**, **4直播标题**, **5直播简介**, **6直播封面**, **7主办方id**, **9主办方name**, **9主办方子节点**, **10根节点id**, **11会议信息**]
+### 数组
++ nodesMap[ **0消息类型** -> 1, **1来源**: 0(child)/1(host), **2房间内所有成员ID**: number, **3房间类型**, **4直播标题**, **5直播简介**, **6直播封面**, **7主办方id**, **8主办方name**, **9主办方子节点**, **10根节点id**, **11会议信息**]
 
 + child_Nodes[ **消息类型** -> 1, **来源**: 0(child)/1(host), **子节点个数**: number, **房间内的所有id**, **所属id**, **所属名称**, **未启用的扩展接口**, **子节点A的id**, **子节点A的名称**, **子节点A的子节点**, **子节点B的id**....]
 
 + hereNodes[ **0.dataTypes**: 1, **1.sourceMark**: 0(child), **2.Number Of child Nodes**: number, **3.unused for your extension**, **4.own_Id**, **5.own_Name**, **6.unused for your extension**, **7.here_A_Id**, **8.here_A_name**, **9.here_Nodes_Of_Child_A**, **10.here_B_Id**...]
 
 + iframeWindow.postMessage[ **0.dataTypes**: 0(switch setting value)/1(change theme), **1.sourceMark**: value]
+
++ `conferee_Map = [[0, ...],[0, ...],[0, ...],[0, ...]];     // [indexs], [ids], [names], [stream.id] ; [0:up to now only has taken up position, 1...:conferee]`
 
 ### 标识
 + 消息类型: 0 -> 互动信息, 1 -> 节点信息收集用, 2 -> 流媒体请求, 3 -> 提醒更换父节点， 4 -> 流媒体呼叫刷新请求

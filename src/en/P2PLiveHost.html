@@ -34,6 +34,7 @@
         </div>
         <div class="pop_Content covert">
             <!-- Stream Source -->
+            <button onclick="stop_Live_Stream()()">Stop Conference Stream</button><br>
             <div id="onlyPC">
                 <div class="stress">
                     Share PC Desktop:<br>
@@ -100,8 +101,9 @@
            What will you Share Local Devices:<br>
            <input type="checkbox" id="ifUseConferenceCamera">Camera
            <input type="checkbox" id="ifUseConferenceMicrophone">Microphone<br>
-           <button onclick="askNavigatorMediaDevices(true)">Get Local Video</button><br>
-           <video id="conferee_Local_Video"></video><br>
+           <button onclick="askNavigatorMediaDevices(true)">Get Local Video</button>
+           <button onclick="stop_Conference_Stream()">Stop Conference Stream</button><br>
+           <video id="conferee_Local_Video" controls autoplay></video><br>
            Confirm public your Local Devices:
            <button onclick="upload_Conferee_Video()">Public Stream</button><br>
            
@@ -238,24 +240,49 @@
             if (my_Conferee_Index){
                 if (nodesMap[11][1].includes(conn.peer)) {
                     conferee = conn;
-                    conferee_Nodes.push(conferee);
-
                     conferee.on('open', () => {
-                        
+                        if (conference_Stream) {
+                            peer.call(conferee.peer, conference_Stream);
+                        } else if (myIcon) {
+                            conferee.send([5,3, my_Conferee_Index, null, myIcon, getMyName()]);
+                        } else {
+                            conferee.send([5,3, my_Conferee_Index, null, null, getMyName()]);
+                        }
+                        conferee_Nodes.push(conferee);
                     });
                     
                     conferee.on('data', (data) => {
                         switch (data[1]) {
-                            case 3:     // [5,3, my_Conferee_Index, my_Conferee_Stream_Id, myIcon, getMyName()]);
-                                if (data[3]) {      // stream
+                            // case 2:  // host remove at child msg
+                            //     let i = 0;
+                            //     let delete_index = nodesMap[11][1].indexOf(data[2]);
+                            //     console.log("kill5:"+delete_index)  //debug
+                            //     while (i < conferee_Map.length) {
+                            //         conferee_Map[i][delete_index] = null;     // leave blank
+                            //         i++;
+                            //     }
+                            //     nodesMap[11] = conferee_Map;
+                            //     liveSend(nodesMap);
+                            //     conferee_Nodes.splice(delete_index - 1, 1);
+                            //     document.getElementById('conferees'+ delete_index).remove();
+                            //     break;
+                            case 3:
+                                // console.log("Host:"+data);   //debug
+                                // [5,3, my_Conferee_Index, my_Conferee_Stream_Id, myIcon, getMyName()]);
+                                if (data[3]) {      // stream & choose one of img and stream
                                     conferee_Map[3][data[2]] = data[3];
                                 } else if (data[4]){    // img
-                                    document.getElementsByClassName('conferees')[data[2]].style.background = data[5];
+                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeIcon')[0].src = data[4];
+                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeVideos')[0].classList.add('covert');
+                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeVideos')[0].srcObject = null;
+                                    document.getElementById('conferees'+ data[2]).removeAttribute('src');   // empty source
                                 }
-                                document.getElementsByClassName('confereeName')[data[2]].innerHTML = data[6];
-                                conferee_Map[2][data[2]] = data[6];
+                                if (data[5]){    // name
+                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeName')[0].innerHTML = data[5];
+                                    conferee_Map[2][data[2]] = data[5];
+                                }
                                 nodesMap[11] = conferee_Map;
-                                liveSend(nodesMap);
+                                // liveSend(nodesMap);
                                 break;
                         
                             default:
@@ -264,16 +291,33 @@
                     });
 
                     conferee.on('close', () => {
-                        if (nodesMap[11][1].includes(conferee.peer)) {
-                            let delete_index = nodesMap[11][1].indexOf(conferee.peer);
-                            conferee_Map[1][delete_index] = undefined;
-                            conferee_Map[2][delete_index] = undefined;
-                            conferee_Map[3][delete_index] = undefined;
-                            nodesMap[11] = conferee_Map;
-                            liveSend(nodesMap);
-                            document.getElementsByClassName('conferees')[delete_index].remove();
+                        if (my_Conferee_Index) {
+                            let i = 0;
+                            while (i < conferee_Nodes.length) {
+                                if (conferee_Nodes[i]) {
+                                    if (!conferee_Nodes[i].open) {
+                                        if (nodesMap[11][1].includes(conferee_Nodes[i].peer)) {
+                                            let delete_index = nodesMap[11][1].indexOf(conferee_Nodes[i].peer);
+                                            console.log("close"+delete_index);  //debug
+                                            i = 0;
+                                            while (i < conferee_Map.length) {
+                                                conferee_Map[i][delete_index] = null;     // leave blank
+                                                i++;
+                                            }
+                                            nodesMap[11] = conferee_Map;
+                                            liveSend(nodesMap);
+                                            conferee_Nodes.splice(delete_index - 1, 1);
+                                            if (my_Conferee_Index) {
+                                                document.getElementById('conferees'+ delete_index).remove();
+                                            }
+                                        }
+                                    }
+                                }
+                                i++;
+                            }
                         }
                     });
+                    conn = null;    // stop connection bridge deeply
                     return;
                 }
             }
@@ -350,34 +394,50 @@
                     case 5:     // Conference
                         switch (data[1]) {
                             case 0:     // append
-                                let i = 0;
-                                while (i <= conferee_Map[0].length) {
-                                    if (conferee[0][i] == undefined) {
-                                        index = i;
-                                        return;
+                                let index = 1;
+                                while (index < conferee_Map[0].length) {
+                                    if((conferee_Map[0][index] === null) || (conferee_Map[0][index] === undefined)){
+                                        break;
                                     }
-                                    i++;
+                                    index++;
                                 }
-                                let new_Conferee = [index, data[2][1], data[2][2]]
-                                conferee_Map[0].push(new_Conferee[0]);
-                                conferee_Map[1].push(new_Conferee[1]);
-                                conferee_Map[2].push(new_Conferee[2]);
-                                conferee_Map[3].push(null);
+                                // console.log(data)   //debug
+                                // console.log(index)  //debug
+                                let new_Conferee = [index, data[2][1], data[2][2]];     // [index, id, name]
+                                conferee_Map[0][index] = new_Conferee[0];
+                                conferee_Map[1][index] = new_Conferee[1];
+                                conferee_Map[2][index] = new_Conferee[2];
+                                conferee_Map[3][index] = null;
                                 nodesMap[11] = conferee_Map;
 
                                 liveSend([5,1, new_Conferee]);
                                 if (document.getElementById("joinConference").checked) {
-                                    append_Conferee_Dom(data[2]);
+                                    append_Conferee_Dom(new_Conferee);
                                 }
+                                liveSend(nodesMap);
                                 break;
                             case 2:     // delete
-                                if (my_Conferee_Index) {
-                                    
-                                } else {
-
+                                // console.log(data);  //debug
+                                let delete_index = nodesMap[11][1].indexOf(data[2]);
+                                if (delete_index !== -1) {
+                                    console.log("kill:"+delete_index)  //debug
+                                    if (my_Conferee_Index) {
+                                        document.getElementById('conferees'+ delete_index).remove();
+                                        conferee_Nodes.splice(delete_index - 1, 1);
+                                    }
+                                    let i = 0;
+                                    while (i < conferee_Map.length) {
+                                        conferee_Map[i][delete_index] = null;     // leave blank
+                                        i++;
+                                    }
+                                    nodesMap[11] = conferee_Map;
+                                    liveSend(nodesMap);
                                 }
                                 break;
-                            case 3:     // update info [5,3,index,stream,img]
+                            case 3:     // update info [5,3,index,stream,img,name]
+                                nodesMap[11][2][data[2]] = data[5];
+                                nodesMap[11][3][data[2]] = data[3];
+                                conferee_Map = nodesMap[11];
                                 break;
                             case 4:     // stream
                                 break;
@@ -433,17 +493,26 @@
         peer.on('call', (mediaConnection) => {
             // Receive the stream
             mediaConnection.on('stream', (stream) => {
-                if (nodesMap[11][3].includes(stream.id)) {
-                    if (my_Conferee_Index) {
-                        document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = stream;
+                if (my_Conferee_Index) {
+                    if (nodesMap[11][3].includes(stream.id)) {
+                        let index = nodesMap[11][3].indexOf(stream.id);
+                        index = nodesMap[11][0][index];
+                        if (index !== -1) {
+                            document.getElementById('conferees'+ index).srcObject = stream;
+                            document.getElementById('conferees'+ index).getElementsByClassName('confereeVideos')[0].classList.remove('covert');
+                        }
+                        
+                        // mediaConnection.on('close', function() {    // test to do
+                        //     document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = null;
+                        // });
                     }
                 }
                 console.log('Received stream:', stream);    // DEBUG
             });
 
-            mediaConnection.on('close', function() {    // map modify on peer.on('close', ...)
-                document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = null;
-            });
+            // mediaConnection.on('close', function() {    // map modify on peer.on('close', ...)
+            //     document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(conference_Stream.id)].src = null;
+            // });
             
             mediaConnection.answer(null);
         });
@@ -466,9 +535,12 @@
             nodesMap[5] = LiveSummary.value;
             if(liveCoverBase64){
                 nodesMap[6] = liveCoverBase64;
-            } else {
-                coverURL = LiveCoverURL.value;
+            } else if (LiveCoverURL.value) {
                 nodesMap[6] = LiveCoverURL.value;
+            } else if (use_Local_Storage) {
+                if (localStorage.liveCoverURL) {
+                    nodesMap[6] = localStorage.liveCoverURL;
+                }
             }
             liveSend(nodesMap);
             if(root){
@@ -485,25 +557,38 @@
         }
 
         function initial_Conference() {
-            if (document.getElementById("EnableConference").checked) {
-                nodesMap[11] = conferee_Map;
-            } else {
-                nodesMap[11] = false;
-                conference_Send([5,2]);     // stop conference
-                let i = 1;  // without first dom
-                while (i < document.getElementsByClassName('conferees').length) {
-                    document.getElementsByClassName('conferees')[i].remove();
-                    i++;
+            if (peer.open) {
+                if (document.getElementById("EnableConference").checked) {
+                    conferee_Map = [[0], [0], [0], [0]];
+                    nodesMap[11] = conferee_Map;
+                } else {
+                    document.getElementById("joinConference").checked = false;
+                    let i = 1;  // without first dom
+                    while (i <= nodesMap[11][0].length) {
+                        if (nodesMap[11][0][i]) {
+                            document.getElementById('conferees'+ nodesMap[11][0][i]).remove();
+                        }
+                        i++;
+                    }
+                    nodesMap[11] = false;
+                    my_Conferee_Index = null;
+                    my_Conferee_Stream_Id = null;
+                    if (conference_Stream) {
+                        conference_Stream.getTracks().forEach(track => track.stop());
+                    }
+                    conference_Stream = null;
+                    conferee_Nodes = [];    // clean connections
                 }
-                
+                liveSend(nodesMap);
+            } else {
+                document.getElementById("EnableConference").checked = !document.getElementById("EnableConference").checked;
             }
-            liveSend(nodesMap);
         }
 
         MyName.addEventListener(
             "focusout",
             () => {
-                if (MyName.value != nodesMap[8] && MyName.value){
+                if (MyName.value !== nodesMap[8] && MyName.value){
                     nodesMap[8] = MyName.value;
                     childNodes[5] = MyName.value;
                     liveSend(nodesMap);
@@ -511,8 +596,11 @@
                         if(root.open){
                             root.send(nodesMap);
                         }
+                        if (use_Local_Storage) {
+                            localStorage.myName = MyName.value;
+                        }
+                        update_Conferee_Info();
                     }
-                    update_Conferee_Info();
                 }
             },
             true,
@@ -568,10 +656,6 @@
     if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
         document.getElementById("onlyPC").remove();
     }
-    window.addEventListener('message', function(event) {
-        if (event.origin !== 'https://127.0.0.1') return;
-        change_Theme(event.data);
-    });
     </script>
 </body>
 </html>
