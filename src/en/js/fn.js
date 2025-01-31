@@ -105,7 +105,6 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                         appearMsg(data);
                         break;
                     case 1:
-                        if (data[1] == -1){ break; }    // refused to receive msg for guest
                         if (nodesMap[11]) {
                             if (!data[11]) {
                                 // stop conference
@@ -215,6 +214,38 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                                         append_Conferee_Dom(new_Conferee);
                                     }
                                 }
+                                break;
+                            case 2:     // delete conferee dom  [5, 2, 1, index, id]
+                            switch (data[2]) {
+                                case 0:
+                                    // if (last_Date === data) {     // clean repeat msg todo
+                                    //     break;
+                                    // }
+                                    parent_Node.send(data);
+                                    break;
+                                case 1:
+                                    deliverId = parent_Node.peer;
+                                    liveSend(data);
+                                    if (my_Conferee_Index) {
+                                        document.getElementById('conferees'+ data[3]).remove();
+                                        if (data[4]) {
+                                            let i = 0;
+                                            while (i < conferee_Nodes.length) {
+                                                if (conferee_Nodes[i]) {
+                                                    if (conferee_Nodes[i].peer === data[4]) {
+                                                        conferee_Nodes[i].close();
+                                                        conferee_Nodes.splice(i, 1);
+                                                        break;   // bug todo
+                                                        i--;
+                                                    }
+                                                }
+                                                i++;
+                                            }
+                                        }
+                                    }
+                                default:
+                                    break;
+                            }
                                 break;
                             default:
                                 break;
@@ -335,25 +366,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             conferee.on('data', (data) => {
                 switch (data[1]) {
                     case 2:
-                        if (parent_Node && data[2]) {
-                            // need faster than update nodesMap
-                            let delete_index = nodesMap[11][1].indexOf(data[2]);
-                            if (delete_index !== -1) {
-                                conference_Delete_Lock.push(data[2]);
-                                document.getElementById('conferees'+ delete_index).remove();
-                                let i = 0;
-                                while (i < conferee_Nodes.length) {
-                                    if (conferee_Nodes[i]) {
-                                        if (conferee_Nodes[i].peer === data[2]) {
-                                            conferee_Nodes[i].close();
-                                            conferee_Nodes.splice(i, 1);
-                                            i--;
-                                        }
-                                    }
-                                    i++;
-                                }
-                            }
-                        }
+                        parent_Node.send(data);
                         break;
                     case 3:   // [5,3, my_Conferee_Index, my_Conferee_Stream_Id, myIcon, getMyName()]);
                         // console.log("conference[3]:"+data)  //debug
@@ -404,54 +417,49 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
 
             conferee.on('close', () => {
                 if (my_Conferee_Index) {
-                    let i = 0;
-                    while (i < conferee_Nodes.length) {
-                        if (conferee_Nodes[i]) {
-                            if (!conferee_Nodes[i].open) {
-                                if (conference_Delete_Lock.includes(conferee_Nodes[i].peer)) {
-                                    let d = 0;
-                                    while (d < conference_Delete_Lock.length) {
-                                        if (conference_Delete_Lock[d] === conferee_Nodes[t].peer) {
-                                            conference_Delete_Lock.splice(d, 1);
-                                        } else {
-                                            d++;
-                                        }
-                                    }
-                                } else if (nodesMap[11][1].includes(conferee_Nodes[i].peer)) {
+                    let t = 0;
+                    while (t < conferee_Nodes.length) {
+                        if (conferee_Nodes[t]) {
+                            if (!conferee_Nodes[t].open) {
+                                if (nodesMap[11][1].includes(conferee_Nodes[t].peer)) {
                                     if (parent_Node) {
-                                        if ((!nodesMap[11][1].includes(nodesMap[7])) && (nodesMap[11][1] !== conferee_Nodes[i].peer) && parent_Node.open) {
+                                        if ((!nodesMap[11][1].includes(nodesMap[7])) && (nodesMap[7] !== conferee_Nodes[t].peer) && parent_Node.open) {
                                             // console.log((!nodesMap[11][1].includes(nodesMap[9])) +"&&"+ nodesMap[7] +"=="+ conferee_Nodes[i].peer)  //debug
-                                            parent_Node.send([5,2, conferee_Nodes[i].peer]);
+                                            parent_Node.send([5, 2, 0, nodesMap[11][0][nodesMap[11][1].indexOf(conferee_Nodes[t].peer)], conferee_Nodes[t].peer]);
+                                            console.log('disconnected:'+conferee_Nodes[t].peer+'\nIndex='+nodesMap[11][0][nodesMap[11][1].indexOf(conferee_Nodes[t].peer)])//debug
                                         }
                                     } else {
-                                        let delete_index = nodesMap[11][1].indexOf(conferee_Nodes[i].peer);
+                                        let delete_index = nodesMap[11][1].indexOf(conferee_Nodes[t].peer);
                                         console.log("close"+delete_index);  //debug
+                                        let delete_Conference_Index = nodesMap[11][0][delete_index];
                                         if (delete_index !== -1) {
-                                            i = 0;
+                                            liveSend([5, 2, 1, delete_Conference_Index, conferee_Nodes[t].peer]);   // dieliver msg to audience yo update date
+                                            let i = 0;
                                             while (i < conferee_Map.length) {
                                                 conferee_Map[i][delete_index] = null;     // leave blank
                                                 i++;
                                             }
                                             nodesMap[11] = conferee_Map;
                                             liveSend(nodesMap);
-                                            let i = 0;
+                                            i = 0;
                                             while (i < conferee_Nodes.length) {
                                                 if (conferee_Nodes[i]) {
-                                                    if (conferee_Nodes[i].peer === data[2]) {
+                                                    if (conferee_Nodes[i].peer === conferee_Nodes[t].peer) {
                                                         conferee_Nodes[i].close();
                                                         conferee_Nodes.splice(i, 1);
+                                                        break;   // bug todo
                                                         i--;
                                                     }
                                                 }
                                                 i++;
                                             }
-                                            document.getElementById('conferees'+ delete_index).remove();
+                                            document.getElementById('conferees'+ delete_Conference_Index).remove();
                                         }
                                     }
                                 }
                             }
                         }
-                        i++;
+                        t++;
                     }
                 }
             });
@@ -874,8 +882,8 @@ function upload_Conferee_Video() {
                 }
                 i++;
             }
-            document.getElementsByClassName('confereeVideos')[my_Conferee_Index - 1].classList.remove('covert');
-            document.getElementsByClassName('confereeVideos')[my_Conferee_Index - 1].srcObject = conference_Stream;
+            document.getElementById('conferees'+ my_Conferee_Index).getElementsByClassName('confereeVideos')[0].classList.remove('covert');
+            document.getElementById('conferees'+ my_Conferee_Index).getElementsByClassName('confereeVideos')[0].srcObject = conference_Stream;
             document.getElementById('conferee_Local_Video').srcObject = null;
             document.getElementById('conferee_Local_Video').removeAttribute('src'); // empty source
         } else {
@@ -974,7 +982,6 @@ function join_Conference() {
             append_Conferee_Dom();
         }
     } else {    // leave conference
-        console.log('leave')    //debug
         let i = 1;  // without first dom
         while (i < nodesMap[11][0].length) {
             if (nodesMap[11][0][i]) {
@@ -984,11 +991,12 @@ function join_Conference() {
         }
         if (parent_Node) {
             if (parent_Node.open) {
-                parent_Node.send([5,2, peer.id]);   // dieliver msg to host update nodesMap info
+                parent_Node.send([5, 2, 0, my_Conferee_Index, peer.id]);   // dieliver msg to host update nodesMap info
             }
         } else {
+            console.log("host leave remove:"+my_Conferee_Index)  //debug
+            liveSend([5, 2, 1, my_Conferee_Index, peer.id]);
             let i = 0;
-            console.log("kill4:"+my_Conferee_Index)  //debug
             while (i < conferee_Map.length) {
                 conferee_Map[i][my_Conferee_Index] = null;     // leave blank
                 i++;
@@ -1333,7 +1341,6 @@ function change_Theme(
     ui_color = ui_color || 'rgb(230,230,230)';
     input_color = input_color || 'rgb(241,242,243)';
     active_color = active_color || 'rgb(162,255,109)';
-    visited_color = visited_color || 'rgb(23, 134, 245)';
     switch (index) {
         case "1":   // dark mode
             theme_color = 'rgb(28,33,40)';
@@ -1351,7 +1358,6 @@ function change_Theme(
     document.documentElement.style.setProperty('--ui-color', ui_color);
     document.documentElement.style.setProperty('--input-color', input_color);
     document.documentElement.style.setProperty('--active-color', active_color);
-    document.documentElement.style.setProperty('--visited-color', visited_color);
 }
 
 function pop(dom, new_Index) {

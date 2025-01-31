@@ -78,7 +78,7 @@
                     <button id="copyURL">Copy Web Link to share</button><br>
                     <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
                 </div>
-            </div>
+            </div><br>
             <div id="nodeInfo">
                 <div id="stable">
                     <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">Host Node</button>
@@ -238,10 +238,10 @@
             conns.push(conn);
 
             if (my_Conferee_Index){
-                if (nodesMap[11][1].includes(conn.peer)) {
+                if (nodesMap[2].includes(conn.peer)) {
                     conferee = conn;
                     conferee_Nodes.push(conferee);
-                    
+
                     conferee.on('open', () => {
                         if (conference_Stream) {
                             peer.call(conferee.peer, conference_Stream);
@@ -257,7 +257,7 @@
                             case 2:  // host move to child msg
                             //     let i = 0;
                             //     let delete_index = nodesMap[11][1].indexOf(data[2]);
-                            //     console.log("kill5:"+delete_index)  //debug
+                            //     console.log("remove5:"+delete_index)  //debug
                             //     while (i < conferee_Map.length) {
                             //         conferee_Map[i][delete_index] = null;     // leave blank
                             //         i++;
@@ -302,18 +302,10 @@
                             while (t < conferee_Nodes.length) {
                                 if (conferee_Nodes[t]) {
                                     if (!conferee_Nodes[t].open) {
-                                        if (conference_Delete_Lock.includes(conferee_Nodes[t].peer)) {
-                                            let d = 0;
-                                            while (d < conference_Delete_Lock.length) {
-                                                if (conference_Delete_Lock[d] === conferee_Nodes[t].peer) {
-                                                    conference_Delete_Lock.splice(d, 1);
-                                                } else {
-                                                    d++;
-                                                }
-                                            }
-                                        } else if (nodesMap[11][1].includes(conferee_Nodes[t].peer)) {
-                                            let delete_index = nodesMap[11][1].indexOf(conferee_Nodes[t].peer);
-                                            let delete_Conference_index = nodesMap[11][0][delete_index];
+                                        let delete_index = nodesMap[11][1].indexOf(conferee_Nodes[t].peer);
+                                        if (delete_index !== -1) {
+                                            let delete_Conference_Index = nodesMap[11][0][delete_index];
+                                            liveSend([5, 2, 1, delete_Conference_Index, conferee_Nodes[t].peer]);   // dieliver msg to audience yo update date
                                             let i = 0;
                                             while (i < conferee_Map.length) {
                                                 conferee_Map[i][delete_index] = null;     // leave blank
@@ -327,13 +319,14 @@
                                                 if (conferee_Nodes[i]) {
                                                     if (conferee_Nodes[i].peer === conferee_Nodes[t].peer) {
                                                         conferee_Nodes.splice(i, 1);
+                                                        break;   // bug todo
                                                         i--;
                                                     }
                                                 }
                                                 i++;
                                             }
                                             if (my_Conferee_Index) {
-                                                document.getElementById('conferees'+ delete_Conference_index).remove();
+                                                document.getElementById('conferees'+ delete_Conference_Index).remove();
                                             }
                                         }
                                     }
@@ -342,17 +335,13 @@
                             }
                         }
                     });
+
                     // conn = null;    // stop connection bridge deeply
                     return;
                 }
             }
             conn.on('open', () => {
-                // for guest in index
-                let sendNodesMap = nodesMap;
-                sendNodesMap[2] = -1;
-                conn.send(sendNodesMap);
-
-                // for conferee in room
+                conn.send(nodesMap);
             });
             
             // Receive the text: Host <-- Guest
@@ -441,14 +430,14 @@
                                 }
                                 liveSend(nodesMap);
                                 break;
-                            case 2:     // delete
+                            case 2:     // delete   [5, 2, 0, index, id]
                                 // console.log(data);  //debug
-                                let delete_index = nodesMap[11][1].indexOf(data[2]);
+                                let delete_index = nodesMap[11][1].indexOf(data[4]);
                                 if (delete_index !== -1) {
+                                    data[2] = 1;
+                                    liveSend(data)
                                     if (my_Conferee_Index) {
                                         console.log("msg close():"+delete_index)  //debug
-                                        conference_Delete_Lock.push(data[2]);
-                                        let delete_Conference_index = nodesMap[11][0][delete_index];
                                         let i = 0;
                                         while (i < conferee_Map.length) {
                                             conferee_Map[i][delete_index] = null;     // leave blank
@@ -459,19 +448,20 @@
                                         i = 0;
                                         while (i < conferee_Nodes.length) {
                                             if (conferee_Nodes[i]) {
-                                                if (conferee_Nodes[i].peer === data[2]) {
+                                                if (conferee_Nodes[i].peer === data[4]) {
                                                     conferee_Nodes[i].close();
                                                     conferee_Nodes.splice(i, 1);
+                                                    break;   // bug todo
                                                     i--;
                                                 }
                                             }
                                             i++;
                                         }
                                         if (my_Conferee_Index) {
-                                            document.getElementById('conferees'+ delete_Conference_index).remove();
+                                            document.getElementById('conferees'+ data[3]).remove();
                                         }
                                     } else {
-                                        console.log("kill:"+delete_index)  //debug
+                                        console.log("remove:"+delete_index)  //debug
                                         let i = 0;
                                         while (i < conferee_Map.length) {
                                             conferee_Map[i][delete_index] = null;     // leave blank
