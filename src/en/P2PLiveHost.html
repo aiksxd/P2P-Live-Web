@@ -241,6 +241,7 @@
                 if (nodesMap[11][1].includes(conn.peer)) {
                     conferee = conn;
                     conferee.on('open', () => {
+                        conferee_Nodes.push(conferee);
                         if (conference_Stream) {
                             peer.call(conferee.peer, conference_Stream);
                         } else if (myIcon) {
@@ -248,7 +249,6 @@
                         } else {
                             conferee.send([5,3, my_Conferee_Index, null, null, getMyName()]);
                         }
-                        conferee_Nodes.push(conferee);
                     });
                     
                     conferee.on('data', (data) => {
@@ -269,20 +269,25 @@
                             case 3:
                                 // console.log("Host:"+data);   //debug
                                 // [5,3, my_Conferee_Index, my_Conferee_Stream_Id, myIcon, getMyName()]);
-                                if (data[3]) {      // stream & choose one of img and stream
-                                    conferee_Map[3][data[2]] = data[3];
-                                } else if (data[4]){    // img
-                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeIcon')[0].src = data[4];
-                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeVideos')[0].classList.add('covert');
-                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeVideos')[0].srcObject = null;
-                                    document.getElementById('conferees'+ data[2]).removeAttribute('src');   // empty source
-                                }
                                 if (data[5]){    // name
-                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeName')[0].innerHTML = data[5];
                                     conferee_Map[2][data[2]] = data[5];
                                 }
-                                nodesMap[11] = conferee_Map;
-                                // liveSend(nodesMap);
+                                if (data[3]) {      // stream & choose one of img and stream
+                                    conferee_Map[3][data[2]] = data[3];
+                                    nodesMap[11] = conferee_Map;
+                                } else {    // img
+                                    nodesMap[11] = conferee_Map;
+                                    liveSend(nodesMap);
+                                    if (data[4]) {
+                                        document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeIcon')[0].src = data[4];
+                                        document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeVideos')[0].classList.add('covert');
+                                        document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeVideos')[0].srcObject = null;
+                                        document.getElementById('conferees'+ data[2]).removeAttribute('src');   // empty source
+                                    }
+                                }
+                                if (data[5]) {
+                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeName')[0].innerHTML = data[5];
+                                }
                                 break;
                         
                             default:
@@ -292,32 +297,51 @@
 
                     conferee.on('close', () => {
                         if (my_Conferee_Index) {
-                            let i = 0;
-                            while (i < conferee_Nodes.length) {
-                                if (conferee_Nodes[i]) {
-                                    if (!conferee_Nodes[i].open) {
-                                        if (nodesMap[11][1].includes(conferee_Nodes[i].peer)) {
-                                            let delete_index = nodesMap[11][1].indexOf(conferee_Nodes[i].peer);
-                                            console.log("close"+delete_index);  //debug
-                                            i = 0;
+                            let t = 0;
+                            while (t < conferee_Nodes.length) {
+                                if (conferee_Nodes[t]) {
+                                    if (!conferee_Nodes[t].open) {
+                                        if (conference_Delete_Lock.includes(conferee_Nodes[t].peer)) {
+                                            let d = 0;
+                                            while (d < conference_Delete_Lock.length) {
+                                                if (conference_Delete_Lock[d] === conferee_Nodes[t].peer) {
+                                                    conference_Delete_Lock.splice(d, 1);
+                                                } else {
+                                                    d++;
+                                                }
+                                            }
+                                        } else if (nodesMap[11][1].includes(conferee_Nodes[t].peer)) {
+                                            let delete_index = nodesMap[11][1].indexOf(conferee_Nodes[t].peer);
+                                            let delete_Conference_index = nodesMap[11][0][delete_index];
+                                            let i = 0;
                                             while (i < conferee_Map.length) {
                                                 conferee_Map[i][delete_index] = null;     // leave blank
                                                 i++;
                                             }
                                             nodesMap[11] = conferee_Map;
                                             liveSend(nodesMap);
-                                            conferee_Nodes.splice(delete_index - 1, 1);
+                                            console.log("close"+delete_index);  //debug
+                                            i = 0;
+                                            while (i < conferee_Nodes.length) {
+                                                if (conferee_Nodes[i]) {
+                                                    if (conferee_Nodes[i].peer === conferee_Nodes[t].peer) {
+                                                        conferee_Nodes.splice(i, 1);
+                                                        i--;
+                                                    }
+                                                }
+                                                i++;
+                                            }
                                             if (my_Conferee_Index) {
-                                                document.getElementById('conferees'+ delete_index).remove();
+                                                document.getElementById('conferees'+ delete_Conference_index).remove();
                                             }
                                         }
                                     }
                                 }
-                                i++;
+                                t++;
                             }
                         }
                     });
-                    conn = null;    // stop connection bridge deeply
+                    // conn = null;    // stop connection bridge deeply
                     return;
                 }
             }
@@ -420,18 +444,41 @@
                                 // console.log(data);  //debug
                                 let delete_index = nodesMap[11][1].indexOf(data[2]);
                                 if (delete_index !== -1) {
-                                    console.log("kill:"+delete_index)  //debug
                                     if (my_Conferee_Index) {
-                                        document.getElementById('conferees'+ delete_index).remove();
-                                        conferee_Nodes.splice(delete_index - 1, 1);
+                                        console.log("msg close():"+delete_index)  //debug
+                                        conference_Delete_Lock.push(data[2]);
+                                        let delete_Conference_index = nodesMap[11][0][delete_index];
+                                        let i = 0;
+                                        while (i < conferee_Map.length) {
+                                            conferee_Map[i][delete_index] = null;     // leave blank
+                                            i++;
+                                        }
+                                        nodesMap[11] = conferee_Map;
+                                        liveSend(nodesMap);
+                                        i = 0;
+                                        while (i < conferee_Nodes.length) {
+                                            if (conferee_Nodes[i]) {
+                                                if (conferee_Nodes[i].peer === data[2]) {
+                                                    conferee_Nodes[i].close();
+                                                    conferee_Nodes.splice(i, 1);
+                                                    i--;
+                                                }
+                                            }
+                                            i++;
+                                        }
+                                        if (my_Conferee_Index) {
+                                            document.getElementById('conferees'+ delete_Conference_index).remove();
+                                        }
+                                    } else {
+                                        console.log("kill:"+delete_index)  //debug
+                                        let i = 0;
+                                        while (i < conferee_Map.length) {
+                                            conferee_Map[i][delete_index] = null;     // leave blank
+                                            i++;
+                                        }
+                                        nodesMap[11] = conferee_Map;
+                                        liveSend(nodesMap);
                                     }
-                                    let i = 0;
-                                    while (i < conferee_Map.length) {
-                                        conferee_Map[i][delete_index] = null;     // leave blank
-                                        i++;
-                                    }
-                                    nodesMap[11] = conferee_Map;
-                                    liveSend(nodesMap);
                                 }
                                 break;
                             case 3:     // update info [5,3,index,stream,img,name]
