@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
+    <title>PeerLive-Audience</title>
     <link rel="stylesheet" type="text/css" href="css/styleLiveWeb.css">
 </head>
 <body>
@@ -22,9 +23,12 @@
             <div id="openRoomInfo">
                 <div style="display: flex;">
                     <img id="roomCover" src="">
-                    <span id="roomTitle"></span>
-                </div>
-                <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
+                    <div>
+                        <h2 id="roomTitle"></h2>
+                        <button id="copyURL">复制房间分享直链</button><br>
+                        <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
+                    </div>
+                </div><br>
                 <div id="nodeInfo">
                     <div id="stable">
                         <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">房主</button>
@@ -33,7 +37,6 @@
                     <div id="block0"></div>
                     <div id="block1"></div>
                 </div>
-                <button id="copyURL">复制房间分享直链</button>
             </div>
             <button id="autoJoin" class="confirm_Button" onclick="autoJoin(4, 1)">自动<br>加入</button>
         </div>
@@ -74,16 +77,16 @@
         </div>
         <div class="pop_Content covert">
             <input type="checkbox" onclick="join_Conference()" id="joinConference">加入会议<br>
-            
-            选择你想要分享的设备:<br>
-            <input type="checkbox" id="ifConferenceUseCamera">摄像头
-            <input type="checkbox" id="ifConferenceUseMicrophone">麦克风<br>
-            <input type="checkbox" onclick="upload_Conferee_Video()" id="uploadConfereeVideo">获取本地设备<br><br>
-            <video id="conferee_Local_Video"></video><br>
-            确认公开本地流:
-            <input type="checkbox" onclick="askNavigatorMediaDevices(true)" id="uploadConfereeVideo">公开流<br><br>
-            
-         </div>
+           
+           选择你想要分享的设备:<br>
+           <input type="checkbox" id="ifConferenceUseCamera">摄像头
+           <input type="checkbox" id="ifConferenceUseMicrophone">麦克风<br>
+           <input type="checkbox" onclick="stop_Conference_Stream()">停止会议流</button><br>
+           <video id="conferee_Local_Video" controls></video><br>
+           确认公开本地流:
+           <button onclick="upload_Conferee_Video()" id="uploadConfereeVideo">公开流</button><br>
+           
+        </div>
         </div>
     <!-- Id interaction -->
     <input type="checkbox" id="toggleContainer" style="display: none;">
@@ -97,7 +100,9 @@
             <div id="status" style="font-weight: bold;">正在等待连接到Peer服务器...</div>
         </div>
         <div class="box">
-            <button onclick="fullWebVideo()" id="fullScreen">铺满屏幕</button><br>
+            <!-- <button onclick="fullWebVideo()" id="fullScreen">Full Page Video</button> -->
+            <button onclick="document.getElementById('fakeInputText').focus()" class="covert" id="mobileInput">唤起手机端键盘</button>
+            <input type="text" class="covert" id="fakeInputText">
             <div>
                 <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">自定义头像与昵称<br/><input type="text" id="name" placeholder="填入你的名字..." /></div><br>
                 <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
@@ -108,10 +113,12 @@
             <input type="checkbox" id="ifAutoClean">自动清理信息[最大->100]<br>
             <button onclick="cleanMsg()">清理信息</button><br>
             <button onclick="document.getElementById('toggleChatBox').click()">隐藏侧边栏</button><br>
-            切换主题:<select id="themes" onchange="change_Theme(this.value)">
+            <div id="themeController">
+                切换主题:<select onchange="change_Theme(this.value)">
                 <option value="0" selected="selected">白天</option>
                 <option value="1">黑暗</option>
-            </select>
+                </select>
+            </div>
         </div>
         <div class="box">
             <div id="confereesContainer">
@@ -146,10 +153,11 @@
     <video id="localVideo" autoplay></video-->
     <!--if you want to check the availability of localStream, here are <2.3localvideo>, desplayLocalStream(), -->
     
+    <script src="../config.js"></script>
     <script src="js/peerjs.min.js"></script>
     <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
     <script>
-        const peer = new Peer({ debug: 2})      //use PeerJS official server
+        const peer = new Peer({ debug: 2});      //use PeerJS official server
     </script>
     <script src="js/fn.js"></script>
     <script>
@@ -165,7 +173,6 @@
         let conns = new Array();
         let connIds = new Array();
         let nodesMap = new Array();
-        let params = new URLSearchParams(document.location.search.substring(1));
         let urlId = params.get("id");
         let urlName = params.get("name");
         let hereNode = new Array();
@@ -186,8 +193,14 @@
         // Listen for the event when a Peer connection is successfully opened
         // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
         peer.on('open', (id) => {
-            MyName.value = urlName;
-            hereNode = [ 1, 0, 0, [], id, getMyName(), []]
+            if (urlName) {
+                MyName.value = urlName;
+            } else if (use_Local_Storage) {
+                if (localStorage.myName) {
+                    MyName.value = localStorage.myName;
+                }
+            }
+            hereNode = [ 1, 0, 0, [], id, getMyName(), []];
             console.log(id);
             document.getElementById("myid").innerHTML = "你的ID:<br/>" + id;
             document.getElementById("status").innerHTML="状态:正在连接到直播间...";
@@ -200,39 +213,87 @@
             conns.push(connPort);
             conn = connPort;
             if (my_Conferee_Index) {
-                if (nodesMap[11][1].includes(conn.peer)) {
+                if (nodesMap[2].includes(conn.peer)) {
                     conferee = conn;
                     conferee_Nodes.push(conferee);
 
                     conferee.on('open', () => {
-
+                        if (conference_Stream) {
+                            conferee.send([5,3, my_Conferee_Index, conference_Stream.id, null, getMyName()]);
+                            peer.call(conferee.peer, conference_Stream);
+                        } else if (myIcon) {
+                            conferee.send([5,3, my_Conferee_Index, null, myIcon, getMyName()]);
+                        } else {
+                            conferee.send([5,3, my_Conferee_Index, null, null, getMyName()]);
+                        }
                     });
 
                     conferee.on('data', (data) => {
-                        if (data[1] === 3) {    // 5,3,index,stream,img
-                            if (data[3]) {      // stream
-                                nodesMap[11][3][data[2]] = data[3];
-                                document.getElementsByClassName('confereeVideos')[data[2]].src = data[3];
-                            } else {    // img
-                                document.getElementsByClassName('conferees')[data[2]].style.background = data[4];
-                            }
+                        switch (data[1]) {
+                            // case 2:     // delete [5,1]
+                            //     if (data[2]) {
+                            //         let delete_index = nodesMap[11][1].indexOf(data[2]);
+                            //         if (delete_index !== -1) {
+                            //             document.getElementById('conferees'+ delete_index).remove();
+                            //             let i = 0;
+                            //             while (i < conferee_Nodes.length) {
+                            //                 if (conferee_Nodes[i]) {
+                            //                     if (conferee_Nodes[i].peer === data[2]) {
+                            //                         conferee_Nodes[i].close();
+                            //                         conferee_Nodes.splice(i, 1);
+                            //                         // break;   bug todo
+                            //                         i--;
+                            //                     }
+                            //                 }
+                            //                 i++;
+                            //             }
+                            //         }
+                            //     }
+                            //     break;
+                            case 3:   // [5,3, my_Conferee_Index, my_Conferee_Stream_Id, myIcon, getMyName()]);
+                                if (data[3]) {      // stream & choose one of img and stream
+                                    nodesMap[11][3][data[2]] = data[3];
+                                } else if (data[4]){    // img
+                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeIcon')[0].src = data[4];
+                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeVideos')[0].srcObject = null;
+                                    document.getElementById('conferees'+ data[2]).removeAttribute('src'); // empty source
+                                }
+                                if (data[5]){    // name
+                                    nodesMap[11][2][data[2]] = data[5];
+                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeName')[0].innerHTML = data[5];
+                                }
+                                break;
                         }
                     });
 
                     conferee.on('close', () => {
-                        if (nodesMap[11][1].includes(conferee.peer)) {
-                            let delete_index = nodesMap[11][1].indexOf(conferee.peer);
-                            document.getElementsByClassName('conferees')[delete_index].remove();
+                        if (my_Conferee_Index) {
+                            let i = 0;
+                            while (i < conferee_Nodes.length) {
+                                if (conferee_Nodes[i]) {
+                                    if (!conferee_Nodes[i].open) {
+                                        if (nodesMap[11][1].includes(conferee_Nodes[i].peer)) {
+                                            if (parent_Node) {
+                                                if ((!nodesMap[11][1].includes(nodesMap[7])) && (nodesMap[7] !== conferee_Nodes[i].peer && parent_Node.open)) {
+                                                    // console.log((!nodesMap[11][1].includes(nodesMap[7])) +"&&"+ nodesMap[7] +"!=="+ conferee_Nodes[i].peer)  //debug
+                                                    parent_Node.send([5,2, conferee_Nodes[i].peer]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                i++;
+                            }
                         }
                     });
-                    conn = null;
+                    // conn = null;    // stop connection bridge deeply
                     return;
                 }
             }
             conn.on('open', () => {
                 // for guest in index
                 let sendNodesMap = nodesMap;
-                sendNodesMap[2] = -1;
+                sendNodesMap[1] = -1;
                 conn.send(sendNodesMap);
             });
 
@@ -318,16 +379,26 @@
                     case 5:     // Conference
                         switch (data[1]) {
                             case 0:
-                                parent_Node.send(data);
-                            case 1:     // useless?
+                                if (parent_Node.open) {
+                                    parent_Node.send(data);
+                                }
+                                break;
+                            case 1:         // [index, id, name]
+                                // if (my_Conferee_Index) {
+                                //     conferee_Map[0][data[2][1]] = data[2][1];
+                                //     conferee_Map[1][data[2][1]] = data[2][2];
+                                //     conferee_Map[2][data[2][1]] = data[2][3];
+                                //     conferee_Map[3][data[2][1]] = null;
+                                // }
                                 break;
                             case 2:     // delete
-                                if (my_Conferee_Index) {
-                                    
-                                } else {
-                                    
+                                if (parent_Node.open) {
+                                    parent_Node.send(data);
                                 }
-                            case 3:
+                            case 3:     // update nodesMap
+                                if (parent_Node.open) {
+                                    parent_Node.send(data);
+                                }
                                 break;
                             case 4:
                                 break;
@@ -368,7 +439,6 @@
                                                 parent_Node.send(hereNode);
                                             }
                                         }
-
                                     }
                                 }
                                 // console.log("Disconnected and deleted: " + conns[i].peer);     //DEBUG
@@ -386,17 +456,19 @@
             // Receive the stream
             mediaConnection.on('stream', (stream) => {
                 remoteStream = stream;
-                if (nodesMap[11]) {
-                    if (my_Conferee_Index && nodesMap[11][3].includes(stream.id)) {
-                        document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = stream;
-                        
-                        mediaConnection.on('close', function() {    // test to do
-                            document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = null;
-                        });
+                if (nodesMap[11] && my_Conferee_Index && nodesMap[11][3].includes(stream.id)) {
+                        let index = nodesMap[11][3].indexOf(stream.id);
+                        index = nodesMap[11][0][index];
+                        if (index !== -1) {
+                            document.getElementById('conferees'+ index).getElementsByClassName('confereeVideos')[0].classList.remove('covert');
+                            document.getElementById('conferees'+ index).srcObject = stream;
+                        }
+
+                        // mediaConnection.on('close', function() {    // test to do
+                        //     document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = null;
+                        // });
                         return;
-                    }
-                }
-                if(awaitedNodeId){
+                } else if(awaitedNodeId){
                     peer.call(awaitedNodeId, stream/*document.getElementById('RemoteVideo').srcObject*/);
                     console.log("Media delivered successfully: "+ awaitedNodeId);
                     awaitedNodeId = null;
@@ -455,10 +527,13 @@
             () => {
                 if (MyName.value != hereNode[5] && MyName.value){
                     hereNode[5] = MyName.value;
-                    parent_Node.send(hereNode);
-                }
-                if (my_Conferee_Index) {
-                    parent_Node.send([5,4, my_Conferee_Index, getMyName(), null]);
+                    if (parent_Node.open) {
+                        parent_Node.send(hereNode);
+                    }
+                    if (use_Local_Storage) {
+                        localStorage.myName = MyName.value;
+                    }
+                    update_Conferee_Info();
                 }
             },
             true,
@@ -528,7 +603,9 @@
 
     if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
         document.getElementById("onlyPC").remove();
+        document.getElementById('mobileInput').classList.remove('covert')
     }
     </script>
+    <script src="js/srs.sdk.js"></script>
 </body>
 </html>

@@ -1,17 +1,26 @@
 :root {
     --theme-color: rgb(255,255,255);
-    --theme-ui-color: rgb(230,230,230);
-    --theme-font-color: rgb(0,0,0);
-    --theme-active-color: rgb(162, 255, 109);
-    --theme-input-color: rgb(241,242,243);
-    --theme-visited-color: rgb(23, 134, 245);
+    --sidebar-color: rgb(243,243,243);
+    --ui-color: rgb(230,230,230);
+    --font-color: rgb(21,26,34);
+    --active-color: rgb(162, 255, 109);
+    --input-color: rgb(241,242,243);
+}
+html, body {
+    background: var(--theme-color);
+    color: var(--font-color);
+    font-family: "Lato", sans-serif;
+    height: 100%;
+	margin: 0; 
+	padding: 0;
+	border: 0;
 }
 .containerShowcaseSwitch {
     position: absolute;
     right: 50%;
     top: 15%;
     font-size: 25px;
-    color: var(--theme-active-color);
+    color: var(--active-color);
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     z-index: 100;
     opacity: 0;
@@ -44,35 +53,29 @@
     z-index: 1000;
     overflow: auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    scrollbar-gutter: stable;
 }
 .stress {
     padding-bottom: 1%;
-    border-bottom: 2px solid var(--theme-ui-color);
+    border-bottom: 2px solid var(--ui-color);
 }
 .pop_Menu {
     overflow-x: auto;
     display: flex;
     font-size: 20px;
     gap: 10%;
-    border-bottom: 2px solid var(--theme-font-color);
-
-    a:hover {
-        color: var(--theme-font-color);
-    }
-
-    a:visited {
-        color: var(--theme-visited-color);
-    }
+    border-bottom: 2px solid var(--font-color);
 
     .active {
-        background-color: var(--theme-active-color);
+        color: var(--active-color);
     }
-    
 }
 .pop_Option {
-    background-color: var(--theme-ui-color);
-    border: 1px solid var(--theme-input-color);
+    background-color: var(--ui-color);
+    border: 1px solid var(--input-color);
     border-radius: 10px;
+    text-decoration: unset;
+    color: var(--font-color);
 }
 .covert {
     display: none;
@@ -96,6 +99,7 @@
     font-size: 30px;
     top: -5%;
     left: 100%;
+    cursor: pointer;
 }
 .confirm_Button {
     min-height: 60px;
@@ -116,14 +120,12 @@
 }
 .conferees {
     position: relative;
-    border: 1px solid var(--theme-ui-color);
-    background-color: var(--theme-ui-color);  /*0.5 opacity*/
+    background-color: var(--ui-color);  /*0.5 opacity*/
     display: block;
     float: left;
     height: 100%;
-    width: 80px;
-    font-size: 20px;
-    color: var(--theme-font-color);    /*0.8 opacity*/
+    min-width: 80px;
+    color: var(--font-color);    /*0.8 opacity*/
     
     button {
         height: 50%;
@@ -135,9 +137,16 @@
     position: absolute;
     bottom: 0;
     overflow-x: auto;
+    font-size: 25px;
+    -webkit-text-stroke: 1px var(--theme-color);
     z-index: 1;
 }
-.confereeVideo {
+.confereeIcon {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+.confereeVideos {
     width: 100%;
     height: 100%;
 }
@@ -150,28 +159,19 @@
 }
 .pop_Button:focus > .pop { visibility:visible; opacity:1; }
 
-html, body {
-    background: var(--theme-color);
-    height: 100%;
-	margin: 0; 
-	padding: 0;
-	border: 0;
-    color: var(--theme-font-color);
-}
 video::-webkit-media-controls-timeline {
-display: none;
+    display: none;
 }
 video::-webkit-media-controls-current-time-display {
-display: none;
+    display: none;
 }
 video::-webkit-media-controls-time-remaining-display {
-display: none;
+    display: none;
 }
 
 body::-webkit-scrollbar {
     display: none;
 }
-
 ::-webkit-scrollbar {  /*TODO*/
     width: 7px;
     height: 7px;
@@ -207,7 +207,7 @@ body::-webkit-scrollbar {
     display: flex;
     white-space: nowrap;
     height: 14%;
-    background: var(--theme-color);
+    background: var(--sidebar-color);
     overflow-y: hidden;
     width: 100%;
     position: absolute;
@@ -218,14 +218,14 @@ body::-webkit-scrollbar {
     -webkit-border-radius: 100px;
 }
 .box {
-    min-width: 300px;
+    /* min-width: 300px; */
     display: inline-block;
-    border-right: 1px solid var(--theme-ui-color);
+    border-right: 1px solid var(--ui-color);
     box-sizing: border-box;
     padding: 10px;
     height: 98%;
     padding-bottom: 0px;
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
 }
 .videoBox {
     position: absolute;
@@ -236,7 +236,7 @@ body::-webkit-scrollbar {
 }
 #chatContainer {
     float: right;
-    border:1px solid var(--theme-ui-color);
+    border:1px solid var(--ui-color);
     box-sizing: border-box;
     width: 30%;
     height: 100%;
@@ -274,14 +274,15 @@ body::-webkit-scrollbar {
 }
 .rooms {
     position: relative;
-    border: 1px solid var(--theme-font-color);
-    background-color: var(--theme-ui-color);  /*0.5 opacity*/
+    border: 1px solid var(--font-color);
+    background-color: var(--ui-color);  /*0.5 opacity*/
     display: block;
     float: left;
     height: 150px;
     width: 150px;
-    font-size: 20px;
-    color: var(--theme-font-color);    /*0.8 opacity*/
+    font-size: 35px;
+    color: var(--font-color);    /*0.8 opacity*/
+    -webkit-text-stroke: 1px var(--theme-color);
     overflow: auto;
 }
 /* #openRoomInfo {
@@ -301,7 +302,7 @@ body::-webkit-scrollbar {
     height: 150px;
     margin: 1%;
     vertical-align: text-top;
-    border: 1px solid var(--theme-font-color);
+    border: 1px solid var(--font-color);
 }
 .actionButton {
     position: relative;
@@ -320,18 +321,17 @@ body::-webkit-scrollbar {
     vertical-align: text-top;
 }
 #roomSummary {
-    background-color: var(--theme-input-color);
+    background-color: var(--input-color);
     height: 60%;
     margin: 1%;
-    border: 1px solid var(--theme-font-color);
+    border: 1px solid var(--font-color);
     overflow: auto;
     vertical-align: text-top;
 }
 #nodeInfo {
-    background-color: var(--theme-input-color);
+    background-color: var(--input-color);
     min-height: 100px;
-    width: 80%;
-    height: 60%;
+    width: 70%;
 }
 #stable {
     float: left;
@@ -350,40 +350,40 @@ body::-webkit-scrollbar {
     height: 50%;
 }
 #block0 {
-    background-color: var(--theme-input-color);
+    background-color: var(--input-color);
     float: left;
     width: 40%;
     height: 100%;
-    border: 1px solid var(--theme-ui-color);
+    border: 1px solid var(--ui-color);
     overflow: auto;
 }
 #block1 {
-    background-color: var(--theme-input-color);
+    background-color: var(--input-color);
     float: left;
     width: 40%;
     height: 100%;
-    border: 1px solid var(--theme-ui-color);
+    border: 1px solid var(--ui-color);
     overflow: auto;
 }
 .childNodes {
     min-width: 100%;
 }
 .menu {
-    background-color: var(--theme-ui-color);
-    border: 1px solid var(--theme-input-color);
+    background-color: var(--ui-color);
+    border: 1px solid var(--input-color);
     border-radius: 20px;
     margin-right: 10px;
     height: 50px;
 }
 #LiveCover {
-    background-color: var(--theme-input-color);
+    background-color: var(--input-color);
     width: 150px;
     height: 150px;
     margin: 1%;
-    border: 1px solid var(--theme-color);
+    border: 1px solid var(--color);
 }
 .liveInput {
-    background-color: var(--theme-input-color);
+    background-color: var(--input-color);
     min-width: 150px;
     width: 70%;
     height: 10%;
@@ -391,7 +391,7 @@ body::-webkit-scrollbar {
 }
 #LiveSummary {
     width: 70%;
-    background-color: var(--theme-input-color);
+    background-color: var(--input-color);
     height: 30%;
     word-wrap: break-word;
     overflow: scroll;
@@ -411,46 +411,48 @@ body::-webkit-scrollbar {
     width: 40px;
 }
 input {
-    background-color: var(--theme-input-color);
-    color: var(--theme-font-color);
+    background-color: var(--input-color);
+    color: var(--font-color);
     /* border: unset; */
     border-radius: 5px;
 }
 button {
-    background-color: var(--theme-input-color);
-    color: var(--theme-font-color);
+    background-color: var(--input-color);
+    color: var(--font-color);
     border-radius: 10px;
+    cursor: pointer;
+    transition: 0.5s;
 }
 input[type=checkbox]{
-    background-color: var(--theme-input-color);
+    background-color: var(--input-color);
     border-radius: 10px;
 }
 input[type="file"]::file-selector-button {
-    background-color: var(--theme-input-color);
-    color: var(--theme-font-color);
+    background-color: var(--input-color);
+    color: var(--font-color);
     border-radius: 10px;
 }
 option{
-    background-color: var(--theme-input-color);
-    color: var(--theme-font-color);
+    background-color: var(--input-color);
+    color: var(--font-color);
     border-radius: 10px;
 }
 select{
-    background-color: var(--theme-input-color);
-    color: var(--theme-font-color);
+    background-color: var(--input-color);
+    color: var(--font-color);
     border-radius: 10px;
 }
 textarea {
     border-radius: 5px;
-    background-color: var(--theme-input-color);
-    color: var(--theme-font-color);
+    background-color: var(--input-color);
+    color: var(--font-color);
 }
 textarea::-webkit-scrollbar {
     width: 10px;
     height: 10px;
 }
 textarea::-webkit-scrollbar-thumb {
-    background: var(--theme-input-color);
+    background: var(--input-color);
 /*    background: #afafaf*/;
     -webkit-border-radius: 100px;
 }

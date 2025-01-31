@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
+    <title>PeerLive-Host</title>
     <link rel="stylesheet" type="text/css" href="css/styleLiveWeb.css">
 </head>
 <body>
@@ -16,6 +17,7 @@
             <a href="#menu_1" class="pop_Option" onclick="changePopMenu(1)">直播流媒体源</a>
             <a href="#menu_2" class="pop_Option" onclick="changePopMenu(2); refreshMap(0);">房间信息</a>
             <a href="#menu_3" class="pop_Option" onclick="changePopMenu(3)">Peer设置</a>
+            <a herf="#menu_4" class="pop_Option" onclick="changePopMenu(4)">会议</a>
         </div>
         <div class="pop_Content">
             <div style="display: flex;">
@@ -32,6 +34,7 @@
         </div>
         <div class="pop_Content covert">
             <!-- Stream Source -->
+            <button onclick="stop_Live_Stream()()">停止会议流</button><br>
             <div id="onlyPC">
                 <div class="stress">
                     分享电脑屏幕画面:<br>
@@ -61,7 +64,7 @@
             </div>
             选项:<br>
             <div>
-                <div style="font-weight: bold;">
+                <div class="stress">
                     <input type="checkbox" id="ifNotDisplayLocalStream">是否不展示本地流媒体<br>
                     —— 启用以节省电脑性能损耗
                 </div>
@@ -70,13 +73,16 @@
         <div class="pop_Content covert">
             <div style="display: flex;">
                 <img id="roomCover" src="">
-                <span id="roomTitle"></span>
-            </div>
-            <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
+                <div>
+                    <h2 id="roomTitle"></h2>
+                    <button id="copyURL">复制房间分享链接</button><br>
+                    <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
+                </div>
+            </div><br>
             <div id="nodeInfo">
                 <div id="stable">
-                    <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 0)">我</button>
-                    <button id="refreshMap" onclick="refreshMap(0)">刷新</button>
+                    <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">我</button>
+                    <button id="refreshMap" onclick="refreshMap(1)">刷新</button>
                 </div>
                 <div id="block0"></div>
                 <div id="block1"></div>
@@ -95,10 +101,11 @@
            选择你想要分享的设备:<br>
            <input type="checkbox" id="ifConferenceUseCamera">摄像头
            <input type="checkbox" id="ifConferenceUseMicrophone">麦克风<br>
-           <input type="checkbox" onclick="upload_Conferee_Video()" id="uploadConfereeVideo">获取本地设备<br><br>
-           <video id="conferee_Local_Video"></video><br>
+           <button onclick="askNavigatorMediaDevices(true)">获取本地设备</button>
+           <button onclick="stop_Conference_Stream()">停止会议流</button><br>
+           <video id="conferee_Local_Video" controls autoplay></video><br>
            确认公开本地流:
-           <input type="checkbox" onclick="askNavigatorMediaDevices(true)" id="uploadConfereeVideo">公开流<br><br>
+           <button onclick="upload_Conferee_Video()">公开流</button><br>
            
         </div>
         
@@ -116,7 +123,7 @@
             <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnection<br> -->
         </div>
         <div class="box">
-            <button onclick="fullWebVideo()" id="fullScreen">铺满屏幕</button><br>
+            <!-- <button onclick="fullWebVideo()" id="fullScreen">Full Page Video</button><br> -->
             <div>
                 <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Avatar & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br>
                 <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
@@ -125,18 +132,20 @@
         <div class="box">
             <span id="sumOfRoom">Members: 1</span><br>
             <input type="checkbox" id="ifAutoClean">自动清理信息[最大->100]<br>
-            <button onclick="cleanMsg()">清理信息</button><br>
+            <button onclick="cleanMsg()">清理信息</button>
             <button onclick="document.getElementById('toggleChatBox').click()">Hide Side</button><br>
-            切换主题:<select id="themes" onchange="change_Theme(this.value)">
-                <option value="0" selected="selected">白天</option>
-                <option value="1">黑暗</option>
-            </select>
+            <div id="themeController">
+                Change Themes:<select onchange="change_Theme(this.value)">
+                <option value="0" selected="selected">Light</option>
+                <option value="1">Dark</option>
+                </select>
+            </div>
         </div>
         <div class="box">
             <div id="confereesContainer">
                 <div class="conferees">
-                    <button onclick="pop(document.getElementById('liveSetting'), 4);">会议 <br> 设置</button><br>
-                    <button onclick="conference_Play()">播放所有 <br> 会议视频</button>
+                    <button onclick="pop(document.getElementById('liveSetting'), 4);">Conference <br> Setting</button><br>
+                    <button onclick="conference_Play()">Play All <br> of Videos</button>
                 </div>
             </div>
         </div>
@@ -152,13 +161,14 @@
             <div id="chatBox"></div>
             <div class="sendInput">
                 <!-- Send box -->
-                <input type="text" id="sendMessageBox" placeholder="填入你想发的信息..." autofocus="true" />
-                <button type="button" id="uploadImgButton">图片</button>
-                <button type="button" id="sendButton" onclick="sendMsg()">发送</button><br>
+                <input type="text" id="sendMessageBox" placeholder="Input message here..." autofocus="true" />
+                <button type="button" id="uploadImgButton">Img</button>
+                <button type="button" id="sendButton" onclick="sendMsg()">Send</button><br>
                 <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
             </div>
         </div>
     </div>
+    <script src="../config.js"></script>
     <script src="js/peerjs.min.js"></script>
     <script src="js/srs.sdk.js"></script>
     <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
@@ -184,8 +194,7 @@
         let nodesMap = new Array();     // init later
         let childNodes = new Array();
         const WebVideo = document.getElementById('webVideo');
-        let params = new URLSearchParams(document.location.search.substring(1));
-        let urlInfo = [params.get("rootId"), params.get("title"), params.get("summary"), params.get("coverURL")]
+        let urlInfo = [params.get("rootId"), params.get("title"), params.get("summary"), params.get("coverURL")];
         const LiveTitle = document.getElementById("LiveTitle");
         const LiveSummary = document.getElementById("LiveSummary");
         const LiveCoverURL = document.getElementById("LiveCoverURL");
@@ -195,12 +204,22 @@
         // Listen for the event when a Peer connection is successfully opened
         // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
         peer.on('open', (id) => {
+            //childNodes=[0.dataType, 1.sourceMark, 2.NumberOfchildNodes, 3.unused for you ]
+            childNodes = [ 1, 1, 0, [], id, getMyName(), []];
             if (LiveTitle.value || LiveSummary.value || LiveCoverURL.value){
                 nodesMap = [ 1, 1, [id], 0, LiveTitle.value, LiveSummary.value, LiveCoverURL.value, id, getMyName(), childNodes, urlInfo[0], false];
-            } else {
-                //childNodes=[0.dataType, 1.sourceMark, 2.NumberOfchildNodes, 3.unused for you ]
-                childNodes = [ 1, 1, 0, [], id, getMyName(), []];
+            } else if (urlInfo[1] || urlInfo[2] || urlInfo[3]) {
                 //nodesMap=[0.dataType, 1.sourceMark, 2.idsOfMembersInRoom, 3.roomType]
+                nodesMap = [ 1, 1, [id], 0, urlInfo[1], urlInfo[2], urlInfo[3], id, getMyName(), childNodes, urlInfo[0], false];
+            } else if (use_Local_Storage) {
+                LiveTitle.value = localStorage.liveTitle;
+                if (localStorage.liveCoverURL) {
+                    document.getElementById("LiveCover").src = localStorage.liveCoverURL;
+                }
+                LiveSummary.value = localStorage.liveSummary;
+                nodesMap = [ 1, 1, [id], 0, LiveTitle.value, '', LiveCoverURL.value, id, getMyName(), childNodes, urlInfo[0], false];
+                nodesMap[6] = localStorage.liveCoverURL;
+            } else {
                 nodesMap = [ 1, 1, [id], 0, urlInfo[1], urlInfo[2], urlInfo[3], id, getMyName(), childNodes, urlInfo[0], false];
             }
             console.log(id);
@@ -219,48 +238,110 @@
             conns.push(conn);
 
             if (my_Conferee_Index){
-                if (nodesMap[11][1].includes(conn.peer)) {
+                if (nodesMap[2].includes(conn.peer)) {
                     conferee = conn;
                     conferee_Nodes.push(conferee);
 
                     conferee.on('open', () => {
-                        
+                        if (conference_Stream) {
+                            peer.call(conferee.peer, conference_Stream);
+                        } else if (myIcon) {
+                            conferee.send([5,3, my_Conferee_Index, null, myIcon, getMyName()]);
+                        } else {
+                            conferee.send([5,3, my_Conferee_Index, null, null, getMyName()]);
+                        }
                     });
                     
                     conferee.on('data', (data) => {
-                        if (data[1] === 3) {
-                            if (data[3]) {      // stream
-                                conferee_Map[3][data[2]] = data[3];
-                                nodesMap[11] = conferee_Map;
-                                liveSend(nodesMap);
-                                document.getElementsByClassName('confereeVideos')[data[2]].src = data[3];
-                            } else {    // img
-                                document.getElementsByClassName('conferees')[data[2]].style.background = data[4];
-                            }
+                        switch (data[1]) {
+                            case 2:  // host move to child msg
+                            //     let i = 0;
+                            //     let delete_index = nodesMap[11][1].indexOf(data[2]);
+                            //     console.log("remove5:"+delete_index)  //debug
+                            //     while (i < conferee_Map.length) {
+                            //         conferee_Map[i][delete_index] = null;     // leave blank
+                            //         i++;
+                            //     }
+                            //     nodesMap[11] = conferee_Map;
+                            //     liveSend(nodesMap);
+                            //     conferee_Nodes.splice(delete_index - 1, 1);
+                            //     document.getElementById('conferees'+ delete_index).remove();
+                            //     break;
+                            case 3:
+                                // console.log("Host:"+data);   //debug
+                                // [5,3, my_Conferee_Index, my_Conferee_Stream_Id, myIcon, getMyName()]);
+                                if (data[5]){    // name
+                                    conferee_Map[2][data[2]] = data[5];
+                                }
+                                if (data[3]) {      // stream & choose one of img and stream
+                                    conferee_Map[3][data[2]] = data[3];
+                                    nodesMap[11] = conferee_Map;
+                                } else {    // img
+                                    nodesMap[11] = conferee_Map;
+                                    liveSend(nodesMap);
+                                    if (data[4]) {
+                                        document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeIcon')[0].src = data[4];
+                                        document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeVideos')[0].classList.add('covert');
+                                        document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeVideos')[0].srcObject = null;
+                                        document.getElementById('conferees'+ data[2]).removeAttribute('src');   // empty source
+                                    }
+                                }
+                                if (data[5]) {
+                                    document.getElementById('conferees'+ data[2]).getElementsByClassName('confereeName')[0].innerHTML = data[5];
+                                }
+                                break;
+                        
+                            default:
+                                break;
                         }
                     });
 
                     conferee.on('close', () => {
-                        if (nodesMap[11][1].includes(conferee.peer)) {
-                            let delete_index = nodesMap[11][1].indexOf(conferee.peer);
-                            conferee_Map[1][delete_index] = undefined;
-                            conferee_Map[2][delete_index] = undefined;
-                            conferee_Map[3][delete_index] = undefined;
-                            nodesMap[11] = conferee_Map;
-                            liveSend(nodesMap);
-                            document.getElementsByClassName('conferees')[delete_index].remove();
+                        if (my_Conferee_Index) {
+                            let t = 0;
+                            while (t < conferee_Nodes.length) {
+                                if (conferee_Nodes[t]) {
+                                    if (!conferee_Nodes[t].open) {
+                                        let delete_index = nodesMap[11][1].indexOf(conferee_Nodes[t].peer);
+                                        if (delete_index !== -1) {
+                                            let delete_Conference_Index = nodesMap[11][0][delete_index];
+                                            liveSend([5, 2, 1, delete_Conference_Index, conferee_Nodes[t].peer]);   // dieliver msg to audience yo update date
+                                            let i = 0;
+                                            while (i < conferee_Map.length) {
+                                                conferee_Map[i][delete_index] = null;     // leave blank
+                                                i++;
+                                            }
+                                            nodesMap[11] = conferee_Map;
+                                            liveSend(nodesMap);
+                                            console.log("close"+delete_index);  //debug
+                                            i = 0;
+                                            while (i < conferee_Nodes.length) {
+                                                if (conferee_Nodes[i]) {
+                                                    if (conferee_Nodes[i].peer === conferee_Nodes[t].peer) {
+                                                        conferee_Nodes.splice(i, 1);
+                                                        break;   // bug todo
+                                                        i--;
+                                                    }
+                                                }
+                                                i++;
+                                            }
+                                            if (my_Conferee_Index) {
+                                                document.getElementById('conferees'+ delete_Conference_Index).remove();
+                                            }
+                                        }
+                                    }
+                                }
+                                t++;
+                            }
                         }
                     });
+
+                    // conn = null;    // stop connection bridge deeply
                     return;
                 }
             }
             conn.on('open', () => {
-                // for guest in index
-                let sendNodesMap = nodesMap;
-                sendNodesMap[2] = -1;
-                conn.send(sendNodesMap);
-
-                // for conferee in room
+                conn.send(nodesMap);
             });
             
             // Receive the text: Host <-- Guest
@@ -327,26 +408,74 @@
                     case 5:     // Conference
                         switch (data[1]) {
                             case 0:     // append
-                                let new_Conferee = [conferee_Map[0].length -1, data[2][1], data[2][2]]
-                                conferee_Map[0].push(new_Conferee[0]);
-                                conferee_Map[1].push(new_Conferee[1]);
-                                conferee_Map[2].push(new_Conferee[2]);
-                                conferee_Map[3].push(undefined);
+                                let index = 1;
+                                while (index < conferee_Map[0].length) {
+                                    if((conferee_Map[0][index] === null) || (conferee_Map[0][index] === undefined)){
+                                        break;
+                                    }
+                                    index++;
+                                }
+                                // console.log(data)   //debug
+                                // console.log(index)  //debug
+                                let new_Conferee = [index, data[2][1], data[2][2]];     // [index, id, name]
+                                conferee_Map[0][index] = new_Conferee[0];
+                                conferee_Map[1][index] = new_Conferee[1];
+                                conferee_Map[2][index] = new_Conferee[2];
+                                conferee_Map[3][index] = null;
                                 nodesMap[11] = conferee_Map;
 
                                 liveSend([5,1, new_Conferee]);
                                 if (document.getElementById("joinConference").checked) {
-                                    append_Conferee_Dom(data[2]);
+                                    append_Conferee_Dom(new_Conferee);
+                                }
+                                liveSend(nodesMap);
+                                break;
+                            case 2:     // delete   [5, 2, 0, index, id]
+                                // console.log(data);  //debug
+                                let delete_index = nodesMap[11][1].indexOf(data[4]);
+                                if (delete_index !== -1) {
+                                    data[2] = 1;
+                                    liveSend(data)
+                                    if (my_Conferee_Index) {
+                                        console.log("msg close():"+delete_index)  //debug
+                                        let i = 0;
+                                        while (i < conferee_Map.length) {
+                                            conferee_Map[i][delete_index] = null;     // leave blank
+                                            i++;
+                                        }
+                                        nodesMap[11] = conferee_Map;
+                                        liveSend(nodesMap);
+                                        i = 0;
+                                        while (i < conferee_Nodes.length) {
+                                            if (conferee_Nodes[i]) {
+                                                if (conferee_Nodes[i].peer === data[4]) {
+                                                    conferee_Nodes[i].close();
+                                                    conferee_Nodes.splice(i, 1);
+                                                    break;   // bug todo
+                                                    i--;
+                                                }
+                                            }
+                                            i++;
+                                        }
+                                        if (my_Conferee_Index) {
+                                            document.getElementById('conferees'+ data[3]).remove();
+                                        }
+                                    } else {
+                                        console.log("remove:"+delete_index)  //debug
+                                        let i = 0;
+                                        while (i < conferee_Map.length) {
+                                            conferee_Map[i][delete_index] = null;     // leave blank
+                                            i++;
+                                        }
+                                        nodesMap[11] = conferee_Map;
+                                        liveSend(nodesMap);
+                                    }
                                 }
                                 break;
-                            case 2:     // delete
-                                if (my_Conferee_Index) {
-                                    
-                                } else {
-
-                                }
-                                break;
-                            case 3:     // update info [5,3,index,stream,img]
+                            case 3:     // update info [5,3,index,stream,img,name]
+                                nodesMap[11][2][data[2]] = data[5];
+                                nodesMap[11][3][data[2]] = data[3];
+                                conferee_Map = nodesMap[11];
                                 break;
                             case 4:     // stream
                                 break;
@@ -402,17 +531,26 @@
         peer.on('call', (mediaConnection) => {
             // Receive the stream
             mediaConnection.on('stream', (stream) => {
-                if (nodesMap[11][3].includes(stream.id)) {
-                    if (my_Conferee_Index) {
-                        document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = stream;
+                if (my_Conferee_Index) {
+                    if (nodesMap[11][3].includes(stream.id)) {
+                        let index = nodesMap[11][3].indexOf(stream.id);
+                        index = nodesMap[11][0][index];
+                        if (index !== -1) {
+                            document.getElementById('conferees'+ index).srcObject = stream;
+                            document.getElementById('conferees'+ index).getElementsByClassName('confereeVideos')[0].classList.remove('covert');
+                        }
+                        
+                        // mediaConnection.on('close', function() {    // test to do
+                        //     document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = null;
+                        // });
                     }
                 }
                 console.log('Received stream:', stream);    // DEBUG
             });
 
-            mediaConnection.on('close', function() {    // map modify on peer.on('close', ...)
-                document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(stream.id)].src = null;
-            });
+            // mediaConnection.on('close', function() {    // map modify on peer.on('close', ...)
+            //     document.getElementsByClassName('confereeVideos')[nodesMap[11][3].indexOf(conference_Stream.id)].src = null;
+            // });
             
             mediaConnection.answer(null);
         });
@@ -435,9 +573,12 @@
             nodesMap[5] = LiveSummary.value;
             if(liveCoverBase64){
                 nodesMap[6] = liveCoverBase64;
-            } else {
-                coverURL = LiveCoverURL.value;
+            } else if (LiveCoverURL.value) {
                 nodesMap[6] = LiveCoverURL.value;
+            } else if (use_Local_Storage) {
+                if (localStorage.liveCoverURL) {
+                    nodesMap[6] = localStorage.liveCoverURL;
+                }
             }
             liveSend(nodesMap);
             if(root){
@@ -445,29 +586,47 @@
                     root.send(nodesMap);
                 }
             }
+            if (use_Local_Storage) {
+                localStorage.liveTitle = nodesMap[4];
+                localStorage.liveSummary = nodesMap[5];
+                localStorage.liveCoverURL = nodesMap[6];
+            }
             pop(document.getElementById('liveSetting'));
         }
 
         function initial_Conference() {
-            if (document.getElementById("EnableConference").checked) {
-                nodesMap[11] = conferee_Map;
-            } else {
-                nodesMap[11] = false;
-                conference_Send([5,2]);     // stop conference
-                let i = 1;  // without first dom
-                while (i < document.getElementsByClassName('conferees').length) {
-                    document.getElementsByClassName('conferees')[i].remove();
-                    i++;
+            if (peer.open) {
+                if (document.getElementById("EnableConference").checked) {
+                    conferee_Map = [[0], [0], [0], [0]];
+                    nodesMap[11] = conferee_Map;
+                } else {
+                    document.getElementById("joinConference").checked = false;
+                    let i = 1;  // without first dom
+                    while (i <= nodesMap[11][0].length) {
+                        if (nodesMap[11][0][i]) {
+                            document.getElementById('conferees'+ nodesMap[11][0][i]).remove();
+                        }
+                        i++;
+                    }
+                    nodesMap[11] = false;
+                    my_Conferee_Index = null;
+                    my_Conferee_Stream_Id = null;
+                    if (conference_Stream) {
+                        conference_Stream.getTracks().forEach(track => track.stop());
+                    }
+                    conference_Stream = null;
+                    conferee_Nodes = [];    // clean connections
                 }
-                
+                liveSend(nodesMap);
+            } else {
+                document.getElementById("EnableConference").checked = !document.getElementById("EnableConference").checked;
             }
-            liveSend(nodesMap);
         }
 
         MyName.addEventListener(
             "focusout",
             () => {
-                if (MyName.value != nodesMap[8] && MyName.value){
+                if (MyName.value !== nodesMap[8] && MyName.value){
                     nodesMap[8] = MyName.value;
                     childNodes[5] = MyName.value;
                     liveSend(nodesMap);
@@ -475,6 +634,10 @@
                         if(root.open){
                             root.send(nodesMap);
                         }
+                        if (use_Local_Storage) {
+                            localStorage.myName = MyName.value;
+                        }
+                        update_Conferee_Info();
                     }
                 }
             },
