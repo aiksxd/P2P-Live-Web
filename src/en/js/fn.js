@@ -330,14 +330,6 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
             conferee_Nodes.push(conferee);
             
             conferee.on('open', () => {
-                if (conference_Stream) {
-                    conferee.send([5,3, my_Conferee_Index, conference_Stream.id, null, getMyName()]);
-                    peer.call(conferee.peer, conference_Stream);
-                } else if (myIcon) {
-                    conferee.send([5,3, my_Conferee_Index, null, myIcon, getMyName()]);
-                } else {
-                    conferee.send([5,3, my_Conferee_Index, null, null, getMyName()]);
-                }
             });
             
             conferee.on('data', (data) => {
@@ -384,6 +376,25 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                                 conferee_Map[2][data[2]] = data[5];
                                 liveSend(nodesMap);
                             }
+                        }
+                        let source_Id = nodesMap[11][1][nodesMap[11][0].indexOf(data[2])];
+                        console.log('get info from'+ source_Id)//debug
+                        let i = 0;
+                        while (i < conferee_Nodes.length) {
+                            if (conferee_Nodes[i]) {
+                                if (conferee_Nodes[i].open && (conferee_Nodes[i].peer === source_Id)) {
+                                    if (conference_Stream) {
+                                        conferee_Nodes[i].send([5,3, my_Conferee_Index, conference_Stream.id, null, getMyName()]);
+                                        peer.call(conferee_Nodes[i].peer, conference_Stream);
+                                    } else if (myIcon) {
+                                        conferee_Nodes[i].send([5,3, my_Conferee_Index, null, myIcon, getMyName()]);
+                                    } else {
+                                        conferee_Nodes[i].send([5,3, my_Conferee_Index, null, null, getMyName()]);
+                                    }
+                                    break;
+                                }
+                            }
+                            i++;
                         }
                         break;
                     default:

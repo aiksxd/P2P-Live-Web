@@ -216,9 +216,9 @@
             if (my_Conferee_Index) {
                 if (nodesMap[11][1].includes(conn.peer)) {
                     conferee = conn;
+                    conferee_Nodes.push(conferee);
 
                     conferee.on('open', () => {
-                        conferee_Nodes.push(conferee);
                         if (conference_Stream) {
                             conferee.send([5,3, my_Conferee_Index, conference_Stream.id, null, getMyName()]);
                             peer.call(conferee.peer, conference_Stream);

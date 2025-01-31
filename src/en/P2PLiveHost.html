@@ -240,8 +240,9 @@
             if (my_Conferee_Index){
                 if (nodesMap[11][1].includes(conn.peer)) {
                     conferee = conn;
+                    conferee_Nodes.push(conferee);
+                    
                     conferee.on('open', () => {
-                        conferee_Nodes.push(conferee);
                         if (conference_Stream) {
                             peer.call(conferee.peer, conference_Stream);
                         } else if (myIcon) {
@@ -253,7 +254,7 @@
                     
                     conferee.on('data', (data) => {
                         switch (data[1]) {
-                            // case 2:  // host remove at child msg
+                            case 2:  // host move to child msg
                             //     let i = 0;
                             //     let delete_index = nodesMap[11][1].indexOf(data[2]);
                             //     console.log("kill5:"+delete_index)  //debug
