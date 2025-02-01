@@ -292,15 +292,16 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                                 }
                                 break;
                             case 1:
-                                if (ifJump === 2) {
-                                    if (app_Mode) {
-                                        window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
-                                    } else {
-                                        window.open("./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
-                                    }
-                                } else {
-                                    document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index;
-                                }
+                                alert("Find files of P2P Game FiveOnline in Github");
+                                // if (ifJump === 2) {
+                                //     if (app_Mode) {
+                                //         window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
+                                //     } else {
+                                //         window.open("./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
+                                //     }
+                                // } else {
+                                //     document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index;
+                                // }
                                 break;
                             default:
                                 console.log("unknown type of room: "+ nodesMap[3]);

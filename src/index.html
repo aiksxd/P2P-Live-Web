@@ -31,21 +31,25 @@
         
         <div class="settingPage covert">
 
-            Change Theme:<select id="themeController" onchange="change_App_Theme(this.value)">
-                <option value="0" selected="selected">Light</option>
-                <option value="1">Dark</option>
+            <span class="lan">Change Theme:</span><select id="themeController" onchange="change_App_Theme(this.value)">
+                <option class="lan" value="0" selected="selected">Light</option>
+                <option class="lan" value="1">Dark</option>
             </select><br>
 
-            Multi Live Page<input id="multiLivePage" type="checkbox" class="switch" checked>
+            <span class="lan">Multi Live Page</span><input id="multiLivePage" type="checkbox" class="switch" checked>
             <label for="multiLivePage"><svg class="switchIcon" viewBox="0 0 100 50" fill="#c7c7c7"><rect class="svgBg" width="100" height="50" rx="30"/><circle class="inputBall" cy="25" r="21" fill="#fff"/></svg></label><br>
 
-            Use Local Storage(unavailable in inPrivate window)<input id="useLocalStorage"  onclick="switch_Enable_Local_Storage()" type="checkbox" class="switch" checked>
+            <span class="lan">Enable Local Storage(unavailable in inPrivate window)</span><input id="useLocalStorage"  onclick="switch_Enable_Local_Storage()" type="checkbox" class="switch" checked>
             <label for="useLocalStorage"><svg class="switchIcon" viewBox="0 0 100 50" fill="#c7c7c7"><rect class="svgBg" width="100" height="50" rx="30"/><circle class="inputBall" cy="25" r="21" fill="#fff"/></svg></label>
-            <button onclick="localStorage.clear()">Clean Local Storage</button><br>
+            <button class="lan" onclick="localStorage.clear()">Clean Local Storage!</button><br>
 
-            App Mode(unavailable as files:// (at least http://127.0.0.1))<input id="appMode" onclick="switch_App_Mode()" type="checkbox" class="switch">
+            <span class="lan">App Mode(unavailable as files:// (at least http://127.0.0.1))</span><input id="appMode" onclick="switch_App_Mode()" type="checkbox" class="switch">
             <label for="appMode"><svg class="switchIcon" viewBox="0 0 100 50" fill="#c7c7c7"><rect class="svgBg" width="100" height="50" rx="30"/><circle class="inputBall" cy="25" r="21" fill="#fff"/></svg></label><br>
 
+            <span class="lan">Language(reload warning):</span><select id="languageController" onchange="change_Language(this.value)">
+                <option value="en" selected="selected">English</option>
+                <option value="zh">中文</option>
+            </select><br>
             
         </div>
     </div>
@@ -57,5 +61,6 @@
     </div></div>
     <script src="config.js"></script>
     <script src="js/index.js"></script>
+    <script src="js/language.js"></script>
 </body>
 </html>

@@ -2,16 +2,17 @@ let last_Index = 0;
 let language = 'en'
 
 function reboot_App_Language() {
-    document.getElementById('homePage').src = "./"+ language + "/index.html";
+    
 }
 switch (navigator.language) {
     case 'zh-CN':
         language = "zh";
+        change_Language(language);
         break;
     default:
+        document.getElementById('homePage').src = "./"+ language + "/index.html";
         break;
 }
-reboot_App_Language(language);
 
 function changeMenu(index) {
     let sidebar = document.getElementsByClassName('sidebar')[0];
