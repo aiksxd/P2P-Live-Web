@@ -1,9 +1,6 @@
 let last_Index = 0;
 let language = 'en'
 
-function reboot_App_Language() {
-    
-}
 switch (navigator.language) {
     case 'zh-CN':
         language = "zh";

@@ -421,7 +421,6 @@ button {
     color: var(--font-color);
     border-radius: 10px;
     cursor: pointer;
-    transition: 0.5s;
 }
 input[type=checkbox]{
     background-color: var(--input-color);
