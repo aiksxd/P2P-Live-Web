@@ -27,7 +27,7 @@ P2P 是一种分布式网络架构，其中每个参与者（也称为节点）�
 + nodesMap推送不再有差别
 + 修复了一些历史遗留bug
 
-## [在线版本 -> https://aiksxd.github.io/PeerApps/PeerLive/P2PLiveIndex.html](https://aiksxd.github.io/PeerApps/PeerLive/P2PLiveIndex.html)
+## [在线版本 -> https://aiksxd.github.io/PeerApps/PeerLive/index.html](https://aiksxd.github.io/PeerApps/PeerLive/index.html)
 ### 用法：
 1. 使用浏览器/应用程序在有网络的情况下加载主页(index.html)
 > [如果无法连接到网络名称，直接输入**房间ID** / 使用**不公开**选项创建房间]
