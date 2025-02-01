@@ -1,0 +1,156 @@
+:root {
+    --theme-color: rgb(243,243,243);    /* .fae5a0; */
+    --sidebar-color: rgb(216, 224, 209);
+    --sidebar-ui-color: rgb(174,221,129);     /* rgb(193, 238, 31); */
+    --sidebar-font-color: rgb(21,26,34);
+    --sidebar-active-color: rgb(107,194,53);
+    --window-width: 100vh;
+    --window-height: 100vh;
+}
+
+.covert {
+    display: none;
+}
+
+html, body {
+    color: var(--sidebar-font-color);
+    background-color: var(--theme-color);
+    font-family: "Lato", sans-serif;
+    height: 100%;
+	margin: 0; 
+	padding: 0;
+	border: 0;
+}
+
+body {
+    overflow-y: hidden;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+::-webkit-scrollbar-thumb {
+    background: #afafaf;
+    -webkit-border-radius: 100px;
+}
+
+.sidebar {
+    top: 0;
+    width: calc(var(--window-height) / 12);
+    background-color: var(--sidebar-color);
+    position: fixed;
+    height: 100%;
+    overflow-y: hidden;
+}
+
+.sidebar svg {
+    color: var(--sidebar-font-color);
+    height: calc(var(--window-width) / 12);
+    width: 100%;
+    text-decoration: none;
+    .svgBg {
+        fill: var(--sidebar-color);
+        /* stroke: var(--sidebar-active-color); */
+    }
+    .svgText {
+        fill: var(--sidebar-active-color);
+    }
+}
+
+.sidebar svg.active {
+    .svgBg {
+        fill: var(--sidebar-active-color);
+    }
+    .svgText {
+        fill: var(--sidebar-color);
+    }
+}
+
+.sidebar svg:hover:not(.active) {
+    .svgBg {
+        transition: fill 0.5s;
+        fill: var(--sidebar-active-color);
+    }
+    .svgText {
+        transition: fill 0.5s;
+        fill: var(--sidebar-color);
+    }
+}
+
+.content {
+    margin-left: calc(var(--window-height) / 12);
+    height: 100%;
+    display: flex;
+    flex-grow: 1;
+}
+
+iframe {
+    border: 0;
+}
+
+.iframeContainer {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.settingPage {
+    padding: 2px 5px;
+    overflow-y: scroll;
+}
+
+.settingPage svg {
+    .svgBg {
+        transition: fill 0.5s;
+    }
+    .inputBall {
+        transition: cx 0.5s;
+        cx: 25;
+    }
+}
+.switch {
+    display: none;
+}
+.switch:checked + label > .switchIcon {
+    .svgBg {
+        fill: var(--sidebar-active-color);
+    }
+    .inputBall {
+        cx: 75;
+    }
+}
+.switchIcon {
+    width: 50px;
+    height: 20px;
+}
+
+@media only screen and (orientation: portrait) {
+    .sidebar {
+        width: 100%;
+        height: calc(var(--window-width) / 8);
+        position: relative;
+    }
+    .sidebar svg {
+        width: calc(var(--window-height) / 8);
+        height: 100%;
+        float: left;
+    }
+    .content {
+        margin-left: 0;
+        height: 87.5%;
+    }
+    .menuContainer {
+        width: max-content;
+    }
+}
+
+@media only screen and (orientation: landscape) {
+    .sidebar a {
+        text-align: center;
+        float: none;
+    }
+    .menuContainer {
+        display: grid;
+    }
+}

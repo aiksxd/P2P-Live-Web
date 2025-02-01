@@ -1,375 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
-    <link rel="stylesheet" type="text/css" href="css/styleLiveWeb.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ax-Index</title>
+    <link rel="stylesheet" type="text/css" href="css/appUI.css">
 </head>
 <body>
     <div id="shadowCover"></div>
-    <!-- Detail of Room -->
-    <div class="pop" id="openRoomInfo">
-        <span class="close_Button" onclick="pop(document.getElementById('openRoomInfo'))">✕</span>
+    <div class="content">
+
+        <div class="iframeContainer">
+            <iframe
+                id="homePage"
+                width="100%"
+                height="100%"
+                src="">
+            </iframe>
+        </div>
+
+        <div class="iframeContainer covert">
+            <iframe
+                id = "livePage"
+                class = "livePages"
+                width="100%"
+                height="100%"
+                src="">
+            </iframe>
+        </div>
         
-        <div class="pop_Content">
-            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(3)">auto<br>Join</button>
-            ------------------------------------------------<br>
-            <div style="display: flex;">
-                <img id="roomCover" src="">
-                <span id="roomTitle"></span>
-            </div>
-            <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
-            ------------------------------------------------<br>
-            <div id="nodeInfo">
-                <div id="stable">
-                    <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">Host Node</button>
-                    <button id="refreshMap" onclick="indexRefreshMap(1)">Refresh</button>
-                </div>
-                <div id="block0"></div>
-                <div id="block1"></div>
-            </div>
-            <button id="copyURL">Copy Web Link to share</button>
-        </div>
-    </div>
-    <!-- Host Setting -->
-    <div class="pop" id="liveSetting">
-        <button class="confirm_Button" id="createRoom">Create Room</button>
-        <span class="close_Button" onclick="pop(document.getElementById('liveSetting'))">✕</span>
-        <div class="pop_Menu">
-            <a href="#menu_0" class="pop_Option active" onclick="changePopMenu(0);">Live Room Setting</a>
-            <a href="#menu_1" class="pop_Option" onclick="changePopMenu(1)">Peer Setting</a>
-        </div>
-        <div class="pop_Content">
-            ------------------------------------------------<br>
-            Room Title : <input type="text" id="liveTitle" placeholder="Room Title"><br>
-            Cover URL: <input type="text" id="liveCoverURL" placeholder="URL of img served as Cover"><br>
-            Summary:<br><textarea id="LiveSummary" name="roomSummary" rows="5" cols="20" placeholder="Input your Summary there..."></textarea><br>
-            <!-- Notice: Upload Room Cover only become available after created room<br> -->
-            <!-- Cover:<select id="roomCover" onchange="inputCoverURL(this.selectedIndex)">
-                <option value="null" selected="selected">Custome</option>
-                <option value="0">Live</option>
-                <option value="1">FiveOnline</option>
-                <option value="2">Multiplay</option>
-            </select><br> -->
-            ------------------------------------------------<br>
-            Options:<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;
-                pravite:<input type="checkbox" id="ifPravite"><br>
-            &nbsp;&nbsp;&nbsp;&nbsp;
-                Room Type:<select id="roomType">
-                <option value="0" selected="selected">Live</option>
-                <option value="1">FiveOnline(external)</option>
-                <!-- <option value="2">RemoteControl(undone)</option> -->
-            </select>
-            ------------------------------------------------<br>
-            In addition, you can upload your local photo after creating Room(Room Setting)
-        </div>
-        <div class="pop_Content covert">
-            ------------------------------------------------<br>
-            <!-- <button onclick="changeTheme()">Dark - Light Mode</button><br> -->
-            <button onclick="echoHistoricalConnectedId()">console.log( Historical Connected Ids )</button><br><br>
-            <button onclick="defaultConnect()">Click me to connect the deafult Root Id</button><br><br>
-            <button onclick="peer.reconnect()">Reconnect to Peer Server</button><br><br>
-            <!-- <input type="checkbox" id="ifAutoReconnect" checked="checked">Automatic Reconnect when connection closed<br> -->
+        <div class="settingPage covert">
+
+            <span class="lan">Change Theme:</span><select id="themeController" onchange="change_App_Theme(this.value)">
+                <option class="lan" value="0" selected="selected">Light</option>
+                <option class="lan" value="1">Dark</option>
+            </select><br>
+
+            <span class="lan">Multi Live Page</span><input id="multiLivePage" type="checkbox" class="switch" checked>
+            <label for="multiLivePage"><svg class="switchIcon" viewBox="0 0 100 50" fill="#c7c7c7"><rect class="svgBg" width="100" height="50" rx="30"/><circle class="inputBall" cy="25" r="21" fill="#fff"/></svg></label><br>
+
+            <span class="lan">Enable Local Storage(unavailable in inPrivate window)</span><input id="useLocalStorage"  onclick="switch_Enable_Local_Storage()" type="checkbox" class="switch" checked>
+            <label for="useLocalStorage"><svg class="switchIcon" viewBox="0 0 100 50" fill="#c7c7c7"><rect class="svgBg" width="100" height="50" rx="30"/><circle class="inputBall" cy="25" r="21" fill="#fff"/></svg></label>
+            <button class="lan" onclick="localStorage.clear()">Clean Local Storage!</button><br>
+
+            <span class="lan">App Mode(unavailable as files:// (at least http://127.0.0.1))</span><input id="appMode" onclick="switch_App_Mode()" type="checkbox" class="switch">
+            <label for="appMode"><svg class="switchIcon" viewBox="0 0 100 50" fill="#c7c7c7"><rect class="svgBg" width="100" height="50" rx="30"/><circle class="inputBall" cy="25" r="21" fill="#fff"/></svg></label><br>
+
+            <span class="lan">Language(reload warning):</span><select id="languageController" onchange="change_Language(this.value)">
+                <option value="en" selected="selected">English</option>
+                <option value="zh">中文</option>
+            </select><br>
             
         </div>
     </div>
-    <!-- Control Panel -->
-    <div class="container" id="control" style="height: 30%;">
-        <!-- Join a live web -->
-        <div class="box">
-            <div id="myid" style="font-weight: bold;">Connecting to PeerServer...</div><br>
-
-            <div style="font-weight: bold; font-size: 20px;">Direct Connect to Room:</div>
-            <input type="text" id="directConnectId" placeholder="Input room Id...">
-            <button id="directConnectButton">GoTo</button><br>
-            
-            <div style="font-weight: bold; font-size: 32px;">Rooms List:
-                <button id="live" onclick="pop(document.getElementById('liveSetting'))">Create Room</button>
-            </div>
-            Display Room Type:<select id="roomSort" onchange="appearRooms()">
-                <option value="" selected="selected">All</option>
-                <option value="0">Live</option>
-                <option value="1">FiveOnline(external)</option>
-                <!-- <option value="2">RemoteControl(undone)</option> -->
-            </select>
-        </div>
-        <div class="box">
-            Change Themes:<select id="themes" onchange="change_Theme(this.value)">
-                <option value="0" selected="selected">Light</option>
-                <option value="1">Dark</option>
-            </select>
-            <!-- Connect box -->
-            <div id="connectRoot" style="visibility: hidden;">
-                Join a root node:<input type="text" id="peerId" placeholder="Input counterpart's Id" autofocus="true">
-                <button id="connectButton">Connect</button><br>
-            </div>
-            <div id="status" style="font-weight: bold;">Status: Connecting to PeerServer...</div>
-        </div>
-    </div>
-    <div id="rooms">
-    </div>
-    <script src="js/peerjs.min.js"></script>
-    <!--script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script-->
-    <script src="js/fn.js"></script>
-    <script type="text/javascript" src="config.txt"></script>
-    <script>
-        let openInfoTimes = 0;
-        let openLiveTimes = 0;
-        let myid = null;
-        let ifIndex = true;
-        let ifConnectedAim = false;
-        let lastAimId = null;
-        let nodesMap = new Array();
-        let rooms = new Array();
-        let liveHostIds = new Array();
-        let conns = new Array();
-        let connIds = new Array();
-        let layers = [0];
-        let roomPosition = null;
-        let lastLayerNumber = null;
-        const MyName = null;
-
-        let connectHistroy = [];
-        let peer = new Peer(defaultId, { debug: 2});
-        // Listen for the event when a Peer connection is successfully opened
-        // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
-        peer.on('open', (id) => {
-            console.log(id);
-            document.getElementById("myid").innerHTML = "Your ID:<br/>" + id;
-            document.getElementById("status").innerHTML="Status: ✔ Root Node Created ✔";
-        });
-        peer.on('error', function(err) {
-            if (err.type === 'unavailable-id') {
-                document.getElementById("connectRoot").style.visibility = 'visible';
-                peer = new Peer({ debug: 2});
-                // Listen for the event when a Peer connection is successfully opened
-                // *Explanation: The provided code snippet is using the Peer.js library to establish a Peer connection. The peer.on('open', ...) code block is listening for the 'open' event, which is triggered when the Peer connection is successfully opened.
-                peer.on('open', (id) => {
-                    console.log(id);
-                    document.getElementById("myid").innerHTML = "Your ID:<br/>" + id;
-                    document.getElementById("status").innerHTML="Status: ✘ Need to connect to the Root Node ✘";
-                    defaultConnect();
-                });
-            } else {
-                alert("initial work ERROR(check in console)");
-            }
-        });
-        if(peer.id === defaultId){
-            // When a new connection request is received, this code creates a data channel and sends the local or remote stream (if available) and text messages.
-            peer.on('connection', (connPort) => {
-                conn = connPort;
-
-                conn.on('open', () => {
-                    connIds.push(conn.peer);
-                    conns.push(conn);
-                    console.log("Be connected to: " + conn.peer);
-                    conn.send(rooms);
-                });
-
-                conn.on('close', () => {
-                    for (let i = 0; i < conns.length; i++){
-                        if(conns[i]){
-                            if (conns[i].open){
-                                continue;
-                            }else{
-                                let disconnectedHost = connIds.indexOf(conns[i].peer);
-                                let disconnectedLiveHost = liveHostIds.indexOf(conns[i].peer);
-                                if (disconnectedHost !== -1){
-                                    console.log("Disconnected and deleted: " + conns[i].peer);     //DEBUG
-                                    conns.splice(disconnectedHost, 1);
-                                    connIds.splice(disconnectedHost, 1);
-                                }
-                                if (disconnectedLiveHost !== -1){
-                                    liveHostIds.splice(disconnectedLiveHost, 1);
-                                    rooms.splice(disconnectedLiveHost, 1);
-                                    rootSend(rooms);
-                                }
-                            }
-                        }else{break;}
-                    }
-                });
-
-                // Receive the text: Host <-- Guest
-                conn.on('data', (data) => {
-                    // data[0]:
-                    //  0: msg
-                    //  1: nodeInfo or indexRoomInfo 
-                    //  2: roomInfoModfied
-                    //  3: for reconnect: Remind the child node to replace the parent node
-                    //  4: for refresh: apply to the new media Stream for daliver to child
-                    switch (data[0]) {
-                        case 0:
-                            // console.log('Received data:', data);
-                            break;
-                        case 1:
-                            if( liveHostIds.includes(data[7]) ){
-                                rooms[ liveHostIds.indexOf(data[7]) ] = data;
-                            } else {
-                                liveHostIds.push(data[7]);
-                                rooms.push(data); // record child nodesMap
-                            }
-                            console.log("Live rooms update");  // DEBUG
-                            rootSend(rooms);
-                            break;
-                        default:
-                            console.log("unknown data: " + data);
-                    }
-                });
-            });
-
-            
-            // Root Send Massage
-            function rootSend (rooms){
-                console.log("deliver rooms update");  // DEBUG
-                // let disconnectedHost = null;         // todo
-                // let audiences = connIds.filter(function(t){ return liveHostIds.indexOf(t) == -1 })
-                // let aims = 0;     // count successful times
-                // let temp = null;    // to avoid encountering errors, ensure that null.peer is not existed.
-                for(let i=0; i<conns.length; i++){
-                    if(liveHostIds.includes(connIds[i])){continue;}
-                    if(conns[i].open){
-                        // console.log("send " + conns[i].peer + " to " + rooms);    //DEBUG
-                        conns[i].send(rooms);
-                        // aims++;
-                    }
-                }
-                // avoid losing text when sending
-                // predecessorHost = null;
-                appearRooms();
-            }
-        }
-
-        function defaultConnect(){
-            if (peer.id == defaultId){
-                alert("Root node can't connect others");
-                return;
-            }
-            if (root) {
-                root.close();
-            }
-            tryConnect(4, defaultId, false);
-        }
-
-        // Click event for the send message button && root uploads, host receives the reply from the receiving party.
-        // *Explanation: In the given code snippet, there is an event listener attached to the "connectButton" element, which triggers a function when the button is clicked.
-        // *Inside the function, the "root" variable is assigned the value of the connection made with the peer using the peer Id obtained from the input field with the Id "peerId".
-        document.getElementById('connectButton').addEventListener('click', () => {
-            if (peer.id == defaultId){
-                alert("Root node can't connect others");
-                return;
-            }
-            document.getElementById("status").innerHTML="Status: Connecting to Root Node...";
-            
-            if (document.getElementById("peerId").value ){
-                if(connectHistroy.slice(-1)[0] != document.getElementById("peerId").value){
-                    connectHistroy.push(document.getElementById("peerId").value);
-                }
-                tryConnect(4, connectHistroy.slice(-1)[0], false);
-            } else {
-                defaultConnect();
-            }
-            
-        });
-
-        function echoHistoricalConnectedId(){
-            console.log(connectHistroy);
-        }
-
-        document.getElementById('directConnectButton').addEventListener('click', () => {
-            if(guest){if(guest.open){
-                guest.close();
-            }}
-            guest = peer.connect(document.getElementById('directConnectId').value);
-            guest.on('open', () => {
-                console.log("successfully connected: "+ guest.peer)  // DEBUG
-            });
-            guest.on('data', (data) => {
-                nodesMap = data;
-                switch (nodesMap[3]) {  // room type
-                    case 0:
-                        document.location.href = "./P2PLiveAudience.html?id="+ guest.peer +"&name="+ getMyName();       
-                        break;
-                    case 1:
-                        document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName();       
-                        break;
-                    default:
-                        console.log("unknown type of room: "+ nodesMap[3]);
-                        break;
-                }
-            });
-        });
-
-        // add rooms to box
-        function appearRooms() {
-            console.log("Rooms list upated");
-            document.getElementById("rooms").innerHTML = "";
-            for (let i = 0; i < rooms.length; i++){
-                if (document.getElementById("roomSort").value){
-                    if (rooms[i][3] != document.getElementById("roomSort").selectedIndex -1) {
-                        continue;
-                    }
-                }
-                // document.getElementById("rooms").innerHTML = document.getElementById("rooms").innerHTML + 
-                // "<div class=\"rooms\" onclick=displayRoomInfo("+ i +") alt=\"img Error\" style=\"background-image: url(\'"+ rooms[i][6] +"\'); background-size: contain;\"><span style=\"background-color: rgb(46, 46, 46, 0.5);\">"+ rooms[i][4] +
-                // "</span><br><span style=\"background-color: rgb(46, 46, 46, 0.5); position: absolute; bottom: 0;\">Members:"+ rooms[i][2].length +" </span></div>";
-
-                let room = document.createElement("div");
-                room.classList.add('rooms');
-                room.setAttribute('onclick', "displayRoomInfo("+ i +")");
-                room.appendChild(document.createTextNode(rooms[i][4]));
-                room.setAttribute('style', "background-image: url(\'"+ rooms[i][6] +"\'); background-size: contain;");
-                
-                let roomNumbers = document.createElement("span");
-                roomNumbers.appendChild(document.createTextNode("Members:"+ rooms[i][2].length));
-                roomNumbers.setAttribute('style', 'position: absolute; bottom: 0;');
-                room.appendChild(roomNumbers);
-
-                document.getElementById("rooms").appendChild(room);
-            }
-        }
-
-        function displayRoomInfo(aimPosition){
-            roomPosition = aimPosition;
-            nodesMap = rooms[aimPosition];
-            if(openInfoTimes===0){
-                pop(document.getElementById('openRoomInfo'));
-                indexRefreshMap(1);
-            }
-        }
-
-        function indexRefreshMap(fnOfEcho){
-            nodesMap = rooms[roomPosition];
-            refreshMap(fnOfEcho);
-        }
-
-        document.getElementById('createRoom').addEventListener('click', () => {
-            let rootId = "";
-            if(! document.getElementById("ifPravite").checked){
-                if (peer.id === defaultId) {
-                    rootId = defaultId;
-                } else if(root){
-                    if(root.open){
-                        rootId = root.peer;
-                    } else { alert("Please join a Root Node at first!"); return; }
-                } else { alert("Please join a Root Node at first!"); return; }
-            }
-            switch (document.getElementById("roomType").selectedIndex) {
-                case 0:
-                    window.open("./P2PLiveHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("LiveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value, '_blank');
-                    break;
-                case 1:
-                    alert("Find files of P2P Game FiveOnline in Github");
-                    // window.open("./P2PGameFiveOnLineHost.html?rootId="+ rootId +"&title="+ document.getElementById("liveTitle").value +"&summary="+ document.getElementById("LiveSummary").value +"&coverURL="+ document.getElementById("liveCoverURL").value, '_blank');
-                    break;
-                case 2:
-                    alert("undone");        // TODO
-                    break;
-                default:
-                    console.log("Error type of room");
-                    break;
-            }
-        });
-    </script>
+    
+    <div class="sidebar"><div class="menuContainer">
+        <svg onclick="changeMenu(0)" class="active" width="64" height="64" viewBox="0 0 48 48"><rect class="svgBg" width="200" height="200"/><path class="svgBg" d="M0 0h500v500H0z"/><path class="svgText" d="M9.585 40.41q0-16.92-.045-17.19.09-1.351.945-1.396t1.08 1.17l-.135 16.56 5.4.09-.045-6.93q.75-6.255 7.215-5.4t5.88 8.235v4.14l5.49-.36.045-16.425q-.09-.9.945-1.215t1.125 1.26l-.09 16.65q-.225 2.16-3.6 2.07t-20.925-.18q-2.97.27-3.285-1.08"/><path class="svgText" d="M21.6 5.445 4.725 22.86q-1.305 1.305-.63 1.845t1.8-.705l16.74-17.52q.66-.72 1.365.045T42.705 24q.675.78 1.485 0t-3.825-4.56L24 4.59q-1.29-1.23-2.4.855"/></svg>
+        <svg onclick="changeMenu(1)" class="liveMenu" width="150" height="150" viewBox="66 100 55 55"><path class="svgBg" d="M0 0h500v500H0z"/><path class="svgText" d="m87 146 3-16q2-1 2.5 1L90 148q-2 1-2 0Z"/><circle cx="92" cy="125"/><path class="svgText" d="M85 120q9-6 15 2 5 0-1-5-7-6-15.5 1-1 2 1.5 2"/><path class="svgText" d="M80 115q16-11 26 4 2 1 1-3-11-15-29-4 0 3 2 3"/><circle class="svgText" cx="92" cy="125" r="2"/></svg>
+        <svg onclick="changeMenu(-1)" viewBox="0 0 1024 1024" width="200" height="200"><rect class="svgBg" width="2000" height="2000"/><path class="svgText" d="M870.4 401.067c-8.533-21.334-17.067-42.667-27.733-64v-2.134c21.333-25.6 17.066-64-6.4-87.466l-64-64c-23.467-23.467-61.867-25.6-87.467-6.4q-32-16-64-25.6v-2.134c-4.267-32-32-57.6-66.133-57.6h-89.6c-34.134 0-61.867 25.6-66.134 57.6v2.134q-32 9.6-64 25.6c-25.6-21.334-64-17.067-87.466 6.4l-64 64c-23.467 23.466-25.6 61.866-6.4 87.466q-16 32-25.6 64h-2.134c-32 4.267-57.6 32-57.6 66.134v89.6c0 34.133 25.6 61.866 57.6 66.133h2.134q9.6 32 25.6 64c-21.334 25.6-17.067 64 6.4 87.467l64 64c23.466 23.466 61.866 25.6 87.466 6.4q32 16 64 25.6v2.133c4.267 32 32 57.6 66.134 57.6h89.6c34.133 0 61.866-25.6 66.133-57.6v-2.133q32-9.6 64-25.6c25.6 21.333 64 17.066 87.467-6.4l64-64c23.466-23.467 25.6-61.867 6.4-87.467q16-32 25.6-64h2.133c32-4.267 57.6-32 57.6-66.133v-89.6c0-29.867-25.6-59.734-57.6-64M864 556.8s0 2.133 0 0l-46.933 8.533-4.267 21.334c-6.4 29.866-19.2 59.733-36.267 87.466l-10.666 19.2L793.6 729.6v2.133l-64 64h-2.133L691.2 768 672 778.667c-27.733 17.066-55.467 27.733-87.467 36.266L563.2 819.2l-6.4 44.8s0 2.133-2.133 2.133h-89.6c-2.134 0-2.134 0-2.134-2.133l-6.4-44.8-21.333-4.267c-29.867-8.533-59.733-19.2-87.467-36.266L328.533 768l-36.266 27.733h-2.134l-64-64V729.6l27.734-36.267-10.667-19.2c-17.067-27.733-27.733-55.466-36.267-87.466l-4.266-21.334-44.8-6.4s-2.134 0-2.134-2.133v-89.6c0-2.133 0-2.133 2.134-2.133l44.8-6.4 4.266-21.334c8.534-29.866 19.2-59.733 36.267-87.466l10.667-19.2-27.734-36.267v-2.133l64-64h2.134L328.533 256l19.2-10.667c27.734-17.066 55.467-27.733 87.467-36.266l21.333-4.267 6.4-44.8c0-2.133 0-2.133 2.134-2.133h89.6s2.133 0 2.133 2.133l6.4 44.8 21.333 4.267c29.867 8.533 59.734 19.2 87.467 36.266L691.2 256l36.267-27.733h2.133l64 64v2.133l-27.733 36.267 10.666 19.2c17.067 27.733 27.734 55.466 36.267 87.466l4.267 21.334 44.8 6.4c2.133 0 2.133 0 2.133 2.133zM512 373.333c-76.8 0-138.667 61.867-138.667 138.667S435.2 650.667 512 650.667 650.667 588.8 650.667 512 588.8 373.333 512 373.333m0 213.334c-40.533 0-74.667-34.134-74.667-74.667s34.134-74.667 74.667-74.667 74.667 34.134 74.667 74.667-34.134 74.667-74.667 74.667"/></svg>
+    </div></div>
+    <script src="config.js"></script>
+    <script src="js/index.js"></script>
+    <script src="js/language.js"></script>
 </body>
 </html>
