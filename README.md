@@ -1,4 +1,4 @@
-- [中文文档(项目文件中文语言版本见最新releases中chinese后缀)](README_CN.md)
+- [中文文档](README_CN.md)
 
 ### **About P2P & PeerJS**:
 P2P is a distributed network architecture where each participant (also known as a node) acts as both a client and a server
@@ -41,19 +41,37 @@ Unlike the traditional client-server model, P2P allows direct communication betw
 ![Audience-Step-2](https://github.com/aiksxd/material/blob/main/img/Audience-Step-2.png)
 
 ### **SRS support**：
-1. run srs with webRTC support(**1. Onl ychoose one of them**)
+1. run srs with webRTC support(**1. Only choose one of them**)
 > + windows/linux local app
-> [Download SRS app to run then go to 2.](https://ossrs.net/lts/en-us/docs/v4/doc/webrtc)
+> [Download SRS app to run then go to 2.](https://github.com/ossrs/srs/releases)
+> + Windows create & run srs-rtmp2rtc.bat
+> ```bat
+> for /f "tokens=2*" %%i in ('REG QUERY "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\srs\ins_dir"') do set srs_home=%%j
+> 
+> echo %srs_home%
+> 
+> for %%I in ("%srs_home%") do set srs_disk=%%~dI
+> 
+> cd %srs_home%
+> @%srs_disk%
+> 
+> objs\srs.exe -c conf\rtmp2rtc.conf
+> cmd
+> ```
 > + docker:
-> Windows: `docker run --rm -it -p 1935:1935 -p 1985:1985 -p 8080:8080 --env CANDIDATE=127.0.0.1 -p 8000:8000/udp registry.cn-hangzhou.aliyuncs.com/ossrs/srs:5 ./objs/srs -c conf/rtmp2rtc.conf`
+> Windows: 
+> ```bat
+> docker run --rm -it -p 1935:1935 -p 1985:1985 -p 8080:8080 --env CANDIDATE=127.0.0.1 -p 8000:8000/udp registry.cn-hangzhou.aliyuncs.com/ossrs/srs:5 ./objs/srs -c conf/rtmp2rtc.conf`
+> ```
 > Linux/Android(termux):
-```sh
-export CANDIDATE="127.0.0.1"
-docker run --rm --env CANDIDATE=$CANDIDATE \
-  -p 1935:1935 -p 8080:8080 -p 1985:1985 -p 8000:8000/udp \
-  ossrs/srs:4 \
-  objs/srs -c conf/rtmp2rtc.conf
-```
+> ```sh
+> export CANDIDATE="127.0.0.1"
+> docker run --rm --env CANDIDATE=$CANDIDATE \
+>   -p 1935:1935 -p 8080:8080 -p 1985:1985 -p 8000:8000/udp \
+>   ossrs/srs:4 \
+>   objs/srs -c conf/rtmp2rtc.conf
+> ```
+
 2. push **rtmp** stream，pull in web of **Stream Source** button with the key of stream and click the button of **share SRS Media Stream** in the zone of SRS api(localhost is the address of server, next void one is the key of stream which you need to input)
 3. NOTICE!: When setting up the stream, choose the hardware encoder and disable the B-frame function; otherwise, frame drops may occur!!
 ![Host-Step-3](https://github.com/aiksxd/material/blob/main/img/Host-Step-3-en.png)

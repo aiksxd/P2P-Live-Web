@@ -1,6 +1,0 @@
-
-let defaultId = 'P2P-Live-Web-Default-ID';
-
-let default_Theme = 0;
-
-// let max_Child_Nodes = 4;

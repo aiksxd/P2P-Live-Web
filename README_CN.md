@@ -1,5 +1,3 @@
-项目文件中文语言版本见最新releases中chinese后缀
-
 ### **关于P2P & PeerJS**：
 P2P 是一种分布式网络架构，其中每个参与者（也称为节点）充当客户端和服务器的角色。
 与传统的客户端-服务器模型不同，P2P 允许直接的节点之间通信，而无需通过中央服务器进行转发。
@@ -46,17 +44,35 @@ P2P 是一种分布式网络架构，其中每个参与者（也称为节点）�
 ### **SRS支持**：
 1. 运行srs服务器并添加webRTC支持(以下选一种)
 > + windows/linux推荐直接下载运行
-> [下载安装链接，运行后第二步](https://ossrs.net/lts/en-us/docs/v4/doc/webrtc)
+> [下载安装](https://github.com/ossrs/srs/releases)
+> + Windows 创建并运行 srs-rtmp2rtc.bat
+> ```bat
+> for /f "tokens=2*" %%i in ('REG QUERY "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\srs\ins_dir"') do set srs_home=%%j
+> 
+> echo %srs_home%
+> 
+> for %%I in ("%srs_home%") do set srs_disk=%%~dI
+> 
+> cd %srs_home%
+> @%srs_disk%
+> 
+> objs\srs.exe -c conf\rtmp2rtc.conf
+> cmd
+> ```
 > + docker:
-> Windows: `docker run --rm -it -p 1935:1935 -p 1985:1985 -p 8080:8080 --env CANDIDATE=127.0.0.1 -p 8000:8000/udp registry.cn-hangzhou.aliyuncs.com/ossrs/srs:5 ./objs/srs -c conf/rtmp2rtc.conf`
+> Windows: 
+> ```bat
+> docker run --rm -it -p 1935:1935 -p 1985:1985 -p 8080:8080 --env CANDIDATE=127.0.0.1 -p 8000:8000/udp registry.cn-hangzhou.aliyuncs.com/ossrs/srs:5 ./objs/srs -c conf/rtmp2rtc.conf`
+> ```
 > Linux/Android(termux):
-```sh
-export CANDIDATE="127.0.0.1"
-docker run --rm --env CANDIDATE=$CANDIDATE \
-  -p 1935:1935 -p 8080:8080 -p 1985:1985 -p 8000:8000/udp \
-  ossrs/srs:4 \
-  objs/srs -c conf/rtmp2rtc.conf
-```
+> ```sh
+> export CANDIDATE="127.0.0.1"
+> docker run --rm --env CANDIDATE=$CANDIDATE \
+>   -p 1935:1935 -p 8080:8080 -p 1985:1985 -p 8000:8000/udp \
+>   ossrs/srs:4 \
+>   objs/srs -c conf/rtmp2rtc.conf
+> ```
+
 2. 向目标地址推rtmp协议流（例如rtmp://localhost/live/livestream），拉取时在共享本地流SRS功能区域的密钥位置填入"密钥"并点分享按钮(第一个是SRS服务器地址，默认localhost。第二个是推流时填入的密钥，需要手动填写)
 3. 特别注意，推流时设置选择**硬件编码器**，并且把**B帧**功能关闭，否则会出现丢帧情况！！
 ![Host-Step-3](https://github.com/aiksxd/material/blob/main/img/Host-Step-3-zh.png)
