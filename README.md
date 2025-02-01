@@ -23,8 +23,7 @@ Unlike the traditional client-server model, P2P allows direct communication betw
 + nodesMap push no longer has discrepancies
 + Fixed some historical bugs
 
-
-## [Online Version-> https://aiksxd.github.io/PeerApps/PeerLive/P2PLiveIndex.html](https://aiksxd.github.io/PeerApps/PeerLive/P2PLiveIndex.html)
+## [Online Version-> https://aiksxd.github.io/PeerApps/PeerLive/index.html](https://aiksxd.github.io/PeerApps/PeerLive/index.html)
 ### Instructions:
 1. Use browser/app to load the homepage(index.html) with available Internet,
 > [if can't connect to a network name, directly enter by **room ID** / Create room with **pravite** option]

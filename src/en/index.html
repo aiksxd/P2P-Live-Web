@@ -388,7 +388,9 @@
                 room.classList.add('rooms');
                 room.setAttribute('onclick', "displayRoomInfo("+ i +")");
                 room.appendChild(document.createTextNode(rooms[i][4]));
-                room.setAttribute('style', "background-image: url(\'"+ rooms[i][6] +"\'); background-size: contain;");
+                if (rooms[i][6]) {
+                    room.setAttribute('style', "background-image: url(\'"+ rooms[i][6] +"\'); background-size: contain;");
+                }
                 
                 let roomNumbers = document.createElement("span");
                 roomNumbers.appendChild(document.createTextNode("Members:"+ rooms[i][2].length));
