@@ -204,7 +204,6 @@ body::-webkit-scrollbar {
     height: 100%;
 }
 .container {
-    display: flex;
     white-space: nowrap;
     height: 14%;
     background: var(--sidebar-color);
@@ -225,7 +224,8 @@ body::-webkit-scrollbar {
     padding: 10px;
     height: 98%;
     padding-bottom: 0px;
-    /* overflow-x: hidden; */
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 .videoBox {
     position: absolute;
@@ -258,14 +258,17 @@ body::-webkit-scrollbar {
     padding-left: 32px;
 }
 .sendInput {
-    min-height: 30px;
-
     button {
         height: 100%;
+        width: 100%;
     }
 }
+.sendInputContainer {
+    display: flex;
+    width: 100%;
+}
+
 #sendMessageBox {
-    height: 100%;
     min-width: 50%;
 }
 .indexBox {
