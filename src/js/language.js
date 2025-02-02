@@ -32,7 +32,8 @@ let language_Text = [
         "zh": "语言(注意会重载首页):",
     }
 ]
-function change_Language(language) {
+function change_Language(lan) {
+    language = lan;
     document.getElementById('homePage').src = "./"+ language + "/index.html";
     let doms = document.getElementsByClassName('lan');
     let i = 0;

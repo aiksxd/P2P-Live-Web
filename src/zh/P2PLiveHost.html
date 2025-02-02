@@ -125,19 +125,19 @@
         <div class="box">
             <!-- <button onclick="fullWebVideo()" id="fullScreen">Full Page Video</button><br> -->
             <div>
-                <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Avatar & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br>
+                <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">自定义名称 & 头像<br/><input type="text" id="name" placeholder="输入你的名称..." /></div><br>
                 <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
             </div>
         </div>
         <div class="box">
-            <span id="sumOfRoom">Members: 1</span><br>
+            <span id="sumOfRoom">成员数: 1</span><br>
             <input type="checkbox" id="ifAutoClean">自动清理信息[最大->100]<br>
             <button onclick="cleanMsg()">清理信息</button>
-            <button onclick="document.getElementById('toggleChatBox').click()">Hide Side</button><br>
+            <button onclick="document.getElementById('toggleChatBox').click()">隐藏侧边栏</button><br>
             <div id="themeController">
-                Change Themes:<select onchange="change_Theme(this.value)">
-                <option value="0" selected="selected">Light</option>
-                <option value="1">Dark</option>
+                切换主题:<select onchange="change_Theme(this.value)">
+                <option value="0" selected="selected">白天</option>
+                <option value="1">夜晚</option>
                 </select>
             </div>
         </div>
@@ -161,9 +161,9 @@
             <div id="chatBox"></div>
             <div class="sendInput">
                 <!-- Send box -->
-                <input type="text" id="sendMessageBox" placeholder="Input message here..."/>
-                <button type="button" id="uploadImgButton">Img</button>
-                <button type="button" id="sendButton" onclick="sendMsg()">Send</button><br>
+                <input type="text" id="sendMessageBox" placeholder="输入你想发送的信息..."/>
+                <button type="button" id="uploadImgButton">图片</button>
+                <button type="button" id="sendButton" onclick="sendMsg()">发送</button><br>
                 <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
             </div>
         </div>

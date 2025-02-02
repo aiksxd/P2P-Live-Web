@@ -1,29 +1,12 @@
 ### **About P2P & PeerJS**:
 P2P is a distributed network architecture where each participant (also known as a node) acts as both a client and a server
 Unlike the traditional client-server model, P2P allows direct communication between nodes without the need for relay through a central server
-
 [PeerJS](https://peerjs.com/): A JavaScript library based on WebRTC for simplifying P2P communication implementation
-
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
-
-### Updates:
-+ New Features:
-+ Meeting function (merged with independent audio function) update
-+ Tauri PC application branch
-+ More custom interface controls, expand/collapse control panel
-+ Enriched program feedback text prompts
-+ App mode (not enabled by default on the web, enabled by default in the app)
-+ Added cache for submissions (enabled by default)
-+ Partial UI and color scheme optimizations
-
-### Adjustments:
-+ Disabled the original web full-screen button
-+ Reverted stream transmission to the old version and updated it, while fixing issues from the old version
-+ Renamed root node to network name (group number, easier to understand)
-+ nodesMap push no longer has discrepancies
-+ Fixed some historical bugs
+![DeliverGIF](https://github.com/aiksxd/material/blob/main/img/DeliverGIF.gif)
 
 ## [Online Version-> https://aiksxd.github.io/PeerApps/PeerLive/index.html](https://aiksxd.github.io/PeerApps/PeerLive/index.html)
+
 ### Instructions:
 1. Use browser/app to load the homepage(index.html) with available Internet,
 > [if can't connect to a network name, directly enter by **room ID** / Create room with **pravite** option]
