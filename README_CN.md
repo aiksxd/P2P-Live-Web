@@ -1,50 +1,27 @@
-### **关于P2P & PeerJS**：
-P2P 是一种分布式网络架构，其中每个参与者（也称为节点）充当客户端和服务器的角色。
-与传统的客户端-服务器模型不同，P2P 允许直接的节点之间通信，而无需通过中央服务器进行转发。
-
+### **关于PeerJS**：
 [PeerJS](https://peerjs.com/)：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实现。
-
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
-
-它采用**节点式传递**，允许数据直接从一个节点传递到另一个节点，这意味着无论连接谁，都可以收到相同的文字互动信息，而且**无需依赖中央服务器**，大大减少网络延迟。
-
- ![DeliverGIF](https://github.com/aiksxd/material/blob/main/img/DeliverGIF.gif)
-
-### 更新:
-+ 新功能：
-+ 会议功能(与独立音频功能合并)更新
-+ tauri PC端程序分支
-+ 更多自定义界面控件，展开关闭控制面板
-+ 丰富程序反馈文本提示
-+ app模式 (网页端默认不启用，app默认启用)
-+ 提交内容增加缓存（默认启用）
-+ 部分UI，配色优化
-
-### 调整
-+ 停用原有的网页全屏按钮
-+ 流传输还原回旧版并更新，同时修复了旧版的问题
-+ 根节点改名为网络名称(群组编号，更容易理解)
-+ nodesMap推送不再有差别
-+ 修复了一些历史遗留bug
+![DeliverGIF](https://github.com/aiksxd/material/blob/main/img/DeliverGIF.gif)
 
 ## [在线版本 -> https://aiksxd.github.io/PeerApps/PeerLive/index.html](https://aiksxd.github.io/PeerApps/PeerLive/index.html)
+
 ### 用法：
 1. 使用浏览器/应用程序在有网络的情况下加载主页(index.html)
 > [如果无法连接到网络名称，直接输入**房间ID** / 使用**不公开**选项创建房间]
-![Step-1](https://github.com/aiksxd/material/blob/main/img/Live-Step-1.png)
+![Step-1](https://s21.ax1x.com/2025/02/01/pEZUrJ1.png)
 
 + [ 对于观众 ]
 2. 观众在执行第一步后可以看到该根节点下的所有活跃直播间(列入标准不在于是否推流，而是直播页面的连接情况)
-![Host-Step-2](https://github.com/aiksxd/material/blob/main/img/Host-Step-2.png)
+![Audience-Step-2](https://s21.ax1x.com/2025/02/01/pEZUyz6.png)
 
 + [ 对于主播 ]
 2. 点击**创建房间**之后点击**共享本地流**，选择合适的方式共享流媒体
-![Audience-Step-2](https://github.com/aiksxd/material/blob/main/img/Audience-Step-2.png)
+![Host-Step-2](https://s21.ax1x.com/2025/02/01/pEZUsRx.png)
 
 ### **SRS支持**：
 1. 运行srs服务器并添加webRTC支持(以下选一种)
 > + windows/linux推荐直接下载运行
-> [下载安装](https://github.com/ossrs/srs/releases)
+> [下载安装链接](https://github.com/ossrs/srs/releases)
 > + Windows 创建并运行 srs-rtmp2rtc.bat
 > ```bat
 > for /f "tokens=2*" %%i in ('REG QUERY "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\srs\ins_dir"') do set srs_home=%%j
@@ -61,7 +38,7 @@ P2P 是一种分布式网络架构，其中每个参与者（也称为节点）�
 > ```
 > + docker:
 > Windows: 
-> ```bat
+> ```cmd
 > docker run --rm -it -p 1935:1935 -p 1985:1985 -p 8080:8080 --env CANDIDATE=127.0.0.1 -p 8000:8000/udp registry.cn-hangzhou.aliyuncs.com/ossrs/srs:5 ./objs/srs -c conf/rtmp2rtc.conf`
 > ```
 > Linux/Android(termux):
@@ -75,7 +52,7 @@ P2P 是一种分布式网络架构，其中每个参与者（也称为节点）�
 
 2. 向目标地址推rtmp协议流（例如rtmp://localhost/live/livestream），拉取时在共享本地流SRS功能区域的密钥位置填入"密钥"并点分享按钮(第一个是SRS服务器地址，默认localhost。第二个是推流时填入的密钥，需要手动填写)
 3. 特别注意，推流时设置选择**硬件编码器**，并且把**B帧**功能关闭，否则会出现丢帧情况！！
-![Host-Step-3](https://github.com/aiksxd/material/blob/main/img/Host-Step-3-zh.png)
+![Host-Step-3](https://s21.ax1x.com/2025/02/01/pEZU0o9.png)
 
 ### **注意事项**：
 1. 如果建立连接发生在主机开始共享流媒体之前，再次点击刷新按钮会**刷新接收的流媒体**（如不可用则刷新整个页面）
