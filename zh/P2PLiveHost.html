@@ -161,10 +161,12 @@
             <div id="chatBox"></div>
             <div class="sendInput">
                 <!-- Send box -->
-                <input type="text" id="sendMessageBox" placeholder="输入你想发送的信息..."/>
-                <button type="button" id="uploadImgButton">图片</button>
-                <button type="button" id="sendButton" onclick="sendMsg()">发送</button><br>
-                <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
+                <div class="sendInputContainer">
+                    <input type="text" id="sendMessageBox" placeholder="输入你想发送的信息..."/>
+                    <button type="button" id="uploadImgButton">图片</button>
+                    <button type="button" id="sendButton" onclick="sendMsg()">发送</button><br>
+                    <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
+                </div>
             </div>
         </div>
     </div>

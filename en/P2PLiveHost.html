@@ -161,10 +161,12 @@
             <div id="chatBox"></div>
             <div class="sendInput">
                 <!-- Send box -->
-                <input type="text" id="sendMessageBox" placeholder="Input message here..."/>
-                <button type="button" id="uploadImgButton">Img</button>
-                <button type="button" id="sendButton" onclick="sendMsg()">Send</button><br>
-                <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
+                <div class="sendInputContainer">
+                    <input type="text" id="sendMessageBox" placeholder="Input message here..."/>
+                    <button type="button" id="uploadImgButton">Img</button>
+                    <button type="button" id="sendButton" onclick="sendMsg()">Send</button><br>
+                    <input id="msgImgInput" type="file" onchange="sendImg()" style="display: none;">
+                </div>
             </div>
         </div>
     </div>
