@@ -38,7 +38,7 @@
                     <div id="block1"></div>
                 </div>
             </div>
-            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(4, 1)">auto<br>Join</button>
+            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(max_Child_Nodes, 1)">auto<br>Join</button>
         </div>
         <div class="pop_Content covert">
             <!-- Stream Source -->
@@ -88,7 +88,7 @@
            <button onclick="upload_Conferee_Video()" id="uploadConfereeVideo">Public Stream</button><br>
            
         </div>
-        </div>
+    </div>
     <!-- Id interaction -->
     <input type="checkbox" id="toggleContainer" style="display: none;">
     <label for="toggleContainer" onclick="document.getElementById('expandVideoBox').click()" class="containerShowcaseSwitch fadeout">▲</label>
@@ -105,7 +105,7 @@
             <button onclick="document.getElementById('fakeInputText').focus()" class="covert" id="mobileInput">Wake Mobile Input</button>
             <input type="text" class="covert" id="fakeInputText">
             <div>
-                <img id="myIcon" style="width: 32px; height: 32px;"><div style="display: inline-block;">Custome Avatar & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br>
+                <img id="myIcon"><div style="display: inline-block;">Custome Avatar & Name<br/><input type="text" id="name" placeholder="Input your name here..." /></div><br>
                 <input type="file" name="icon" id="uploadIcon" onchange="iconInput()">
             </div>
         </div>

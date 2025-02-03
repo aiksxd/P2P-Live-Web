@@ -5,6 +5,7 @@
     --font-color: rgb(21,26,34);
     --active-color: rgb(162, 255, 109);
     --input-color: rgb(241,242,243);
+    --fade-color: rgba(21, 26, 34, 0.5);
 }
 html, body {
     background: var(--theme-color);
@@ -145,6 +146,7 @@ html, body {
     width: 100%;
     height: 100%;
     position: absolute;
+    object-fit: contain;
 }
 .confereeVideos {
     width: 100%;
@@ -277,16 +279,34 @@ body::-webkit-scrollbar {
 }
 .rooms {
     position: relative;
-    border: 1px solid var(--font-color);
+    border-radius: 8px;
     background-color: var(--ui-color);  /*0.5 opacity*/
     display: block;
     float: left;
     height: 150px;
     width: 150px;
-    font-size: 35px;
-    color: var(--font-color);    /*0.8 opacity*/
-    -webkit-text-stroke: 1px var(--theme-color);
+    font-size: 25px;
+    transition: 0.5s;
+    color: var(--theme-color);    /*0.8 opacity*/
     overflow: auto;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+.rooms:hover {
+    color: var(--active-color);
+}
+.roomTitleSpan {
+    position: absolute;
+    top: 0;
+    background: linear-gradient(to bottom, var(--fade-color), rgb(0,0,0,0));
+    width: 100%;
+    overflow-x: auto;
+}
+.roomMembersNumber {
+    position: absolute;
+    bottom: 0;
+    background: linear-gradient(to top, var(--fade-color), rgb(0,0,0,0));
+    width: 100%;
 }
 /* #openRoomInfo {
     border: 1px solid var(--theme-color);
@@ -306,6 +326,7 @@ body::-webkit-scrollbar {
     margin: 1%;
     vertical-align: text-top;
     border: 1px solid var(--font-color);
+    object-fit: contain;
 }
 .actionButton {
     position: relative;
@@ -384,6 +405,7 @@ body::-webkit-scrollbar {
     height: 150px;
     margin: 1%;
     border: 1px solid var(--color);
+    object-fit: contain;
 }
 .liveInput {
     background-color: var(--input-color);
@@ -459,7 +481,13 @@ textarea::-webkit-scrollbar-thumb {
     -webkit-border-radius: 100px;
 }
 .icon {
+    object-fit: contain;
     vertical-align: middle;
+    width: 32px;
+    height: 32px;
+}
+#myIcon {
+    object-fit: contain;
     width: 32px;
     height: 32px;
 }

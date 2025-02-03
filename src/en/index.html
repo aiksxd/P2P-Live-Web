@@ -43,6 +43,7 @@
         <div class="pop_Content covert">
             <button onclick="echoHistoricalConnectedId()">echo Historical Connected Peer NetWork Name</button><br><br>
             <button onclick="defaultConnect()">Click me to connect the deafult Peer NetWork Name</button><br><br>
+            <input type="checkbox" id="autoReconnect">Auto Reconnect<br>
             <button onclick="peer.reconnect()">Reconnect to Peer Server</button><br><br>
         </div>
     </div>
@@ -64,23 +65,26 @@
             <a class="pop_Option active" onclick="changePopMenu(0);">Room View</a>
         </div>
         <div class="pop_Content">
-            <div style="display: flex;">
-                <img id="roomCover" src="">
-                <div>
-                    <span id="roomTitle"></span><br>
-                    <button id="copyURL">Copy Web Link to share</button>
+            <!-- Detail of Room -->
+            <div id="openRoomInfo">
+                <div style="display: flex;">
+                    <img id="roomCover" src="">
+                    <div>
+                        <h2 id="roomTitle"></h2>
+                        <button id="copyURL">Copy Web Link to share</button><br>
+                        <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
+                    </div>
+                </div><br>
+                <div id="nodeInfo">
+                    <div id="stable">
+                        <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">Host Node</button>
+                        <button id="refreshMap" onclick="refreshMap(1)">Refresh</button>
+                    </div>
+                    <div id="block0"></div>
+                    <div id="block1"></div>
                 </div>
             </div>
-            <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
-            <div id="nodeInfo">
-                <div id="stable">
-                    <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">Host Node</button>
-                    <button id="refreshMap" onclick="indexRefreshMap(1)">Refresh</button>
-                </div>
-                <div id="block0"></div>
-                <div id="block1"></div>
-            </div>
-            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(3, 2)">auto<br>Join</button>
+            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(max_Child_Nodes, 1)">auto<br>Join</button>
         </div>
     </div>
     <!-- Control Panel -->
@@ -267,7 +271,9 @@
                         // alert("peer name is not exist!");
                         break;
                     case 'disconnected':
-                        // peer.reconnect();
+                        if (document.getElementById('autoReconnect').checked) {
+                            peer.reconnect();
+                        }
                         break;
                     default:
                         alert("initial ERRORl!");
@@ -387,14 +393,18 @@
                 let room = document.createElement("div");
                 room.classList.add('rooms');
                 room.setAttribute('onclick', "displayRoomInfo("+ i +")");
-                room.appendChild(document.createTextNode(rooms[i][4]));
                 if (rooms[i][6]) {
-                    room.setAttribute('style', "background-image: url(\'"+ rooms[i][6] +"\'); background-size: contain;");
+                    room.setAttribute('style', "background-image: url(\'"+ rooms[i][6] +"\');");
                 }
                 
+                let roomTitleSpan = document.createElement("span");
+                roomTitleSpan.appendChild(document.createTextNode(rooms[i][4]));
+                roomTitleSpan.classList.add('roomTitleSpan');
+                room.appendChild(roomTitleSpan);
+
                 let roomNumbers = document.createElement("span");
                 roomNumbers.appendChild(document.createTextNode("Members:"+ rooms[i][2].length));
-                roomNumbers.setAttribute('style', 'position: absolute; bottom: 0;');
+                roomNumbers.classList.add('roomMembersNumber');
                 room.appendChild(roomNumbers);
 
                 document.getElementById("rooms").appendChild(room);

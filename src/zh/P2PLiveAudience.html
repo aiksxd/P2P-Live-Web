@@ -38,7 +38,7 @@
                     <div id="block1"></div>
                 </div>
             </div>
-            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(4, 1)">自动<br>加入</button>
+            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(max_Child_Nodes, 1)">自动<br>加入</button>
         </div>
         <div class="pop_Content covert">
             <!-- Stream Source -->
@@ -78,16 +78,17 @@
         <div class="pop_Content covert">
             <input type="checkbox" onclick="join_Conference()" id="joinConference">加入会议<br>
            
-           选择你想要分享的设备:<br>
-           <input type="checkbox" id="ifConferenceUseCamera">摄像头
-           <input type="checkbox" id="ifConferenceUseMicrophone">麦克风<br>
-           <input type="checkbox" onclick="stop_Conference_Stream()">停止会议流</button><br>
-           <video id="conferee_Local_Video" controls></video><br>
-           确认公开本地流:
-           <button onclick="upload_Conferee_Video()" id="uploadConfereeVideo">公开流</button><br>
-           
+            选择你想要分享的设备:<br>
+            <input type="checkbox" id="ifConferenceUseCamera">摄像头
+            <input type="checkbox" id="ifConferenceUseMicrophone">麦克风<br>
+            <button onclick="askNavigatorMediaDevices(true)">获取本地设备</button>
+            <button onclick="stop_Conference_Stream()">停止会议流</button><br>
+            <video id="conferee_Local_Video" controls autoplay></video><br>
+            确认公开本地流:
+            <button onclick="upload_Conferee_Video()">公开流</button><br>
+            
         </div>
-        </div>
+    </div>
     <!-- Id interaction -->
     <input type="checkbox" id="toggleContainer" style="display: none;">
     <label for="toggleContainer" onclick="document.getElementById('expandVideoBox').click()" class="containerShowcaseSwitch fadeout">▲</label>

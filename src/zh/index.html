@@ -43,6 +43,7 @@
         <div class="pop_Content covert">
             <button onclick="echoHistoricalConnectedId()">打印历史网络名称连接</button><br><br>
             <button onclick="defaultConnect()">点我重连默认网络名称</button><br><br>
+            <input type="checkbox" id="autoReconnect">自动重连<br>
             <button onclick="peer.reconnect()">重连至Peer服务器</button><br><br>
         </div>
     </div>
@@ -64,23 +65,26 @@
             <a class="pop_Option active" onclick="changePopMenu(0);">房间页面</a>
         </div>
         <div class="pop_Content">
-            <div style="display: flex;">
-                <img id="roomCover" src="">
-                <div>
-                    <span id="roomTitle"></span><br>
-                    <button id="copyURL">复制房间分享直链</button>
+            <!-- Detail of Room -->
+            <div id="openRoomInfo">
+                <div style="display: flex;">
+                    <img id="roomCover" src="">
+                    <div>
+                        <h2 id="roomTitle"></h2>
+                        <button id="copyURL">复制房间分享直链</button><br>
+                        <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
+                    </div>
+                </div><br>
+                <div id="nodeInfo">
+                    <div id="stable">
+                        <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">房主</button>
+                        <button id="refreshMap" onclick="refreshMap(1)">刷新</button>
+                    </div>
+                    <div id="block0"></div>
+                    <div id="block1"></div>
                 </div>
             </div>
-            <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
-            <div id="nodeInfo">
-                <div id="stable">
-                    <button id="hostBlock" onclick="echoNodesMap(nodesMap[9], 0, nodesMap[7], 1)">房主</button>
-                    <button id="refreshMap" onclick="indexRefreshMap(1)">刷新</button>
-                </div>
-                <div id="block0"></div>
-                <div id="block1"></div>
-            </div>
-            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(3, 2)">自动<br>加入</button>
+            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(max_Child_Nodes, 1)">自动<br>加入</button>
         </div>
     </div>
     <!-- Control Panel -->
@@ -267,7 +271,9 @@
                         // alert("peer name is not exist!");
                         break;
                     case 'disconnected':
-                        // peer.reconnect();
+                        if (document.getElementById('autoReconnect').checked) {
+                            peer.reconnect();
+                        }
                         break;
                     default:
                         alert("初始化错误ERRORl!");
@@ -387,13 +393,18 @@
                 let room = document.createElement("div");
                 room.classList.add('rooms');
                 room.setAttribute('onclick', "displayRoomInfo("+ i +")");
-                room.appendChild(document.createTextNode(rooms[i][4]));
                 if (rooms[i][6]) {
-                    room.setAttribute('style', "background-image: url(\'"+ rooms[i][6] +"\'); background-size: contain;");
+                    room.setAttribute('style', "background-image: url(\'"+ rooms[i][6] +"\');");
                 }
+                
+                let roomTitleSpan = document.createElement("span");
+                roomTitleSpan.appendChild(document.createTextNode(rooms[i][4]));
+                roomTitleSpan.classList.add('roomTitleSpan');
+                room.appendChild(roomTitleSpan);
+
                 let roomNumbers = document.createElement("span");
                 roomNumbers.appendChild(document.createTextNode("成员数:"+ rooms[i][2].length));
-                roomNumbers.setAttribute('style', 'position: absolute; bottom: 0;');
+                roomNumbers.classList.add('roomMembersNumber');
                 room.appendChild(roomNumbers);
 
                 document.getElementById("rooms").appendChild(room);
