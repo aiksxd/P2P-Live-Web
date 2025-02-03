@@ -1324,7 +1324,7 @@ function change_Theme(
     ui_color,
     input_color,
     active_color,
-    visited_color
+    fade_color
 ) {
 // get
 //let getComputedStyle(document.documentElement).getPropertyValue('name')
@@ -1341,6 +1341,7 @@ function change_Theme(
     ui_color = ui_color || 'rgb(230,230,230)';
     input_color = input_color || 'rgb(241,242,243)';
     active_color = active_color || 'rgb(162,255,109)';
+    fade_color = fade_color || 'rgba(21, 26, 34, 0.5)';
     switch (index) {
         case "1":   // dark mode
             theme_color = 'rgb(28,33,40)';
@@ -1358,6 +1359,7 @@ function change_Theme(
     document.documentElement.style.setProperty('--ui-color', ui_color);
     document.documentElement.style.setProperty('--input-color', input_color);
     document.documentElement.style.setProperty('--active-color', active_color);
+    document.documentElement.style.setProperty('--fade-color', fade_color);
 }
 
 function pop(dom, new_Index) {
