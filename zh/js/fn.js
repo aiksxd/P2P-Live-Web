@@ -292,15 +292,16 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                                 }
                                 break;
                             case 1:
-                                if (ifJump === 2) {
-                                    if (app_Mode) {
-                                        window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
-                                    } else {
-                                        window.open("./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
-                                    }
-                                } else {
-                                    document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index;
-                                }
+                                alert("本地不可用的房间类型：在线五子棋");
+                                // if (ifJump === 2) {
+                                //     if (app_Mode) {
+                                //         window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
+                                //     } else {
+                                //         window.open("./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
+                                //     }
+                                // } else {
+                                //     document.location.href = "./P2PGameFiveOnLinePlayer.html?id="+ guest.peer +"&name="+ getMyName() + "&themeIndex="+ theme_Index;
+                                // }
                                 break;
                             default:
                                 console.log("unknown type of room: "+ nodesMap[3]);
@@ -514,7 +515,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                     pop(document.getElementById('modifyNetWorkName'));
                 }
                 peer_Conn_Lock = false;
-                document.getElementById("myid").innerHTML = "你的ID:<br/>" + id;
+                document.getElementById("myid").innerHTML = "你的ID:<br/>" + peer.id;
                 document.getElementById("status").innerHTML="状态:✔ 成功连接到根节点! ✔"
             });
 
@@ -855,7 +856,7 @@ function getMyName(){
     } else if (peer) {
         return peer.id;
     }
-    return "";
+    return "undefined_Name";
 }
 
 function conference_Play() {
@@ -1371,10 +1372,10 @@ function pop(dom, new_Index) {
         if (new_Index !== undefined) {
             changePopMenu(new_Index);
         } else {
-            if (lastPopIndex) {
-                changePopMenu(lastPopIndex); // add listener
+            if (pop_Doms.getElementsByClassName("pop_Option")[lastPopIndex]) {
+                pop_Doms.getElementsByClassName("pop_Option")[lastPopIndex].click();
             } else {
-                changePopMenu(0); // add listener
+                pop_Doms.getElementsByClassName("pop_Option")[0].click();
             }
         }
         document.addEventListener('keydown', function handleEnter(event, index) {

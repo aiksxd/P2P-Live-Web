@@ -13,7 +13,7 @@
         <span class="close_Button" onclick="pop(document.getElementById('liveSetting'))">✕</span>
 
         <div class="pop_Menu">
-            <a href="#menu_0" class="pop_Option active" onclick="changePopMenu(0); refreshMap(0);">房间信息</a>
+            <a href="#menu_0" class="pop_Option active" onclick="changePopMenu(0); refreshMap(1);">房间信息</a>
             <a href="#menu_1" class="pop_Option covert" onclick="changePopMenu(1)">流媒体源</a>
             <a href="#menu_2" class="pop_Option" onclick="changePopMenu(2)">Peer设置</a>
             <a href="#menu_3" class="pop_Option" onclick="changePopMenu(3)">会议</a>
@@ -24,7 +24,7 @@
                 <div style="display: flex;">
                     <img id="roomCover" src="">
                     <div>
-                        <h2 id="roomTitle"></h2>
+                        <h3 id="roomTitle"></h3>
                         <button id="copyURL">复制房间分享直链</button><br>
                         <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
                     </div>
@@ -79,8 +79,8 @@
             <input type="checkbox" onclick="join_Conference()" id="joinConference">加入会议<br>
            
             选择你想要分享的设备:<br>
-            <input type="checkbox" id="ifConferenceUseCamera">摄像头
-            <input type="checkbox" id="ifConferenceUseMicrophone">麦克风<br>
+            <input type="checkbox" id="ifUseConferenceCamera">摄像头
+            <input type="checkbox" id="ifUseConferenceMicrophone">麦克风<br>
             <button onclick="askNavigatorMediaDevices(true)">获取本地设备</button>
             <button onclick="stop_Conference_Stream()">停止会议流</button><br>
             <video id="conferee_Local_Video" controls autoplay></video><br>

@@ -338,11 +338,10 @@ body::-webkit-scrollbar {
     margin-top: 1%;
 }
 #roomTitle {
+    width: 50%;
     height: 20%;
-    margin: 1%;
-    font-size: large;
-    word-break: break-word;
-    vertical-align: text-top;
+    margin: 0;
+    overflow-x: auto;
 }
 #roomSummary {
     background-color: var(--input-color);
@@ -355,7 +354,6 @@ body::-webkit-scrollbar {
 #nodeInfo {
     background-color: var(--input-color);
     min-height: 100px;
-    width: 70%;
 }
 #stable {
     float: left;
