@@ -13,7 +13,7 @@
         <span class="close_Button" onclick="pop(document.getElementById('liveSetting'))">✕</span>
 
         <div class="pop_Menu">
-            <a href="#menu_0" class="pop_Option active" onclick="changePopMenu(0); refreshMap(0);">直播间设置</a>
+            <a href="#menu_0" class="pop_Option active" onclick="changePopMenu(0); refreshHostMap();">直播间设置</a>
             <a href="#menu_1" class="pop_Option" onclick="changePopMenu(1)">直播流媒体源</a>
             <a href="#menu_2" class="pop_Option" onclick="changePopMenu(2); refreshMap(0);">房间信息</a>
             <a href="#menu_3" class="pop_Option" onclick="changePopMenu(3)">Peer设置</a>
@@ -567,6 +567,15 @@
             if (event.which && event.keyCode == '13'){
                 document.getElementById("sendButton").click();
             }
+        }
+
+        function refreshHostMap() {
+            document.getElementById("roomTitle").innerHTML = nodesMap[4];
+            document.getElementById("roomSummary").value = nodesMap[5];
+            if (nodesMap[6]) {
+                document.getElementById("roomCover").src = nodesMap[6];   
+            }
+            echoNodesMap(nodesMap[9], 0, undefined, 0);    // refresh the menu
         }
 
         function modify(){
