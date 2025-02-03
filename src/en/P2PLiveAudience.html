@@ -462,7 +462,7 @@
                         index = nodesMap[11][0][index];
                         if (index !== -1) {
                             document.getElementById('conferees'+ index).getElementsByClassName('confereeVideos')[0].classList.remove('covert');
-                            document.getElementById('conferees'+ index).srcObject = stream;
+                            document.getElementById('conferees'+ index).getElementsByClassName('confereeVideos')[0].srcObject = stream;
                         }
 
                         // mediaConnection.on('close', function() {    // test to do
