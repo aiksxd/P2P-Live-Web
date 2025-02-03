@@ -34,7 +34,6 @@ let language_Text = [
 ]
 function change_Language(lan) {
     language = lan;
-    document.getElementById('homePage').src = "./"+ language + "/index.html";
     let doms = document.getElementsByClassName('lan');
     let i = 0;
     while(i < doms.length){
