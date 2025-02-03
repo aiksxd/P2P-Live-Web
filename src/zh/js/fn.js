@@ -514,7 +514,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                     pop(document.getElementById('modifyNetWorkName'));
                 }
                 peer_Conn_Lock = false;
-                document.getElementById("myid").innerHTML = "你的ID:<br/>" + id;
+                document.getElementById("myid").innerHTML = "你的ID:<br/>" + peer.id;
                 document.getElementById("status").innerHTML="状态:✔ 成功连接到根节点! ✔"
             });
 
