@@ -13,7 +13,7 @@
         <span class="close_Button" onclick="pop(document.getElementById('liveSetting'))">✕</span>
 
         <div class="pop_Menu">
-            <a href="#menu_0" class="pop_Option active" onclick="changePopMenu(0); refreshMap(0);">room View</a>
+            <a href="#menu_0" class="pop_Option active" onclick="changePopMenu(0); refreshMap(1);">room View</a>
             <a href="#menu_1" class="pop_Option covert" onclick="changePopMenu(1)">Stream Source Menu</a>
             <a href="#menu_2" class="pop_Option" onclick="changePopMenu(2)">Peer Setting</a>
             <a href="#menu_3" class="pop_Option" onclick="changePopMenu(3)">Conference</a>
@@ -24,7 +24,7 @@
                 <div style="display: flex;">
                     <img id="roomCover" src="">
                     <div>
-                        <h2 id="roomTitle"></h2>
+                        <h3 id="roomTitle"></h3>
                         <button id="copyURL">Copy Web Link to share</button><br>
                         <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
                     </div>
@@ -38,7 +38,7 @@
                     <div id="block1"></div>
                 </div>
             </div>
-            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(max_Child_Nodes, 1)">auto<br>Join</button>
+            <button id="autoJoin" class="confirm_Button" onclick="autoJoin(max_Child_Nodes, 2)">auto<br>Join</button>
         </div>
         <div class="pop_Content covert">
             <!-- Stream Source -->

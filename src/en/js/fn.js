@@ -292,7 +292,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                                 }
                                 break;
                             case 1:
-                                alert("Find files of P2P Game FiveOnline in Github");
+                                alert("unknown type of room: p2pOnlineGame-Tic-Tac-Toe");
                                 // if (ifJump === 2) {
                                 //     if (app_Mode) {
                                 //         window.parent.postMessage("P2PLiveAudience.html?id="+ guest.peer +"&name=&themeIndex="+ theme_Index);
@@ -856,7 +856,7 @@ function getMyName(){
     } else if (peer) {
         return peer.id;
     }
-    return "";
+    return "undefined_Name";
 }
 
 function conference_Play() {
@@ -1372,10 +1372,10 @@ function pop(dom, new_Index) {
         if (new_Index !== undefined) {
             changePopMenu(new_Index);
         } else {
-            if (lastPopIndex) {
-                changePopMenu(lastPopIndex); // add listener
+            if (pop_Doms.getElementsByClassName("pop_Option")[lastPopIndex]) {
+                pop_Doms.getElementsByClassName("pop_Option")[lastPopIndex].click();
             } else {
-                changePopMenu(0); // add listener
+                pop_Doms.getElementsByClassName("pop_Option")[0].click();
             }
         }
         document.addEventListener('keydown', function handleEnter(event, index) {

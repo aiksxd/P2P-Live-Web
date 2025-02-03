@@ -74,7 +74,7 @@
             <div style="display: flex;">
                 <img id="roomCover" src="">
                 <div>
-                    <h2 id="roomTitle"></h2>
+                    <h3 id="roomTitle"></h3>
                     <button id="copyURL">复制房间分享链接</button><br>
                     <textarea id="roomSummary" rows="5" cols="33" readonly="readonly"></textarea><br>
                 </div>
@@ -231,6 +231,7 @@
             } else {
                 document.getElementById("status").innerHTML="状态: ✔ 现在这里是根节点(不公开房间) ✔";
             }
+            refreshHostMap();
         });
 
         // When a new connection request is received, this code creates a data channel and sends the local or remote stream (if available) and text messages.
@@ -570,12 +571,14 @@
         }
 
         function refreshHostMap() {
-            document.getElementById("roomTitle").innerHTML = nodesMap[4];
-            document.getElementById("roomSummary").value = nodesMap[5];
-            if (nodesMap[6]) {
-                document.getElementById("roomCover").src = nodesMap[6];   
+            if (peer.open) {
+                LiveTitle.value = nodesMap[4];
+                LiveSummary.value = nodesMap[5];
+                if (nodesMap[6]) {
+                    document.getElementById("liveCover").src = nodesMap[6];   
+                }
+                echoNodesMap(nodesMap[9], 0, undefined, 0);    // refresh the menu
             }
-            echoNodesMap(nodesMap[9], 0, undefined, 0);    // refresh the menu
         }
 
         function modify(){
