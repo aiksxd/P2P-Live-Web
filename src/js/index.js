@@ -4,7 +4,9 @@ let language = 'en'
 switch (navigator.language) {
     case 'zh-CN':
         language = "zh";
+        document.getElementById('homePage').src = "./"+ language + "/index.html";
         change_Language(language);
+        document.getElementById('languageController').value = language;
         break;
     default:
         document.getElementById('homePage').src = "./"+ language + "/index.html";
