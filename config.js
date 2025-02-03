@@ -7,4 +7,4 @@ let app_Mode = false;
 
 let use_Local_Storage = true;
 
-// let max_Child_Nodes = 4;
+let max_Child_Nodes = 4;

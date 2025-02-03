@@ -158,11 +158,11 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
                             guest.on('open', () => {});
                             guest.on('data', (data) => {
                                 nodesMap = data;
-                                autoJoin(3, false, true);
+                                autoJoin(max_Child_Nodes, false, true);
                             });
                             peer.on('close', function() { 
                                 if (!ifConnectedAim) {
-                                    autoJoin(3, false, true);
+                                    autoJoin(max_Child_Nodes, false, true);
                                 }
                             });
                         } else {
@@ -261,7 +261,7 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
 
                 if(document.getElementById("ifAutoReconnect").checked){
                     document.getElementById("status").innerHTML="状态: 正在重连至房间...";
-                    autoJoin(3, false, true);
+                    autoJoin(max_Child_Nodes, false, true);
                     
                 }
             });
@@ -544,19 +544,19 @@ function tryConnect(object, id, ifJump, ifAskForMediaStream){
     }
 }
 
-function autoJoin(t, ifJump, if_parent_Node_Conn){   // ifJump == 2:_blank
+function autoJoin(max_Child_Nodes, ifJump, if_parent_Node_Conn){   // ifJump == 2:_blank
     if(nodesMap[1] !== 1 || ifConnectedAim){
         console.log("Error: try autoJoin() by the nodesMap which wasn't from Root of Room");
         return;
     }
-    if(nodesMap[9][3] < t){        // host node has low child nodes
+    if(nodesMap[9][3] < max_Child_Nodes){        // host node has low child nodes
         if (if_parent_Node_Conn) {
             tryConnect(0, nodesMap[7], false);
         } else {
             tryConnect(1, nodesMap[7], ifJump);
         }
     } else {
-        recursiveSearch(nodesMap[9], t, 1);   // search for the node with low child nodes
+        recursiveSearch(nodesMap[9], max_Child_Nodes, 1);   // search for the node with low child nodes
     }
 }
 
