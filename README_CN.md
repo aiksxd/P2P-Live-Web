@@ -21,8 +21,12 @@
 ### **SRS支持**：
 1. 运行srs服务器并添加webRTC支持(以下选一种)
 > + windows/linux推荐直接下载运行
-> [下载安装链接](https://github.com/ossrs/srs/releases)
-> + Windows 创建并运行 srs-rtmp2rtc.bat
+> [SRS安装链接](https://github.com/ossrs/srs/releases)
+> + windowsSRS&OBS一键安装脚本 推荐新手下载使用并安装
+> [一键安装脚本链接](https://github.com/aiksxd/P2P-Live-Web/releases/download/v13/Window-Peerlive_0.1.0_x64-setup.exe)
+> + bat脚本
+> [srs-rtmp2rtc.bat脚本链接](https://github.com/aiksxd/P2P-Live-Web/blob/main/srs-rtmp2rtc.bat)
+> + 当然你可以在Windows中自行创建并运行 srs-rtmp2rtc.bat，您可以直接复制以下文本并粘贴至记事本上并更改名为srs-rtmp2rtc.bat
 > ```bat
 > for /f "tokens=2*" %%i in ('REG QUERY "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\srs\ins_dir"') do set srs_home=%%j
 > 
