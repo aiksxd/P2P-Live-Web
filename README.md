@@ -26,7 +26,11 @@ Unlike the traditional client-server model, P2P allows direct communication betw
 1. run srs with webRTC support(**1. Only choose one of them**)
 > + windows/linux local app
 > [Download SRS app to run then go to 2.](https://github.com/ossrs/srs/releases)
-> + Windows create & run srs-rtmp2rtc.bat
+> + If you know Chinese, you can try using the windowsSRS&OBS one-click installation script
+> [One-click installation script link](https://github.com/aiksxd/P2P-Live-Web/releases/download/v13/Window-Peerlive_0.1.0_x64-setup.exe)
+> + bat script
+> [srs-rtmp2rtc.bat script link](https://github.com/aiksxd/P2P-Live-Web/blob/main/srs-rtmp2rtc.bat)
+> + Of course you can create and run srs-rtmp2rtc.bat yourself in Windows. You can directly copy the following text and paste it into Notepad and change the name to srs-rtmp2rtc.bat
 > ```bat
 > for /f "tokens=2*" %%i in ('REG QUERY "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\srs\ins_dir"') do set srs_home=%%j
 > 
