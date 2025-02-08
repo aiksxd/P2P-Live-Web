@@ -1,7 +1,7 @@
 ### **关于PeerJS**：
-[PeerJS](https://peerjs.com/)：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实现。
 ![P2PGIF](https://github.com/aiksxd/material/blob/main/img/P2PGIF.gif)
 ![DeliverGIF](https://github.com/aiksxd/material/blob/main/img/DeliverGIF.gif)
+[PeerJS](https://peerjs.com/)：一个基于 WebRTC 的 JavaScript 库，用于简化 P2P 通信的实现。
 
 ## [在线版本 -> https://aiksxd.github.io/PeerApps/PeerLive/index.html](https://aiksxd.github.io/PeerApps/PeerLive/index.html)
 
