@@ -56,7 +56,7 @@
 
 2. 向目标地址推rtmp协议流（例如rtmp://localhost/live/livestream），拉取时在共享本地流SRS功能区域的密钥位置填入"密钥"并点分享按钮(第一个是SRS服务器地址，默认localhost。第二个是推流时填入的密钥，需要手动填写)
 3. 特别注意，推流时设置选择**硬件编码器**，并且把**B帧**功能关闭，否则会出现丢帧情况！！
-![Host-Step-3](https://s21.ax1x.com/2025/02/01/pEZU0o9.png)
+![Host-Step-3](https://github.com/zilinkids/P2P-MDmaterial/blob/main/Host-Step-3-zh.png)
 
 ### **注意事项**：
 1. 如果建立连接发生在主机开始共享流媒体之前，再次点击刷新按钮会**刷新接收的流媒体**（如不可用则刷新整个页面）
