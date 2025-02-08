@@ -60,7 +60,7 @@ Unlike the traditional client-server model, P2P allows direct communication betw
 
 2. push **rtmp** stream，pull in web of **Stream Source** button with the key of stream and click the button of **share SRS Media Stream** in the zone of SRS api(localhost is the address of server, next void one is the key of stream which you need to input)
 3. NOTICE!: When setting up the stream, choose the hardware encoder and disable the B-frame function; otherwise, frame drops may occur!!
-![Host-Step-3](https://github.com/aiksxd/material/blob/main/img/Host-Step-3-en.png)
+![Host-Step-3](https://github.com/zilinkids/P2P-MDmaterial/blob/main/Host-Step-3-en.png)
 
 ### **Considerations**:
 1. If the connection is established before the host starts sharing the media stream, clicking the button again will **refresh the received media stream**(or refresh web)
